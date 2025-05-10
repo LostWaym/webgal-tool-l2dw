@@ -1,0 +1,2749 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+
+public class MainUIWindow : BaseWindow<MainUIWindow>
+{
+    #region auto generated members
+    private Toggle m_togglePreview;
+    private Toggle m_toggleMotion;
+    private Button m_btnSetting;
+    private Transform m_itemPageNavPreview;
+    private Transform m_itemPageNavMotion;
+    #endregion
+
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_togglePreview = transform.Find("GameObject/toggles/m_togglePreview").GetComponent<Toggle>();
+        m_toggleMotion = transform.Find("GameObject/toggles/m_toggleMotion").GetComponent<Toggle>();
+        m_btnSetting = transform.Find("GameObject/m_btnSetting").GetComponent<Button>();
+        m_itemPageNavPreview = transform.Find("pages/m_itemPageNavPreview").GetComponent<Transform>();
+        m_itemPageNavMotion = transform.Find("pages/m_itemPageNavMotion").GetComponent<Transform>();
+
+        m_togglePreview.onValueChanged.AddListener(OnTogglePreviewChange);
+        m_toggleMotion.onValueChanged.AddListener(OnToggleMotionChange);
+        m_btnSetting.onClick.AddListener(OnButtonSettingClick);
+    }
+    #endregion
+
+
+
+    #region auto generated events
+    private void OnTogglePreviewChange(bool value)
+    {
+    }
+    private void OnToggleMotionChange(bool value)
+    {
+    }
+    private void OnButtonSettingClick()
+    {
+        MainControl.Instance.ShowSettingUIWindow();
+    }
+    #endregion
+
+    private PageNavPreview m_pageNavPreview;
+    private PageNavMotion m_pageNavMotion;
+    protected override void OnInit()
+    {
+        base.OnInit();
+        m_pageNavPreview = PageNavPreview.CreateWidget(m_itemPageNavPreview.gameObject);
+        m_pageNavPreview.BindToToggle(m_togglePreview);
+        m_pageNavMotion = PageNavMotion.CreateWidget(m_itemPageNavMotion.gameObject);
+        m_pageNavMotion.BindToToggle(m_toggleMotion);
+    }
+
+    public void Update()
+    {
+        if (m_pageNavPreview.IsActive)
+        {
+            m_pageNavPreview.Update();
+        }
+        if (m_pageNavMotion.IsActive)
+        {
+            // m_pageNavMotion.Update();
+        }
+    }
+}
+
+public class PageNavMotion : UIPageWidget<PageNavMotion>
+{
+
+}
+
+public class PageNavPreview : UIPageWidget<PageNavPreview>
+{
+
+    public class ToolWidget : UIItemWidget<ToolWidget>
+    {
+        #region auto generated members
+        private Toggle m_toggleMove;
+        private Toggle m_toggleRotate;
+        private Toggle m_toggleScale;
+        private Toggle m_toggleMoveCamera;
+        private Toggle m_toggleScaleCamera;
+        private Text m_lblToolTitle;
+        private Dropdown m_dropdownInstCopy;
+        #endregion
+
+        #region auto generated binders
+        protected override void CodeGenBindMembers()
+        {
+            m_toggleMove = transform.Find("Flow/m_toggleMove").GetComponent<Toggle>();
+            m_toggleRotate = transform.Find("Flow/m_toggleRotate").GetComponent<Toggle>();
+            m_toggleScale = transform.Find("Flow/m_toggleScale").GetComponent<Toggle>();
+            m_toggleMoveCamera = transform.Find("Flow/m_toggleMoveCamera").GetComponent<Toggle>();
+            m_toggleScaleCamera = transform.Find("Flow/m_toggleScaleCamera").GetComponent<Toggle>();
+            m_lblToolTitle = transform.Find("m_lblToolTitle").GetComponent<Text>();
+            m_dropdownInstCopy = transform.Find("m_dropdownInstCopy").GetComponent<Dropdown>();
+
+            m_toggleMove.onValueChanged.AddListener(OnToggleMoveChange);
+            m_toggleRotate.onValueChanged.AddListener(OnToggleRotateChange);
+            m_toggleScale.onValueChanged.AddListener(OnToggleScaleChange);
+            m_toggleMoveCamera.onValueChanged.AddListener(OnToggleMoveCameraChange);
+            m_toggleScaleCamera.onValueChanged.AddListener(OnToggleScaleCameraChange);
+            m_dropdownInstCopy.onValueChanged.AddListener(OnDropdownInstCopyChange);
+        }
+        #endregion
+
+        #region auto generated events
+        private void OnToggleMoveCameraChange(bool value)
+        {
+            if (value)
+            {
+                SetCurrentToggle(m_toggleMoveCamera);
+            }
+        }
+        private void OnToggleScaleCameraChange(bool value)
+        {
+            if (value)
+            {
+                SetCurrentToggle(m_toggleScaleCamera);
+            }
+        }
+        private void OnToggleMoveChange(bool value)
+        {
+            if (value)
+            {
+                SetCurrentToggle(m_toggleMove);
+            }
+        }
+        private void OnToggleRotateChange(bool value)
+        {
+            if (value)
+            {
+                SetCurrentToggle(m_toggleRotate);
+            }
+        }
+        private void OnToggleScaleChange(bool value)
+        {
+            if (value)
+            {
+                SetCurrentToggle(m_toggleScale);
+            }
+        }
+        private void OnDropdownInstCopyChange(int value)
+        {
+            Global.InstNextMode = (InstDealOperation)value;
+        }
+
+        #endregion
+
+        private Toggle m_currentToggle;
+
+        private void SetCurrentToggle(Toggle toggle)
+        {
+            m_currentToggle = toggle;
+            if (m_currentToggle.isOn != true)
+            {
+                m_currentToggle.isOn = true;
+            }
+            prevMousePos = Input.mousePosition;
+        }
+
+        protected override void OnInit()
+        {
+            base.OnInit();
+            m_keyToToggle[KeyCode.Q] = m_toggleMove;
+            m_keyToToggle[KeyCode.W] = m_toggleRotate;
+            m_keyToToggle[KeyCode.E] = m_toggleScale;
+            m_keyToToggle[KeyCode.R] = m_toggleMoveCamera;
+            m_keyToToggle[KeyCode.T] = m_toggleScaleCamera;
+            SetCurrentToggle(m_toggleMove);
+
+            m_dropdownInstCopy.SetValueWithoutNotify((int)Global.InstNextMode);
+        }
+
+        private Dictionary<KeyCode, Toggle> m_keyToToggle = new Dictionary<KeyCode, Toggle>();
+
+        private Vector3 prevMousePos;
+        private bool ctrl, shift, alt;
+        private bool canSingleKey;
+        private bool isFocusOnInputField;
+        private bool isMouseOnUI;
+        private bool moveProcessable;
+        private bool inFreezeProcess;
+        private Vector3 worldDelta;
+        public void Update()
+        {
+            ClearButtonSelection();
+
+            isFocusOnInputField = EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.GetComponent<InputField>() != null;
+            bool isInputFreeze = MainControl.Instance.freezeProcessInputFrame > 0;
+            bool anyTopViewActive = MainControl.Instance.AnyTopViewActive;
+
+            if (isInputFreeze)
+            {
+                prevMousePos = Input.mousePosition;
+                if (IsMouseButton(0) || IsMouseButton(1) || IsMouseButton(2))
+                {
+                    inFreezeProcess = true;
+                }
+            }
+            var mainCamera = MainControl.Instance.mainCamera;
+            var mouseDiff = Input.mousePosition - prevMousePos;
+            worldDelta = mainCamera.ScreenToWorldPoint(mouseDiff) - mainCamera.ScreenToWorldPoint(Vector3.zero);
+
+            if (!isFocusOnInputField && !isInputFreeze && !anyTopViewActive)
+            {
+                ctrl = Input.GetKey(KeyCode.LeftControl);
+                shift = Input.GetKey(KeyCode.LeftShift);
+                alt = Input.GetKey(KeyCode.LeftAlt);
+                canSingleKey = !ctrl && !shift && !alt;
+                isMouseOnUI = IsMouseOnUI();
+                ProcessChangeTool();
+                ProcessToolInput();
+                ProcessShortCut();
+
+            }
+
+            prevMousePos = Input.mousePosition;
+            if (!isInputFreeze)
+            {
+                inFreezeProcess = false;
+            }
+        }
+
+        private void ClearButtonSelection()
+        {
+            // 不要Button的Submit事件
+            if (EventSystem.current.currentSelectedGameObject)
+            {
+                var hasButtonComponent = EventSystem.current.currentSelectedGameObject.GetComponent<Button>();
+                if (hasButtonComponent != null)
+                {
+                    EventSystem.current.SetSelectedGameObject(null);
+                }
+            }
+        }
+
+        private void ProcessChangeTool()
+        {
+            if (!canSingleKey)
+            {
+                return;
+            }
+
+            foreach (var key in m_keyToToggle.Keys)
+            {
+                if (Input.GetKeyDown(key))
+                {
+                    SetCurrentToggle(m_keyToToggle[key]);
+                    moveProcessable = false;
+                    break;
+                }
+            }
+        }
+
+        #region 快捷键
+        private void ProcessShortCut()
+        {
+            ProcessGlobalShortCut();
+
+            var editType = MainControl.Instance.editType;
+            if (editType == EditType.Group && MainControl.Instance.curGroup != null)
+            {
+                ProcessGroupShortCut();
+            }
+            else if (editType == EditType.Model && MainControl.Instance.curTarget != null)
+            {
+                ProcessModelShortCut();
+            }
+            else if (editType == EditType.Background)
+            {
+                ProcessBackgroundShortCut();
+            }
+        }
+
+        private void ProcessGlobalShortCut()
+        {
+            if (canSingleKey)
+            {
+                if (Input.GetKeyDown(KeyCode.X))
+                {
+                    MainControl.Instance.LockX = !MainControl.Instance.LockX;
+                    UIEventBus.SendEvent(UIEventType.LockXChanged);
+                }
+                else if (Input.GetKeyDown(KeyCode.Y))
+                {
+                    MainControl.Instance.LockY = !MainControl.Instance.LockY;
+                    UIEventBus.SendEvent(UIEventType.LockYChanged);
+                }
+
+            }
+        }
+
+        private void ProcessGroupShortCut()
+        {
+            var group = MainControl.Instance.curGroup;
+            if (group == null)
+            {
+                return;
+            }
+
+            if (ctrl)
+            {
+                if (Input.GetKeyDown(KeyCode.A))
+                {
+                    MainControl.Instance.CopyAllGroup();
+                }
+                else if (Input.GetKeyDown(KeyCode.F))
+                {
+                    MainControl.Instance.CopyMotionGroup();
+                }
+                else if (Input.GetKeyDown(KeyCode.T))
+                {
+                    MainControl.Instance.CopyTransformGroup();
+                }
+                else if (Input.GetKeyDown(KeyCode.X))
+                {
+                    MainControl.Instance.CopyAllGroupSpilt();
+                }
+            }
+        }
+
+        private void ProcessModelShortCut()
+        {
+            var target = MainControl.Instance.curTarget;
+            if (target == null)
+            {
+                return;
+            }
+
+            if (target.DisplayMode == ModelDisplayMode.EmotionEditor)
+            {
+                if (ctrl)
+                {
+                    if (Input.GetKeyDown(KeyCode.C))
+                    {
+                        MainControl.Instance.CopyMotionEditor();
+                    }
+                }
+            }
+            else if (target.DisplayMode == ModelDisplayMode.Normal)
+            {
+                if (ctrl)
+                {
+                    if (Input.GetKeyDown(KeyCode.A))
+                    {
+                        MainControl.Instance.CopyAll();
+                    }
+                    else if (Input.GetKeyDown(KeyCode.F))
+                    {
+                        MainControl.Instance.CopyMotion();
+                    }
+                    else if (Input.GetKeyDown(KeyCode.T))
+                    {
+                        MainControl.Instance.CopyTransform();
+                    }
+                    else if (Input.GetKeyDown(KeyCode.X))
+                    {
+                        MainControl.Instance.CopyAllSpilt();
+                    }
+                    else if (Input.GetKeyDown(KeyCode.R))
+                    {
+                        target.ReloadTextures();
+                    }
+                }
+            }
+
+        }
+
+        private void ProcessBackgroundShortCut()
+        {
+            if (ctrl)
+            {
+                if (Input.GetKeyDown(KeyCode.A))
+                {
+                    MainControl.Instance.CopyBackgroundAll();
+                }
+                else if (Input.GetKeyDown(KeyCode.F))
+                {
+                    MainControl.Instance.CopyBackgroundChange();
+                }
+                else if (Input.GetKeyDown(KeyCode.T))
+                {
+                    MainControl.Instance.CopyBackgroundTransform();
+                }
+            }
+        }
+
+        #endregion
+
+        private void ProcessToolInput()
+        {
+            if (m_currentToggle == null)
+            {
+                return;
+            }
+
+            if (m_currentToggle == m_toggleMoveCamera || m_currentToggle == m_toggleScaleCamera)
+            {
+                ProcessCameraInput();
+            }
+            else if (MainControl.Instance.editType == EditType.Group && MainControl.Instance.curGroup != null)
+            {
+                ProcessGroupInput();
+            }
+            else if (MainControl.Instance.editType == EditType.Model && MainControl.Instance.curTarget != null)
+            {
+                ProcessModelInput();
+            }
+            else if (MainControl.Instance.editType == EditType.Background)
+            {
+                ProcessBackgroundInput();
+            }
+        }
+
+        #region 功能输入
+
+        private void ProcessCameraInput()
+        {
+            if (m_currentToggle == m_toggleMoveCamera)
+            {
+                if (IsMouseButtonDown(0))
+                {
+                    moveProcessable = !isMouseOnUI;
+                }
+
+                if (IsMouseButton(0) && moveProcessable)
+                {
+                    var delta = Input.mousePosition - prevMousePos;
+                    var camera = MainControl.Instance.mainCamera;
+                    var worldDelta = -(camera.ScreenToWorldPoint(delta) - camera.ScreenToWorldPoint(Vector3.zero));
+                    camera.transform.position += new Vector3(worldDelta.x, worldDelta.y, 0);
+                    UIEventBus.SendEvent(UIEventType.CameraTransformChanged);
+                }
+                else
+                {
+                    moveProcessable = false;
+                }
+            }
+            else if (m_currentToggle == m_toggleScaleCamera && !isMouseOnUI)
+            {
+                if (HasWheel())
+                {
+                    var delta = 0f;
+                    if (HasWheel())
+                    {
+                        delta = -Input.GetAxis("Mouse ScrollWheel") * 0.05f;
+                    }
+                    var camera = MainControl.Instance.mainCamera;
+                    bool isBoost = Input.GetKey(KeyCode.LeftControl);
+                    camera.orthographicSize *= 1 + delta * (isBoost ? 5 : 1);
+                    UIEventBus.SendEvent(UIEventType.CameraTransformChanged);
+                }
+            }
+        }
+
+        private void ProcessGroupInput()
+        {
+            var group = MainControl.Instance.curGroup;
+            if (m_currentToggle == m_toggleMove)
+            {
+                if (IsMouseButtonDown(2) || IsMouseButtonDown(1) || IsMouseButtonDown(0))
+                {
+                    moveProcessable = !isMouseOnUI;
+                }
+
+                if ((IsMouseButton(2) || IsMouseButton(1) || IsMouseButton(0)) && moveProcessable)
+                {
+                    var worldPos = MainControl.Instance.mainCamera.ScreenToWorldPoint(Input.mousePosition);
+                    if (IsMouseButton(0))
+                    {
+                        worldPos = group.root.position + worldDelta;
+                    }
+                    if (MainControl.Instance.LockX)
+                    {
+                        worldPos.x = group.root.position.x;
+                    }
+                    if (MainControl.Instance.LockY)
+                    {
+                        worldPos.y = group.root.position.y;
+                    }
+                    worldPos.z = group.root.position.z;
+                    if (IsMouseButton(2) || IsMouseButton(0))
+                    {
+                        group.SetPosition(worldPos);
+                    }
+                    else if (IsMouseButton(1))
+                    {
+                        group.SetPivotPositon(worldPos);
+                    }
+                }
+                else
+                {
+                    moveProcessable = false;
+                }
+            }
+            else if (m_currentToggle == m_toggleRotate && !isMouseOnUI)
+            {
+                if (HasWheel())
+                {
+                    var value = 0f;
+                    bool isBoost = Input.GetKey(KeyCode.LeftControl);
+                    if (HasWheel())
+                    {
+                        value = Input.GetAxis("Mouse ScrollWheel") * 5f;
+                    }
+
+                    group.SetRotation(value * (isBoost ? 5 : 1));
+                }
+            }
+            else if (m_currentToggle == m_toggleScale && !isMouseOnUI)
+            {
+                if (HasWheel())
+                {
+                    var value = 0f;
+                    bool isBoost = Input.GetKey(KeyCode.LeftControl);
+                    if (HasWheel())
+                    {
+                        value = Input.GetAxis("Mouse ScrollWheel") * 0.05f;
+                    }
+
+                    group.SetScale(value * (isBoost ? 5 : 1));
+                }
+            }
+        }
+
+        private void ProcessModelInput()
+        {
+            var target = MainControl.Instance.curTarget;
+            if (m_currentToggle == m_toggleMove)
+            {
+                if (IsMouseButtonDown(2) || IsMouseButtonDown(0))
+                {
+                    moveProcessable = !isMouseOnUI;
+                }
+
+                if ((IsMouseButton(2) || IsMouseButton(0)) && moveProcessable)
+                {
+                    var worldPos = MainControl.Instance.mainCamera.ScreenToWorldPoint(Input.mousePosition);
+                    if (IsMouseButton(0))
+                    {
+                        worldPos = target.MainPos.position + worldDelta;
+                    }
+                    if (MainControl.Instance.LockX)
+                    {
+                        worldPos.x = target.MainPos.position.x;
+                    }
+                    if (MainControl.Instance.LockY)
+                    {
+                        worldPos.y = target.MainPos.position.y;
+                    }
+                    target.SetCharacterWorldPosition(worldPos.x, worldPos.y);
+                    UIEventBus.SendEvent(UIEventType.ModelTransformChanged);
+                }
+                else
+                {
+                    moveProcessable = false;
+                }
+            }
+            else if (m_currentToggle == m_toggleRotate && !isMouseOnUI)
+            {
+                if (HasWheel())
+                {
+                    var value = 0f;
+                    bool isBoost = Input.GetKey(KeyCode.LeftControl);
+                    if (HasWheel())
+                    {
+                        value = Input.GetAxis("Mouse ScrollWheel") * 5f;
+                    }
+
+                    var oldPos = target.MainPos.position;
+                    target.SetRotation(target.RootRotation + value * (isBoost ? 5 : 1));
+                    target.SetCharacterWorldPosition(oldPos.x, oldPos.y);
+                    UIEventBus.SendEvent(UIEventType.ModelTransformChanged);
+                }
+            }
+            else if (m_currentToggle == m_toggleScale && !isMouseOnUI)
+            {
+                if (HasWheel())
+                {
+                    var value = 0f;
+                    bool isBoost = Input.GetKey(KeyCode.LeftControl);
+                    if (HasWheel())
+                    {
+                        value = Input.GetAxis("Mouse ScrollWheel") * 0.05f;
+                    }
+
+                    var oldPos = target.MainPos.position;
+                    target.SetScale(target.RootScaleValue + value * (isBoost ? 5 : 1));
+                    target.SetCharacterWorldPosition(oldPos.x, oldPos.y);
+                    UIEventBus.SendEvent(UIEventType.ModelTransformChanged);
+                }
+            }
+        }
+
+        private void ProcessBackgroundInput()
+        {
+            var bgContainer = MainControl.Instance.bgContainer;
+            if (m_currentToggle == m_toggleMove)
+            {
+                if (IsMouseButtonDown(2) || IsMouseButtonDown(0))
+                {
+                    moveProcessable = !isMouseOnUI;
+                }
+
+                if ((IsMouseButton(2) || IsMouseButton(0)) && moveProcessable)
+                {
+                    var mainCamera = MainControl.Instance.mainCamera;
+                    var worldPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+                    if (IsMouseButton(0))
+                    {
+                        worldPos = bgContainer.root.position + worldDelta;
+                    }
+                    if (MainControl.Instance.LockX)
+                    {
+                        worldPos.x = bgContainer.root.position.x;
+                    }
+                    if (MainControl.Instance.LockY)
+                    {
+                        worldPos.y = bgContainer.root.position.y;
+                    }
+                    bgContainer.SetWorldPosition(worldPos.x, worldPos.y);
+                }
+                else
+                {
+                    moveProcessable = false;
+                }
+            }
+            else if (m_currentToggle == m_toggleRotate && !isMouseOnUI)
+            {
+                if (HasWheel())
+                {
+                    var value = 0f;
+                    bool isBoost = Input.GetKey(KeyCode.LeftControl);
+                    if (HasWheel())
+                    {
+                        value = Input.GetAxis("Mouse ScrollWheel") * 5f;
+                    }
+                    bgContainer.SetRotation(bgContainer.rootRotation + value * (isBoost ? 5 : 1));
+                }
+            }
+            else if (m_currentToggle == m_toggleScale && !isMouseOnUI)
+            {
+                if (HasWheel())
+                {
+                    var value = 0f;
+                    bool isBoost = Input.GetKey(KeyCode.LeftControl);
+                    if (HasWheel())
+                    {
+                        value = Input.GetAxis("Mouse ScrollWheel") * 0.05f;
+                    }
+                    bgContainer.SetScale(bgContainer.rootScale + value * (isBoost ? 5 : 1));
+                }
+            }
+        }
+
+        #endregion
+
+        private bool IsMouseButton(int button)
+        {
+            return Input.GetMouseButton(button);
+        }
+
+        private bool IsMouseButtonDown(int button)
+        {
+            return Input.GetMouseButtonDown(button) || inFreezeProcess && IsMouseButton(button);
+        }
+
+        private bool IsMouseButtonUp(int button)
+        {
+            return Input.GetMouseButtonUp(button);
+        }
+
+        private bool HasWheel()
+        {
+            return !isMouseOnUI && Input.GetAxis("Mouse ScrollWheel") != 0;
+        }
+
+        private bool IsMouseOnUI()
+        {
+            return EventSystem.current.IsPointerOverGameObject();
+        }
+    }
+
+    #region auto generated members
+    private Transform m_tfCursor;
+    private Transform m_tfFunctions;
+    private Toggle m_toggleChara;
+    private Toggle m_toggleGroup;
+    private Toggle m_toggleBackGround;
+    private Transform m_itemPageCharaMenu;
+    private Transform m_itemPageGroupMenu;
+    private Transform m_itemPageBackgroundMenu;
+    private Transform m_itemPageCharaFunctions;
+    private Transform m_itemPageGroupFunctions;
+    private Transform m_itemPageBackgroundFunctions;
+    private Transform m_itemTools;
+    #endregion
+
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_tfCursor = transform.Find("m_tfCursor").GetComponent<Transform>();
+        m_tfFunctions = transform.Find("Left/m_tfFunctions").GetComponent<Transform>();
+        m_toggleChara = transform.Find("Left/m_tfFunctions/m_toggleChara").GetComponent<Toggle>();
+        m_toggleGroup = transform.Find("Left/m_tfFunctions/m_toggleGroup").GetComponent<Toggle>();
+        m_toggleBackGround = transform.Find("Left/m_tfFunctions/m_toggleBackGround").GetComponent<Toggle>();
+        m_itemPageCharaMenu = transform.Find("Left/pages/m_itemPageCharaMenu").GetComponent<Transform>();
+        m_itemPageGroupMenu = transform.Find("Left/pages/m_itemPageGroupMenu").GetComponent<Transform>();
+        m_itemPageBackgroundMenu = transform.Find("Left/pages/m_itemPageBackgroundMenu").GetComponent<Transform>();
+        m_itemPageCharaFunctions = transform.Find("Right/pages/m_itemPageCharaFunctions").GetComponent<Transform>();
+        m_itemPageGroupFunctions = transform.Find("Right/pages/m_itemPageGroupFunctions").GetComponent<Transform>();
+        m_itemPageBackgroundFunctions = transform.Find("Right/pages/m_itemPageBackgroundFunctions").GetComponent<Transform>();
+        m_itemTools = transform.Find("Center/m_itemTools").GetComponent<Transform>();
+
+        m_toggleChara.onValueChanged.AddListener(OnToggleCharaChange);
+        m_toggleGroup.onValueChanged.AddListener(OnToggleGroupChange);
+        m_toggleBackGround.onValueChanged.AddListener(OnToggleBackGroundChange);
+    }
+    #endregion
+
+    #region auto-generated code event
+    private void OnToggleCharaChange(bool value)
+    {
+        // Debug.Log("OnToggleCharaChange");
+    }
+    private void OnToggleGroupChange(bool value)
+    {
+        // Debug.Log("OnToggleGroupChange");
+    }
+    private void OnToggleBackGroundChange(bool value)
+    {
+        // Debug.Log("OnToggleBackGroundChange");
+    }
+    #endregion
+
+    private PageCharaFunctions m_pageCharaFunctions;
+    private PageCharaMenu m_pageCharaMenu;
+    private PageGroupMenu m_pageGroupMenu;
+    private PageGroupFunctions m_pageGroupFunctions;
+    private PageBackgroundMenu m_pageBackgroundMenu;
+    private PageBackgroundFunctions m_pageBackgroundFunctions;
+
+    private ToolWidget m_toolWidget;
+    protected override void OnInit()
+    {
+        base.OnInit();
+        m_pageCharaMenu = PageCharaMenu.CreateWidget(m_itemPageCharaMenu.gameObject);
+        m_pageCharaFunctions = PageCharaFunctions.CreateWidget(m_itemPageCharaFunctions.gameObject);
+        m_pageCharaMenu.Inject(m_pageCharaFunctions);
+        m_pageCharaMenu.BindToToggle(m_toggleChara);
+        m_pageCharaFunctions.BindToToggle(m_toggleChara);
+
+        m_pageGroupMenu = PageGroupMenu.CreateWidget(m_itemPageGroupMenu.gameObject);
+        m_pageGroupFunctions = PageGroupFunctions.CreateWidget(m_itemPageGroupFunctions.gameObject);
+        m_pageGroupMenu.Inject(m_pageGroupFunctions, m_tfCursor);
+        m_pageGroupMenu.BindToToggle(m_toggleGroup);
+        m_pageGroupFunctions.BindToToggle(m_toggleGroup);
+
+        m_pageBackgroundMenu = PageBackgroundMenu.CreateWidget(m_itemPageBackgroundMenu.gameObject);
+        m_pageBackgroundFunctions = PageBackgroundFunctions.CreateWidget(m_itemPageBackgroundFunctions.gameObject);
+        m_pageBackgroundMenu.BindToToggle(m_toggleBackGround);
+        m_pageBackgroundFunctions.BindToToggle(m_toggleBackGround);
+        m_pageBackgroundMenu.Inject(m_pageBackgroundFunctions);
+
+        m_toolWidget = ToolWidget.CreateWidget(m_itemTools.gameObject);
+    }
+
+    public void Update()
+    {
+        m_toolWidget.Update();
+    }
+}
+
+public class MotionEntryWidget : UIItemWidget<MotionEntryWidget>
+{
+    public string name;
+
+    #region auto-generated code
+    private Image m_imgBG;
+    private Text m_lblTitle;
+
+    protected override void CodeGenBindMembers()
+    {
+        m_imgBG = transform.Find("m_imgBG").GetComponent<Image>();
+        m_lblTitle = transform.Find("m_lblTitle").GetComponent<Text>();
+    }
+    #endregion
+    #region auto-generated code event
+    #endregion
+
+
+    public void SetData(string name)
+    {
+        this.name = name;
+        m_lblTitle.text = name;
+    }
+
+    public override void SetStateStyle(UIStateStyle.UIState state)
+    {
+        base.SetStateStyle(state);
+        StateStyle.SetColor(m_imgBG, state);
+    }
+}
+
+public class CharaItemWidget : UIItemWidget<CharaItemWidget>
+{
+    #region auto-generated code
+    private Text m_lblTitle;
+    private Button m_btnVisible;
+    private MonoUIStyle m_styleVisible;
+    private Button m_btnDelete;
+
+    protected override void CodeGenBindMembers()
+    {
+        m_lblTitle = transform.Find("m_lblTitle").GetComponent<Text>();
+        m_btnVisible = transform.Find("m_btnVisible").GetComponent<Button>();
+        m_styleVisible = transform.Find("m_btnVisible/m_styleVisible").GetComponent<MonoUIStyle>();
+        m_btnDelete = transform.Find("m_btnDelete").GetComponent<Button>();
+        m_btnVisible.onClick.AddListener(OnVisibleClick);
+        m_btnDelete.onClick.AddListener(OnDeleteClick);
+    }
+    #endregion
+
+
+    #region auto-generated code event
+    public void OnVisibleClick()
+    {
+        _OnVisibleClick?.Invoke(this);
+    }
+    public void OnDeleteClick()
+    {
+        _OnDeleteClick?.Invoke(this);
+    }
+    #endregion
+
+
+    public Action<CharaItemWidget> _OnVisibleClick;
+    public Action<CharaItemWidget> _OnDeleteClick;
+    public override void SetStateStyle(UIStateStyle.UIState state)
+    {
+        StateStyle.SetActiveObject(state);
+        StateStyle.SetColor(m_lblTitle, state);
+    }
+
+    public void SetVisibleStyle(UIStateStyle.UIState state)
+    {
+        m_styleVisible.style.SetActiveObject(state);
+        m_styleVisible.style.SetObjectsColor(state);
+    }
+
+    protected override void OnInit()
+    {
+        base.OnInit();
+        SetStateStyle(UIStateStyle.UIState.Normal);
+    }
+
+    public void SetData(string name)
+    {
+        m_lblTitle.text = name;
+    }
+}
+
+public class LabelInputFieldWidget : UIItemWidget<LabelInputFieldWidget>
+{
+
+    #region auto-generated code
+    private Text m_lblTitle;
+    private InputField m_iptValue;
+    private Text m_lblPrefix;
+    private Toggle m_toggleLock;
+    private InputField m_iptValue2;
+    private Text m_lblPrefix2;
+    private Toggle m_toggleLock2;
+
+    protected override void CodeGenBindMembers()
+    {
+        m_lblTitle = transform.Find("m_lblTitle").GetComponent<Text>();
+        m_iptValue = transform.Find("m_iptValue").GetComponent<InputField>();
+        m_lblPrefix = transform.Find("m_iptValue/m_lblPrefix").GetComponent<Text>();
+        m_toggleLock = transform.Find("m_iptValue/m_toggleLock").GetComponent<Toggle>();
+        m_iptValue2 = transform.Find("m_iptValue2").GetComponent<InputField>();
+        m_lblPrefix2 = transform.Find("m_iptValue2/m_lblPrefix2").GetComponent<Text>();
+        m_toggleLock2 = transform.Find("m_iptValue2/m_toggleLock2").GetComponent<Toggle>();
+    }
+    #endregion
+
+    #region auto-generated code event
+    #endregion
+
+    public string Data => m_iptValue.text;
+    public string Data2 => m_iptValue2.text;
+
+    private Action<string> m_onSubmit;
+    private Action<string> m_onSubmit2;
+
+    private Action<Toggle, bool> _onToggleChange;
+    private Action<Toggle, bool> _onToggleChange2;
+
+    protected override void OnInit()
+    {
+        base.OnInit();
+        m_iptValue.onEndEdit.AddListener(OnEndEdit);
+        m_iptValue2.onEndEdit.AddListener(OnEndEdit2);
+        m_toggleLock.onValueChanged.AddListener(OnToggleChange);
+        m_toggleLock2.onValueChanged.AddListener(OnToggleChange2);
+    }
+
+    private void OnToggleChange(bool arg0)
+    {
+        _onToggleChange?.Invoke(m_toggleLock, arg0);
+    }
+
+    private void OnToggleChange2(bool arg0)
+    {
+        _onToggleChange2?.Invoke(m_toggleLock2, arg0);
+    }
+
+    private void OnEndEdit(string value)
+    {
+        m_onSubmit?.Invoke(value);
+    }
+
+    private void OnEndEdit2(string value)
+    {
+        m_onSubmit2?.Invoke(value);
+    }
+
+    public void SetData(string value)
+    {
+        m_iptValue.SetTextWithoutNotify(value);
+    }
+
+    public void SetData2(string value)
+    {
+        m_iptValue2.SetTextWithoutNotify(value);
+    }
+
+    public void SetDataSubmit(Action<string> onSubmit)
+    {
+        m_onSubmit = onSubmit;
+    }
+
+    public void SetDataSubmit2(Action<string> onSubmit)
+    {
+        m_onSubmit2 = onSubmit;
+    }
+
+    public void SetLockChange(Action<Toggle, bool> onToggleChange)
+    {
+        _onToggleChange = onToggleChange;
+    }
+
+    public void SetLockChange2(Action<Toggle, bool> onToggleChange2)
+    {
+        _onToggleChange2 = onToggleChange2;
+    }
+
+    public void SetLockValue(bool value, bool notify = true)
+    {
+        if (notify)
+        {
+            m_toggleLock.isOn = value;
+        }
+        else
+        {
+            m_toggleLock.SetIsOnWithoutNotify(value);
+        }
+    }
+
+    public void SetLockValue2(bool value, bool notify = true)
+    {
+        if (notify)
+        {
+            m_toggleLock2.isOn = value;
+        }
+        else
+        {
+            m_toggleLock2.SetIsOnWithoutNotify(value);
+        }
+    }
+}
+
+public class PageCharaMenu : UIPageWidget<PageCharaMenu>
+{
+    #region auto generated members
+    private Button m_btnLoadConf;
+    private Button m_btnLoadJson;
+    private Button m_btnLoadImg;
+    private ScrollRect m_scrollChara;
+    private Transform m_tfCharaItems;
+    private Transform m_itemChara;
+    private Button m_btnMoreProp;
+    private Button m_btnSaveProfile;
+    private Button m_btnTop;
+    private Button m_btnUp;
+    private Button m_btnZSortHelp;
+    private Button m_btnDown;
+    private Button m_btnBottom;
+    private Transform m_itemPos;
+    private Transform m_itemScale;
+    private Transform m_itemRotation;
+    private Button m_btnReloadModel;
+    private Button m_btnReloadTexture;
+    private Button m_btnOpenModelPath;
+    #endregion
+
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_btnLoadConf = transform.Find("GameObject/m_btnLoadConf").GetComponent<Button>();
+        m_btnLoadJson = transform.Find("GameObject/m_btnLoadJson").GetComponent<Button>();
+        m_btnLoadImg = transform.Find("GameObject/m_btnLoadImg").GetComponent<Button>();
+        m_scrollChara = transform.Find("m_scrollChara").GetComponent<ScrollRect>();
+        m_tfCharaItems = transform.Find("m_scrollChara/Viewport/m_tfCharaItems").GetComponent<Transform>();
+        m_itemChara = transform.Find("m_scrollChara/Viewport/m_tfCharaItems/m_itemChara").GetComponent<Transform>();
+        m_btnMoreProp = transform.Find("GameObject (1)/m_btnMoreProp").GetComponent<Button>();
+        m_btnSaveProfile = transform.Find("GameObject (1)/m_btnSaveProfile").GetComponent<Button>();
+        m_btnTop = transform.Find("zsetgroup/m_btnTop").GetComponent<Button>();
+        m_btnUp = transform.Find("zsetgroup/m_btnUp").GetComponent<Button>();
+        m_btnZSortHelp = transform.Find("zsetgroup/m_btnZSortHelp").GetComponent<Button>();
+        m_btnDown = transform.Find("zsetgroup/m_btnDown").GetComponent<Button>();
+        m_btnBottom = transform.Find("zsetgroup/m_btnBottom").GetComponent<Button>();
+        m_itemPos = transform.Find("m_itemPos").GetComponent<Transform>();
+        m_itemScale = transform.Find("m_itemScale").GetComponent<Transform>();
+        m_itemRotation = transform.Find("m_itemRotation").GetComponent<Transform>();
+        m_btnReloadModel = transform.Find("GameObject/m_btnReloadModel").GetComponent<Button>();
+        m_btnReloadTexture = transform.Find("GameObject/m_btnReloadTexture").GetComponent<Button>();
+        m_btnOpenModelPath = transform.Find("GameObject/m_btnOpenModelPath").GetComponent<Button>();
+
+        m_btnLoadConf.onClick.AddListener(OnButtonLoadConfClick);
+        m_btnLoadJson.onClick.AddListener(OnButtonLoadJsonClick);
+        m_btnLoadImg.onClick.AddListener(OnButtonLoadImgClick);
+        m_btnMoreProp.onClick.AddListener(OnButtonMorePropClick);
+        m_btnSaveProfile.onClick.AddListener(OnButtonSaveProfileClick);
+        m_btnTop.onClick.AddListener(OnButtonTopClick);
+        m_btnUp.onClick.AddListener(OnButtonUpClick);
+        m_btnZSortHelp.onClick.AddListener(OnButtonZSortHelpClick);
+        m_btnDown.onClick.AddListener(OnButtonDownClick);
+        m_btnBottom.onClick.AddListener(OnButtonBottomClick);
+        m_btnReloadModel.onClick.AddListener(OnButtonReloadModelClick);
+        m_btnReloadTexture.onClick.AddListener(OnButtonReloadTextureClick);
+        m_btnOpenModelPath.onClick.AddListener(OnButtonOpenModelPathClick);
+    }
+    #endregion
+
+
+
+    #region auto-generated code event
+    public void OnButtonLoadConfClick()
+    {
+        MainControl.Instance.LoadConf();
+    }
+    public void OnButtonLoadJsonClick()
+    {
+        MainControl.Instance.LoadConfig();
+    }
+    private void OnButtonLoadImgClick()
+    {
+        MainControl.Instance.LoadImg();
+    }
+
+    public void OnButtonMorePropClick()
+    {
+        MainControl.Instance.ShowConfigEditor();
+    }
+
+    private void OnButtonSaveProfileClick()
+    {
+        MainControl.Instance.SaveConf();
+    }
+
+    private void OnButtonTopClick()
+    {
+        SetTargetZSort(true, true);
+    }
+    private void OnButtonUpClick()
+    {
+        SetTargetZSort(true, false);
+    }
+    private void OnButtonZSortHelpClick()
+    {
+        MessageTipWindow.Instance.Show("Z轴排序帮助", "目前只是在编辑器里看的，和webgal里的z-index毫无关系\n排序做得还不是很完美\n立绘会有锯齿\n这个以后在优化.");
+    }
+
+    private void OnButtonDownClick()
+    {
+        SetTargetZSort(false, false);
+    }
+    private void OnButtonBottomClick()
+    {
+        SetTargetZSort(false, true);
+    }
+
+
+    public void OnButtonReloadModelClick()
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model != null)
+        {
+            MainControl.Instance.ReloadModel();
+        }
+    }
+    public void OnButtonReloadTextureClick()
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model != null)
+        {
+            model.ReloadTextures();
+        }
+    }
+    public void OnButtonOpenModelPathClick()
+    {
+        var meta = MainControl.Instance.curMeta;
+        if (meta != null)
+        {
+            System.Diagnostics.Process.Start("explorer.exe", Path.GetDirectoryName(meta.GetValidModelFilePath(0)));
+        }
+    }
+    #endregion
+
+    private LabelInputFieldWidget m_liptPos;
+    private LabelInputFieldWidget m_liptScale;
+    private LabelInputFieldWidget m_liptRotation;
+    private List<CharaItemWidget> m_listChara = new List<CharaItemWidget>();
+    private PageCharaFunctions m_pageCharaFunctions;
+
+    protected override void OnInit()
+    {
+        base.OnInit();
+        m_liptPos = LabelInputFieldWidget.CreateWidget(m_itemPos.gameObject);
+        m_liptScale = LabelInputFieldWidget.CreateWidget(m_itemScale.gameObject);
+        m_liptRotation = LabelInputFieldWidget.CreateWidget(m_itemRotation.gameObject);
+
+        m_liptPos.SetDataSubmit(OnXPosSubmit);
+        m_liptPos.SetDataSubmit2(OnYPosSubmit);
+        m_liptPos.SetLockChange(OnLockChange);
+        m_liptPos.SetLockChange2(OnLockChange2);
+        m_liptScale.SetDataSubmit(OnScaleSubmit);
+        m_liptScale.SetLockChange(OnFlipChange);
+        m_liptRotation.SetDataSubmit(OnRotationSubmit);
+    }
+
+    public override void OnPageShown()
+    {
+        base.OnPageShown();
+        MainControl.OnLoadConf += OnLoadConf;
+        MainControl.OnMetaChanged += OnMetaChanged;
+        UIEventBus.AddListener(UIEventType.ModelTransformChanged, OnModelTransformChanged);
+        UIEventBus.AddListener(UIEventType.OnModelChanged, OnModelChanged);
+        UIEventBus.AddListener(UIEventType.OnModelDeleted, OnModelDeleted);
+
+        UIEventBus.AddListener(UIEventType.LockXChanged, OnLockXChanged);
+        UIEventBus.AddListener(UIEventType.LockYChanged, OnLockYChanged);
+
+        MainControl.Instance.editType = EditType.Model;
+
+        RefreshAll();
+    }
+
+    public override void OnPageHidden()
+    {
+        base.OnPageHidden();
+        MainControl.OnLoadConf -= OnLoadConf;
+        MainControl.OnMetaChanged -= OnMetaChanged;
+        UIEventBus.RemoveListener(UIEventType.ModelTransformChanged, OnModelTransformChanged);
+        UIEventBus.RemoveListener(UIEventType.OnModelChanged, OnModelChanged);
+        UIEventBus.RemoveListener(UIEventType.OnModelDeleted, OnModelDeleted);
+
+        UIEventBus.RemoveListener(UIEventType.LockXChanged, OnLockXChanged);
+        UIEventBus.RemoveListener(UIEventType.LockYChanged, OnLockYChanged);
+    }
+
+    public void SetTargetZSort(bool isUp, bool isFinal)
+    {
+        var curTarget = MainControl.Instance.curTarget;
+        if (curTarget == null)
+            return;
+
+        var models = MainControl.Instance.models;
+        var index = models.IndexOf(curTarget);
+        
+        if (isFinal)
+        {
+            models.RemoveAt(index);
+            if (isUp)
+            {
+                models.Insert(0, curTarget);
+            }
+            else
+            {
+                models.Add(curTarget);
+            }
+        }
+        else
+        {
+            if (isUp && index > 0)
+            {
+                models.RemoveAt(index);
+                models.Insert(index - 1, curTarget);
+            }
+            else if (!isUp && index < models.Count - 1)
+            {
+                models.RemoveAt(index);
+                models.Insert(index + 1, curTarget);
+            }
+        }
+
+        UIEventBus.SendEvent(UIEventType.OnModelChanged);
+    }
+
+    public void Inject(PageCharaFunctions pageCharaFunctions)
+    {
+        m_pageCharaFunctions = pageCharaFunctions;
+    }
+
+    private void OnLockChange(Toggle toggle, bool value)
+    {
+        MainControl.Instance.LockX = value;
+    }
+
+    private void OnLockChange2(Toggle toggle, bool value)
+    {
+        MainControl.Instance.LockY = value;
+    }
+    
+    private void OnFlipChange(Toggle toggle, bool arg2)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model != null)
+        {
+            model.SetReverseXScale(toggle.isOn);
+        }
+        RefreshCharaTransform();
+    }
+
+    private void OnLockXChanged()
+    {
+        m_liptPos.SetLockValue(MainControl.Instance.LockX);
+    }
+
+    private void OnLockYChanged()
+    {
+        m_liptPos.SetLockValue2(MainControl.Instance.LockY);
+    }
+
+    private void OnModelDeleted()
+    {
+        OnModelChanged();
+    }
+
+    private void OnModelChanged()
+    {
+        RefreshAll();
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            if (m_pageCharaFunctions.PageExpressionEditor.IsActive)
+            {
+                m_pageCharaFunctions.PageExpressionEditor.RefreshAll();
+            }
+            else if (m_pageCharaFunctions.PageCharacterPreview.IsActive)
+            {
+                m_pageCharaFunctions.PageCharacterPreview.RefreshAll();
+            }
+            return;
+        }
+        var modelDisplayMode = model.DisplayMode;
+        if (modelDisplayMode == ModelDisplayMode.EmotionEditor)
+        {
+            m_pageCharaFunctions.PageExpressionEditor.TrySwitchTo();
+            m_pageCharaFunctions.PageExpressionEditor.RefreshAll();
+        }
+        else if (modelDisplayMode == ModelDisplayMode.Normal)
+        {
+            m_pageCharaFunctions.PageCharacterPreview.TrySwitchTo();
+            m_pageCharaFunctions.PageCharacterPreview.RefreshAll();
+        }
+    }
+
+    private void OnRotationSubmit(string obj)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model != null)
+        {
+            if (float.TryParse(obj, out float rotation))
+            {
+                var oldPos = model.MainPos.position;
+                model.SetRotation(rotation);
+                model.SetCharacterWorldPosition(oldPos.x, oldPos.y);
+            }
+            RefreshCharaTransform();
+        }
+    }
+
+    private void OnScaleSubmit(string obj)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model != null)
+        {
+            if (float.TryParse(obj, out float scale))
+            {
+                var oldPos = model.MainPos.position;
+                model.SetScale(scale);
+                model.SetCharacterWorldPosition(oldPos.x, oldPos.y);
+            }
+            RefreshCharaTransform();
+        }
+    }
+    private void OnYPosSubmit(string obj)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model != null)
+        {
+            if (float.TryParse(obj, out float y))
+            {
+                model.SetPosition(model.RootPosition.x, y);
+            }
+            RefreshCharaTransform();
+        }
+    }
+
+    private void OnXPosSubmit(string obj)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model != null)
+        {
+            if (float.TryParse(obj, out float x))
+            {
+                model.SetPosition(x, model.RootPosition.y);
+            }
+            RefreshCharaTransform();
+        }
+    }
+
+    private void OnModelTransformChanged()
+    {
+        RefreshCharaTransform();
+    }
+
+    public void RefreshAll()
+    {
+        RefreshCharaList();
+        if (m_pageCharaFunctions.PageCharacterPreview.IsActive)
+        {
+            m_pageCharaFunctions.PageCharacterPreview.RefreshMotionList();
+            m_pageCharaFunctions.PageCharacterPreview.RefreshExpressionList();
+        }
+        RefreshCharaTransform();
+    }
+
+    public void RefreshCharaList()
+    {
+        var models = MainControl.Instance.models;
+        var selectedModel = MainControl.Instance.curTarget;
+        SetListItem(m_listChara, m_itemChara.gameObject, m_tfCharaItems, models.Count, OnCharaItemCreate);
+        for (int i = 0; i < models.Count; i++)
+        {
+            var item = m_listChara[i];
+            item.SetData(models[i].Name);
+
+            var model = models[i];
+            bool visible = model.gameObject.activeSelf;
+            var state = visible ? UIStateStyle.UIState.Normal : UIStateStyle.UIState.Disabled;
+            if (selectedModel == model)
+            {
+                item.SetStateStyle(UIStateStyle.UIState.Selected);
+            }
+            else
+            {
+                item.SetStateStyle(state);
+            }
+            item.SetVisibleStyle(state);
+        }
+
+    }
+
+    private void OnCharaItemCreate(CharaItemWidget item)
+    {
+        item._OnVisibleClick += OnCharaVisibleClick;
+        item._OnDeleteClick += OnCharaDeleteClick;
+        item.AddClickEvent(() => OnCharaClicked(item));
+    }
+    
+    private void OnCharaVisibleClick(CharaItemWidget item)
+    {
+        var index = GetListItemIndex(m_listChara, item);
+        var model = MainControl.Instance.models[index];
+        MainControl.Instance.SetModelVisible(model, !model.gameObject.activeSelf);
+        RefreshCharaList();
+    }
+
+    private void OnCharaDeleteClick(CharaItemWidget item)
+    {
+        var index = GetListItemIndex(m_listChara, item);
+        MainControl.Instance.DeleteModel(MainControl.Instance.models[index]);
+    }
+
+    private void OnCharaClicked(CharaItemWidget item)
+    {
+        var index = GetListItemIndex(m_listChara, item);
+        MainControl.Instance.SetCharacter(MainControl.Instance.models[index]);
+    }
+
+    private void OnLoadConf()
+    {
+        RefreshAll();
+    }
+
+    private void OnMetaChanged()
+    {
+        RefreshCharaList();
+    }
+
+    public void RefreshCharaTransform()
+    {
+        m_liptPos.SetLockValue(MainControl.Instance.LockX);
+        m_liptPos.SetLockValue2(MainControl.Instance.LockY);
+        
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+
+        m_liptPos.SetData(model.RootPosition.x.ToString("F3"));
+        m_liptPos.SetData2(model.RootPosition.y.ToString("F3"));
+
+        m_liptScale.SetData(model.RootScaleValue.ToString("F3"));
+        m_liptScale.SetLockValue(model.ReverseXScale);
+
+        m_liptRotation.SetData(model.RootRotation.ToString("F3"));
+    }
+
+}
+
+public class PageCharaFunctions : UIPageWidget<PageCharaFunctions>
+{
+    public PageCharacterPreview PageCharacterPreview => m_pageCharacterPreview;
+    public PageExpressionEditor PageExpressionEditor => m_pageExpressionEditor;
+    private PageCharacterPreview m_pageCharacterPreview;
+    private PageExpressionEditor m_pageExpressionEditor;
+
+    #region auto-generated code
+    private Transform m_tfFunctions;
+    private Toggle m_togglePreview;
+    private Toggle m_toggleEdit;
+    private Toggle m_toggleAnim;
+    private Transform m_itemPageExpressionEdit;
+    private Transform m_itemPageCharacterPreview;
+
+    protected override void CodeGenBindMembers()
+    {
+        m_tfFunctions = transform.Find("m_tfFunctions").GetComponent<Transform>();
+        m_togglePreview = transform.Find("m_tfFunctions/m_togglePreview").GetComponent<Toggle>();
+        m_toggleEdit = transform.Find("m_tfFunctions/m_toggleEdit").GetComponent<Toggle>();
+        m_toggleAnim = transform.Find("m_tfFunctions/m_toggleAnim").GetComponent<Toggle>();
+        m_itemPageExpressionEdit = transform.Find("pages/m_itemPageExpressionEdit").GetComponent<Transform>();
+        m_itemPageCharacterPreview = transform.Find("pages/m_itemPageCharacterPreview").GetComponent<Transform>();
+    }
+    #endregion
+    #region auto-generated code event
+    #endregion
+
+    protected override void OnInit()
+    {
+        base.OnInit();
+        
+        m_pageCharacterPreview = PageCharacterPreview.CreateWidget(m_itemPageCharacterPreview.gameObject);
+        m_pageExpressionEditor = PageExpressionEditor.CreateWidget(m_itemPageExpressionEdit.gameObject);
+        //m_pageAnimationEditor = PageAnimationEditor.CreateWidget(m_itemPageAnimationEditor.gameObject);
+    }
+
+    public override void OnPageShown()
+    {
+        base.OnPageShown();
+        m_pageCharacterPreview.BindToToggle(m_togglePreview);
+        m_pageExpressionEditor.BindToToggle(m_toggleEdit);
+    }
+}
+
+public class PageCharacterPreview : UIPageWidget<PageCharacterPreview>
+{
+    #region auto generated members
+    private Button m_btnCopyMotionExp;
+    private Button m_btnCopyTransform;
+    private Button m_btnCopyAll;
+    private Button m_btnCopyAllSpilt;
+    private InputField m_iptFilterMotion;
+    private ScrollRect m_scrollMotion;
+    private Transform m_tfMotionItems;
+    private Transform m_itemMotion;
+    private InputField m_iptFilterExpression;
+    private ScrollRect m_scrollExpression;
+    private Transform m_tfExpressionItems;
+    private Transform m_itemExpression;
+    #endregion
+
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_btnCopyMotionExp = transform.Find("m_btnCopyMotionExp").GetComponent<Button>();
+        m_btnCopyTransform = transform.Find("m_btnCopyTransform").GetComponent<Button>();
+        m_btnCopyAll = transform.Find("m_btnCopyAll").GetComponent<Button>();
+        m_btnCopyAllSpilt = transform.Find("m_btnCopyAllSpilt").GetComponent<Button>();
+        m_iptFilterMotion = transform.Find("GameObject/m_iptFilterMotion").GetComponent<InputField>();
+        m_scrollMotion = transform.Find("m_scrollMotion").GetComponent<ScrollRect>();
+        m_tfMotionItems = transform.Find("m_scrollMotion/Viewport/m_tfMotionItems").GetComponent<Transform>();
+        m_itemMotion = transform.Find("m_scrollMotion/Viewport/m_tfMotionItems/m_itemMotion").GetComponent<Transform>();
+        m_iptFilterExpression = transform.Find("GameObject (1)/m_iptFilterExpression").GetComponent<InputField>();
+        m_scrollExpression = transform.Find("m_scrollExpression").GetComponent<ScrollRect>();
+        m_tfExpressionItems = transform.Find("m_scrollExpression/Viewport/m_tfExpressionItems").GetComponent<Transform>();
+        m_itemExpression = transform.Find("m_scrollExpression/Viewport/m_tfExpressionItems/m_itemExpression").GetComponent<Transform>();
+
+        m_btnCopyMotionExp.onClick.AddListener(OnButtonCopyMotionExpClick);
+        m_btnCopyTransform.onClick.AddListener(OnButtonCopyTransformClick);
+        m_btnCopyAll.onClick.AddListener(OnButtonCopyAllClick);
+        m_btnCopyAllSpilt.onClick.AddListener(OnButtonCopyAllSpiltClick);
+        m_iptFilterMotion.onValueChanged.AddListener(OnInputFieldFilterMotionChange);
+        m_iptFilterMotion.onEndEdit.AddListener(OnInputFieldFilterMotionEndEdit);
+        m_iptFilterExpression.onValueChanged.AddListener(OnInputFieldFilterExpressionChange);
+        m_iptFilterExpression.onEndEdit.AddListener(OnInputFieldFilterExpressionEndEdit);
+    }
+    #endregion
+
+
+    #region auto-generated code event
+
+    private void OnButtonCopyMotionExpClick()
+    {
+        MainControl.Instance.CopyMotion();
+    }
+    private void OnButtonCopyTransformClick()
+    {
+        MainControl.Instance.CopyTransform();
+    }
+    private void OnButtonCopyAllClick()
+    {
+        MainControl.Instance.CopyAll();
+    }
+    private void OnButtonCopyAllSpiltClick()
+    {
+        MainControl.Instance.CopyAllSpilt();
+    }
+    private void OnInputFieldFilterMotionChange(string value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null || !model.HasMotions)
+        {
+            return;
+        }
+        model.meta.m_filterMotion = value;
+        RefreshMotionList();
+    }
+    private void OnInputFieldFilterMotionEndEdit(string value)
+    {
+        // Debug.Log("OnInputFieldFilterMotionEndEdit");
+    }
+    private void OnInputFieldFilterExpressionChange(string value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null || !model.HasMotions)
+        {
+            return;
+        }
+        model.meta.m_filterExp = value;
+        RefreshExpressionList();
+    }
+    private void OnInputFieldFilterExpressionEndEdit(string value)
+    {
+        // Debug.Log("OnInputFieldFilterExpressionEndEdit");
+    }
+
+    #endregion
+    
+    private List<MotionEntryWidget> m_listMotion = new List<MotionEntryWidget>();
+    private List<MotionEntryWidget> m_listExpression = new List<MotionEntryWidget>();
+
+
+    public override void OnPageShown()
+    {
+        base.OnPageShown();
+        var model = MainControl.Instance.curTarget;
+        if (model == null || !model.HasMotions)
+        {
+            RefreshMotionList();
+            RefreshExpressionList();
+            return;
+        }
+        m_iptFilterMotion.text = model.meta.m_filterMotion;
+        m_iptFilterExpression.text = model.meta.m_filterExp;
+        RefreshMotionList();
+        RefreshExpressionList();
+        model.SetDisplayMode(ModelDisplayMode.Normal);
+    }
+
+    public void RefreshMotionList()
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null || !model.HasMotions)
+        {
+            SetListItem(m_listMotion, m_itemMotion.gameObject, m_tfMotionItems, 0, OnMotionItemCreate);
+            return;
+        }
+
+        var pairs = model.MotionPairs;
+
+        if (!string.IsNullOrEmpty(model.meta.m_filterMotion))
+        {
+            var filters = model.meta.m_filterMotion.Split(' ').Where(s => !string.IsNullOrEmpty(s)).Select(s => s.ToLower());
+            pairs = pairs.Where(x => filters.All(f => x.name.ToLower().Contains(f))).ToList();
+        }
+
+        SetListItem(m_listMotion, m_itemMotion.gameObject, m_tfMotionItems, pairs.Count, OnMotionItemCreate);
+        var selectedMotion = model.curMotionName;
+        for (int i = 0; i < pairs.Count; i++)
+        {
+            var item = m_listMotion[i];
+            var pair = pairs[i];
+            item.SetData(pair.name);
+            if (pair.name == selectedMotion)
+            {
+                item.SetStateStyle(UIStateStyle.UIState.Selected);
+            }
+            else
+            {
+                item.SetStateStyle(UIStateStyle.UIState.Normal);
+            }
+        }
+    }
+
+    public void RefreshAll()
+    {
+        RefreshExpressionList();
+        RefreshMotionList();
+    }
+
+    public void RefreshExpressionList()
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null || !model.HasMotions)
+        {
+            SetListItem(m_listExpression, m_itemExpression.gameObject, m_tfExpressionItems, 0, OnExpressionItemCreate);
+            return;
+        }
+
+        var pairs = model.ExpPairs;
+
+        if (!string.IsNullOrEmpty(model.meta.m_filterExp))
+        {
+            var filters = model.meta.m_filterExp.Split(' ').Where(s => !string.IsNullOrEmpty(s)).Select(s => s.ToLower());
+            pairs = pairs.Where(x => filters.All(f => x.name.ToLower().Contains(f))).ToList();
+        }
+
+        SetListItem(m_listExpression, m_itemExpression.gameObject, m_tfExpressionItems, pairs.Count, OnExpressionItemCreate);
+        var selectedExpression = model.curExpName;
+        for (int i = 0; i < pairs.Count; i++)
+        {
+            var item = m_listExpression[i];
+            var pair = pairs[i];
+            item.SetData(pair.name);
+            if (pair.name == selectedExpression)
+            {
+                item.SetStateStyle(UIStateStyle.UIState.Selected);
+            }
+            else
+            {
+                item.SetStateStyle(UIStateStyle.UIState.Normal);
+            }
+        }
+    }
+
+    private void OnExpressionItemCreate(MotionEntryWidget widget)
+    {
+        widget.AddClickEvent(() => OnExpressionClicked(widget));
+    }
+
+    private void OnExpressionClicked(MotionEntryWidget widget)
+    {
+        MainControl.Instance.PlayExp(widget.name);
+        RefreshExpressionList();
+    }
+
+    private void OnMotionItemCreate(MotionEntryWidget widget)
+    {
+        widget.AddClickEvent(() => OnMotionClicked(widget));
+    }
+
+    private void OnMotionClicked(MotionEntryWidget widget)
+    {
+        MainControl.Instance.PlayMotion(widget.name);
+        RefreshMotionList();
+    }
+}
+
+public class PageExpressionEditor : UIPageWidget<PageExpressionEditor>
+{
+    #region auto generated members
+    private Button m_btnCopySelectedExp;
+    private Button m_btnCopyExpData;
+    private Toggle m_toggleShowSelectedOnly;
+    private Toggle m_toggleLock;
+    private InputField m_iptFilter;
+    private ScrollRect m_scrollExpression;
+    private Transform m_tfExpEntries;
+    private Transform m_itemExpEntry;
+    #endregion
+
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_btnCopySelectedExp = transform.Find("m_btnCopySelectedExp").GetComponent<Button>();
+        m_btnCopyExpData = transform.Find("m_btnCopyExpData").GetComponent<Button>();
+        m_toggleShowSelectedOnly = transform.Find("m_toggleShowSelectedOnly").GetComponent<Toggle>();
+        m_toggleLock = transform.Find("m_toggleLock").GetComponent<Toggle>();
+        m_iptFilter = transform.Find("m_iptFilter").GetComponent<InputField>();
+        m_scrollExpression = transform.Find("m_scrollExpression").GetComponent<ScrollRect>();
+        m_tfExpEntries = transform.Find("m_scrollExpression/Viewport/m_tfExpEntries").GetComponent<Transform>();
+        m_itemExpEntry = transform.Find("m_scrollExpression/Viewport/m_tfExpEntries/m_itemExpEntry").GetComponent<Transform>();
+
+        m_btnCopySelectedExp.onClick.AddListener(OnButtonCopySelectedExpClick);
+        m_btnCopyExpData.onClick.AddListener(OnButtonCopyExpDataClick);
+        m_toggleShowSelectedOnly.onValueChanged.AddListener(OnToggleShowSelectedOnlyChange);
+        m_toggleLock.onValueChanged.AddListener(OnToggleLockChange);
+        m_iptFilter.onValueChanged.AddListener(OnInputFieldFilterChange);
+        m_iptFilter.onEndEdit.AddListener(OnInputFieldFilterEndEdit);
+    }
+    #endregion
+
+
+
+    #region auto-generated code event
+    public void OnButtonCopySelectedExpClick()
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null || !model.SupportExpressionMode)
+        {
+            return;
+        }
+        var curExp = model.CurExp;
+        if (curExp != null)
+        {
+            model.CopyFromExp(curExp);
+        }
+        else
+        {
+            MainControl.Instance.ShowErrorDebugText("当前没有表情，请先选一个！");
+        }
+
+        RefreshExpEntryList();
+    }
+    public void OnButtonCopyExpDataClick()
+    {
+        MainControl.Instance.CopyMotionEditor();
+    }
+    private void OnToggleShowSelectedOnlyChange(bool value)
+    {
+        RefreshExpEntryList();
+    }
+    private void OnToggleLockChange(bool value)
+    {
+    }
+    private void OnInputFieldFilterChange(string value)
+    {
+        RefreshExpEntryList();
+    }
+    private void OnInputFieldFilterEndEdit(string value)
+    {
+    }
+
+    #endregion
+
+    private List<ExpEntryWidget> m_listExpEntry = new List<ExpEntryWidget>();
+
+    public override void OnPageShown()
+    {
+        base.OnPageShown();
+        var model = MainControl.Instance.curTarget;
+        if (model != null)
+        {
+            model.SetDisplayMode(ModelDisplayMode.EmotionEditor);
+        }
+        RefreshAll();
+    }
+
+    public void RefreshAll()
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null || !model.SupportExpressionMode)
+        {
+            RefreshExpEntryList();
+            return;
+        }
+
+        if (model.DisplayMode != ModelDisplayMode.EmotionEditor)
+        {
+            return;
+        }
+
+        RefreshExpEntryList();
+    }
+
+    public void RefreshExpEntryList()
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null || !model.SupportExpressionMode)
+        {
+            SetListItem(m_listExpEntry, m_itemExpEntry.gameObject, m_tfExpEntries, 0, OnExpItemCreate);
+            return;
+        }
+
+        var expKeyList = model.GetEmotionEditorList().list;
+
+        if (m_toggleShowSelectedOnly.isOn)
+        {
+            expKeyList = expKeyList.Where(x => model.IsMotionParamSetContains(x.name)).ToList();
+        }
+
+        if (!string.IsNullOrEmpty(m_iptFilter.text))
+        {
+            var filters = m_iptFilter.text.Split(' ').Where(s => !string.IsNullOrEmpty(s)).Select(s => s.ToLower());
+            expKeyList = expKeyList.Where(x => filters.All(f => x.name.ToLower().Contains(f))).ToList();
+        }
+
+        SetListItem(m_listExpEntry, m_itemExpEntry.gameObject, m_tfExpEntries, expKeyList.Count, OnExpItemCreate);
+        for (int i = 0; i < expKeyList.Count; i++)
+        {
+            var item = m_listExpEntry[i];
+            var key = expKeyList[i];
+            var value = model.GetMotionParamValue(key.name);
+            item.SetData(key.name, value, key.min, key.max);
+            bool contain = model.IsMotionParamSetContains(key.name);
+            if (contain)
+            {
+                item.SetStateStyle(UIStateStyle.UIState.Selected);
+            }
+            else
+            {
+                item.SetStateStyle(UIStateStyle.UIState.Normal);
+            }
+        }
+    }
+
+    private void OnExpItemCreate(ExpEntryWidget widget)
+    {
+        widget._OnSliderValueChanged = OnSliderValueChanged;
+        widget._OnTitleClick = OnExpClicked;
+        widget._OnInputFieldValueEndEdit = OnInputFieldValueEndEdit;
+    }
+
+    private void OnExpClicked(ExpEntryWidget widget)
+    {
+        if (m_toggleLock.isOn)
+        {
+            return;
+        }
+
+        var model = MainControl.Instance.curTarget;
+        if (model == null || !model.SupportExpressionMode)
+        {
+            return;
+        }
+        bool contain = model.IsMotionParamSetContains(widget.name);
+        if (contain)
+        {
+            model.RemoveMotionParamControl(widget.name);
+            model.ApplyMotionParamValue();
+        }
+        else
+        {
+            model.AddMotionParamControl(widget.name);
+        }
+        RefreshExpEntryList();
+    }
+
+    private void OnSliderValueChanged(string name, float value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+
+        bool contain = model.IsMotionParamSetContains(name);
+        if (contain)
+        {
+            model.SetMotionParamValue(name, value);
+            model.ApplyMotionParamValue();
+        }
+        RefreshExpEntryList();
+    }
+
+    private void OnInputFieldValueEndEdit(ExpEntryWidget widget)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        if (float.TryParse(widget.TextValue, out float value))
+        {
+            var clampValue = Mathf.Clamp(value, widget.MinValue, widget.MaxValue);
+            model.SetMotionParamValue(widget.name, clampValue);
+            model.ApplyMotionParamValue();
+            RefreshExpEntryList();
+        }
+        else
+        {
+            widget.SetText(widget.TextValue);
+        }
+    }
+}
+
+public class ExpEntryWidget : UIItemWidget<ExpEntryWidget>
+{
+
+    #region auto generated members
+    private Button m_btnTitle;
+    private Image m_imgBG;
+    private Text m_lblTitle;
+    private MonoUIStyle m_styleTitle;
+    private Slider m_sliderValue;
+    private Image m_imgSliderFill;
+    private Image m_imgSliderHandle;
+    private Button m_btnPreview;
+    private Image m_imgBtnPreview;
+    private Text m_lblPreview;
+    private MonoUIStyle m_styleButton;
+    private InputField m_iptValue;
+    private Text m_lblMin;
+    private Text m_lblMax;
+    #endregion
+
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_btnTitle = transform.Find("m_btnTitle").GetComponent<Button>();
+        m_imgBG = transform.Find("m_btnTitle/m_imgBG").GetComponent<Image>();
+        m_lblTitle = transform.Find("m_btnTitle/m_lblTitle").GetComponent<Text>();
+        m_styleTitle = transform.Find("m_btnTitle/m_styleTitle").GetComponent<MonoUIStyle>();
+        m_sliderValue = transform.Find("m_sliderValue").GetComponent<Slider>();
+        m_imgSliderFill = transform.Find("m_sliderValue/Fill Area/m_imgSliderFill").GetComponent<Image>();
+        m_imgSliderHandle = transform.Find("m_sliderValue/Handle Slide Area/m_imgSliderHandle").GetComponent<Image>();
+        m_btnPreview = transform.Find("m_btnPreview").GetComponent<Button>();
+        m_imgBtnPreview = transform.Find("m_btnPreview/m_imgBtnPreview").GetComponent<Image>();
+        m_lblPreview = transform.Find("m_btnPreview/m_lblPreview").GetComponent<Text>();
+        m_styleButton = transform.Find("m_btnPreview/m_styleButton").GetComponent<MonoUIStyle>();
+        m_iptValue = transform.Find("m_iptValue").GetComponent<InputField>();
+        m_lblMin = transform.Find("m_iptValue/m_lblMin").GetComponent<Text>();
+        m_lblMax = transform.Find("m_iptValue/m_lblMax").GetComponent<Text>();
+
+        m_btnTitle.onClick.AddListener(OnButtonTitleClick);
+        m_sliderValue.onValueChanged.AddListener(OnSliderValueChange);
+        m_btnPreview.onClick.AddListener(OnButtonPreviewClick);
+        m_iptValue.onValueChanged.AddListener(OnInputFieldValueChange);
+        m_iptValue.onEndEdit.AddListener(OnInputFieldValueEndEdit);
+    }
+    #endregion
+
+
+    #region auto-generated code event
+    public void OnButtonTitleClick()
+    {
+        _OnTitleClick?.Invoke(this);
+    }
+    private void OnInputFieldValueChange(string value)
+    {
+        //empty
+    }
+    private void OnInputFieldValueEndEdit(string value)
+    {
+        ShowEdit(false);
+        _OnInputFieldValueEndEdit?.Invoke(this);
+    }
+    private void OnSliderValueChange(float value)
+    {
+        if (blockSetMinMax)
+        {
+            return;
+        }
+        _OnSliderValueChanged?.Invoke(name, value);
+    }
+
+    private void OnButtonPreviewClick()
+    {
+        ShowEdit(true);
+    }
+
+
+    #endregion
+    
+    public string name;
+    public Action<string, float> _OnSliderValueChanged;
+    public Action<ExpEntryWidget> _OnTitleClick;
+    public Action<ExpEntryWidget> _OnInputFieldValueEndEdit;
+    public string TextValue => m_iptValue.text;
+    public float MinValue => m_sliderValue.minValue;
+    public float MaxValue => m_sliderValue.maxValue;
+
+    private bool blockSetMinMax;
+
+    public override void SetStateStyle(UIStateStyle.UIState state)
+    {
+        base.SetStateStyle(state);
+        StateStyle.SetColor(m_imgBG, state);
+        m_styleTitle.style.SetColor(m_lblTitle, state);
+        m_styleTitle.style.SetColor(m_imgSliderFill, state);
+        m_styleTitle.style.SetColor(m_imgSliderHandle, state);
+        m_styleTitle.style.SetColor(m_lblPreview, state);
+        m_styleButton.style.SetColor(m_imgBtnPreview, state);
+
+        m_sliderValue.interactable = state == UIStateStyle.UIState.Selected;
+        m_btnPreview.interactable = state == UIStateStyle.UIState.Selected;
+    }
+
+    public void SetData(string name, float value, float min, float max)
+    {
+        this.name = name;
+        m_lblTitle.text = name;
+        blockSetMinMax = true;
+        m_sliderValue.minValue = min;
+        m_sliderValue.maxValue = max;
+        blockSetMinMax = false;
+        m_sliderValue.SetValueWithoutNotify(value);
+        m_iptValue.SetTextWithoutNotify(value.ToString("F2"));
+        m_lblPreview.text = value.ToString("F2");
+        m_lblMin.text = min.ToString("F2");
+        m_lblMax.text = max.ToString("F2");
+        ShowEdit(false);
+    }
+
+    public void SetText(string text)
+    {
+        m_iptValue.SetTextWithoutNotify(text);
+    }
+
+    public void ShowEdit(bool show)
+    {
+        m_iptValue.gameObject.SetActive(show);
+        m_sliderValue.gameObject.SetActive(!show);
+        m_btnPreview.gameObject.SetActive(!show);
+        m_btnTitle.gameObject.SetActive(!show);
+
+        if (show)
+        {
+            EventSystem.current.SetSelectedGameObject(m_iptValue.gameObject);
+        }
+    }
+}
+
+public class PageAnimationEditor : UIPageWidget<PageAnimationEditor>
+{
+
+}
+
+public class PageGroupMenu : UIPageWidget<PageGroupMenu>
+{
+    #region auto generated members
+    private Button m_btnAddGroup;
+    private ScrollRect m_scrollGroup;
+    private Transform m_tfGroupItems;
+    private Transform m_itemGroup;
+    private InputField m_iptGroupName;
+    private Transform m_itemPos;
+    private Button m_btnSetPivotCenter;
+    #endregion
+
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_btnAddGroup = transform.Find("m_btnAddGroup").GetComponent<Button>();
+        m_scrollGroup = transform.Find("m_scrollGroup").GetComponent<ScrollRect>();
+        m_tfGroupItems = transform.Find("m_scrollGroup/Viewport/m_tfGroupItems").GetComponent<Transform>();
+        m_itemGroup = transform.Find("m_scrollGroup/Viewport/m_tfGroupItems/m_itemGroup").GetComponent<Transform>();
+        m_iptGroupName = transform.Find("GameObject/m_iptGroupName").GetComponent<InputField>();
+        m_itemPos = transform.Find("m_itemPos").GetComponent<Transform>();
+        m_btnSetPivotCenter = transform.Find("m_btnSetPivotCenter").GetComponent<Button>();
+
+        m_btnAddGroup.onClick.AddListener(OnButtonAddGroupClick);
+        m_iptGroupName.onValueChanged.AddListener(OnInputFieldGroupNameChange);
+        m_iptGroupName.onEndEdit.AddListener(OnInputFieldGroupNameEndEdit);
+        m_btnSetPivotCenter.onClick.AddListener(OnButtonSetPivotCenterClick);
+    }
+    #endregion
+
+    #region auto generated events
+    private void OnButtonAddGroupClick()
+    {
+        MainControl.Instance.AddGroup();
+        RefreshAll();
+    }
+
+    private void OnButtonSetPivotCenterClick()
+    {
+        var group = MainControl.Instance.curGroup;
+        if (group == null)
+        {
+            return;
+        }
+        
+        group.RemoveInvalidModel();
+        if (group.modelAdjusters.Count == 0)
+            return;
+
+        var worldPosition = Vector3.zero;
+        foreach (var model in group.modelAdjusters)
+        {
+            worldPosition += model.MainPos.position;
+        }
+        worldPosition /= group.modelAdjusters.Count;
+        group.SetPivotPositon(worldPosition);
+    }
+
+    private void OnInputFieldGroupNameChange(string value)
+    {
+        //empty
+    }
+
+    private void OnInputFieldGroupNameEndEdit(string value)
+    {
+        var group = MainControl.Instance.curGroup;
+        if (group == null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(value))
+        {
+            m_iptGroupName.SetTextWithoutNotify(group.groupName);
+            return;
+        }
+
+        group.groupName = value;
+        RefreshAll();
+    }
+
+
+    #endregion
+
+    private PageGroupFunctions m_pageGroupFunctions;
+    private Transform m_tfCursor;
+    private LabelInputFieldWidget m_liptPos;
+
+    protected override void OnInit()
+    {
+        base.OnInit();
+        m_liptPos = LabelInputFieldWidget.CreateWidget(m_itemPos.gameObject);
+        
+        m_liptPos.SetDataSubmit(OnGroupPosXSubmit);
+        m_liptPos.SetDataSubmit2(OnGroupPosYSubmit);
+        m_liptPos.SetLockChange(OnLockXChange);
+        m_liptPos.SetLockChange2(OnLockYChange);
+    }
+
+    public void Inject(PageGroupFunctions pageGroupFunctions, Transform tfCursor)
+    {
+        m_pageGroupFunctions = pageGroupFunctions;
+        m_tfCursor = tfCursor;
+    }
+
+    public override void OnPageShown()
+    {
+        base.OnPageShown();
+        UIEventBus.AddListener(UIEventType.GroupTransformChanged, OnGroupTransformChanged);
+        UIEventBus.AddListener(UIEventType.CameraTransformChanged, OnCameraTransformChanged);
+        UIEventBus.AddListener(UIEventType.LockXChanged, RefreshGroupPos);
+        UIEventBus.AddListener(UIEventType.LockYChanged, RefreshGroupPos);
+        MainControl.Instance.editType = EditType.Group;
+        RefreshAll();
+    }
+
+    public override void OnPageHidden()
+    {
+        base.OnPageHidden();
+        UIEventBus.RemoveListener(UIEventType.GroupTransformChanged, OnGroupTransformChanged);
+        UIEventBus.RemoveListener(UIEventType.CameraTransformChanged, OnCameraTransformChanged);
+        UIEventBus.RemoveListener(UIEventType.LockXChanged, RefreshGroupPos);
+        UIEventBus.RemoveListener(UIEventType.LockYChanged, RefreshGroupPos);
+        m_tfCursor.gameObject.SetActive(false);
+    }
+
+    private void OnGroupTransformChanged()
+    {
+        UpdateCursorPosition();
+        RefreshGroupPos();
+    }
+
+    private void OnCameraTransformChanged()
+    {
+        UpdateCursorPosition();
+    }
+
+    private void UpdateCursorPosition()
+    {
+        if (MainControl.Instance.curGroup == null)
+        {
+            m_tfCursor.gameObject.SetActive(false);
+            return;
+        }
+        var screenPos = MainControl.Instance.mainCamera.WorldToScreenPoint(MainControl.Instance.curGroup.root.position);
+        screenPos.z = m_tfCursor.position.z;
+        m_tfCursor.gameObject.SetActive(true);
+        m_tfCursor.position = screenPos;
+    }
+
+    private void RefreshGroupPos()
+    {
+        var group = MainControl.Instance.curGroup;
+        if (group == null)
+        {
+            return;
+        }
+
+        var localPos = group.LocalPosition;
+        m_liptPos.SetData(localPos.x.ToString());
+        m_liptPos.SetData2(localPos.y.ToString());
+
+        m_liptPos.SetLockValue(MainControl.Instance.LockX);
+        m_liptPos.SetLockValue2(MainControl.Instance.LockY);
+    }
+
+    private void OnGroupPosXSubmit(string x)
+    {
+        var group = MainControl.Instance.curGroup;
+        if (group == null)
+        {
+            return;
+        }
+        var localPos = group.LocalPosition;
+        if (float.TryParse(x, out float xValue))
+        {
+            group.SetLocalPosition(new Vector3(xValue, localPos.y, localPos.z));
+        }
+    }
+
+    private void OnGroupPosYSubmit(string y)
+    {
+        var group = MainControl.Instance.curGroup;
+        if (group == null)
+        {
+            return;
+        }
+        var localPos = group.LocalPosition;
+        if (float.TryParse(y, out float yValue))
+        {
+            group.SetLocalPosition(new Vector3(localPos.x, yValue, localPos.z));
+        }
+    }
+
+    private void OnLockXChange(Toggle toggle, bool value)
+    {
+        MainControl.Instance.LockX = value;
+        UIEventBus.SendEvent(UIEventType.LockXChanged);
+    }
+
+    private void OnLockYChange(Toggle toggle, bool value)
+    {
+        MainControl.Instance.LockY = value;
+        UIEventBus.SendEvent(UIEventType.LockYChanged);
+    }
+
+    private List<GroupItemWidget> m_listGroupItem = new List<GroupItemWidget>();
+    public void RefreshAll()
+    {
+        var curGroup = MainControl.Instance.curGroup;
+        var allGroups = MainControl.Instance.modelGroups;
+        SetListItem(m_listGroupItem, m_itemGroup.gameObject, m_tfGroupItems, allGroups.Count, OnGroupItemCreate);
+        for (int i = 0; i < allGroups.Count; i++)
+        {
+            var group = allGroups[i];
+            var item = m_listGroupItem[i];
+            item.SetData(group);
+            bool isCurGroup = curGroup == group;
+            item.SetStateStyle(isCurGroup ? UIStateStyle.UIState.Selected : UIStateStyle.UIState.Normal);
+        }
+        m_pageGroupFunctions.RefreshAll();
+        UpdateCursorPosition();
+        RefreshGroupPos();
+
+        if (curGroup != null)
+        {
+            m_iptGroupName.SetTextWithoutNotify(curGroup.groupName);
+        }
+    }
+
+    private void OnGroupItemCreate(GroupItemWidget widget)
+    {
+        widget.AddClickEvent(() => OnGroupItemClicked(widget));
+        widget._OnDeleteClick = OnGroupItemDelete;
+    }
+
+    private void OnGroupItemClicked(GroupItemWidget widget)
+    {
+        MainControl.Instance.SetGroup(widget.group);
+        RefreshAll();
+    }
+
+    private void OnGroupItemDelete(GroupItemWidget widget)
+    {
+        MainControl.Instance.RemoveGroup(widget.group);
+        RefreshAll();
+    }
+}
+
+public class GroupItemWidget : UIItemWidget<GroupItemWidget>
+{
+    public ModelGroup group;
+    #region auto-generated code
+    private Text m_lblTitle;
+    private Button m_btnDelete;
+
+    protected override void CodeGenBindMembers()
+    {
+        m_lblTitle = transform.Find("m_lblTitle").GetComponent<Text>();
+        m_btnDelete = transform.Find("m_btnDelete").GetComponent<Button>();
+        m_btnDelete.onClick.AddListener(OnDeleteClick);
+    }
+    #endregion
+    #region auto-generated code event
+    public void OnDeleteClick()
+    {
+        _OnDeleteClick?.Invoke(this);
+    }
+    #endregion
+
+    public Action<GroupItemWidget> _OnDeleteClick;
+
+    public void SetData(ModelGroup group)
+    {
+        this.group = group;
+        m_lblTitle.text = group.groupName;
+    }
+
+    public override void SetStateStyle(UIStateStyle.UIState state)
+    {
+        base.SetStateStyle(state);
+        StateStyle.SetActiveObject(state);
+    }
+}
+
+public class PageGroupFunctions : UIPageWidget<PageGroupFunctions>
+{
+    #region auto generated members
+    private Button m_btnCopyMotionExp;
+    private Button m_btnCopyTransform;
+    private Button m_btnCopyAll;
+    private Button m_btnCopyAllSpilt;
+    private Transform m_itemBackgroundTransform;
+    private Transform m_itemBackgroundTransformCopy;
+    private ScrollRect m_scrollChara;
+    private Transform m_tfCharas;
+    private Transform m_itemSelectedChara;
+    #endregion
+
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_btnCopyMotionExp = transform.Find("m_btnCopyMotionExp").GetComponent<Button>();
+        m_btnCopyTransform = transform.Find("m_btnCopyTransform").GetComponent<Button>();
+        m_btnCopyAll = transform.Find("m_btnCopyAll").GetComponent<Button>();
+        m_btnCopyAllSpilt = transform.Find("m_btnCopyAllSpilt").GetComponent<Button>();
+        m_itemBackgroundTransform = transform.Find("m_itemBackgroundTransform").GetComponent<Transform>();
+        m_itemBackgroundTransformCopy = transform.Find("m_itemBackgroundTransformCopy").GetComponent<Transform>();
+        m_scrollChara = transform.Find("m_scrollChara").GetComponent<ScrollRect>();
+        m_tfCharas = transform.Find("m_scrollChara/Viewport/m_tfCharas").GetComponent<Transform>();
+        m_itemSelectedChara = transform.Find("m_scrollChara/Viewport/m_tfCharas/m_itemSelectedChara").GetComponent<Transform>();
+
+        m_btnCopyMotionExp.onClick.AddListener(OnButtonCopyMotionExpClick);
+        m_btnCopyTransform.onClick.AddListener(OnButtonCopyTransformClick);
+        m_btnCopyAll.onClick.AddListener(OnButtonCopyAllClick);
+        m_btnCopyAllSpilt.onClick.AddListener(OnButtonCopyAllSpiltClick);
+    }
+    #endregion
+
+
+    #region auto-generated code event
+    public void OnButtonCopyMotionExpClick()
+    {
+        MainControl.Instance.CopyMotionGroup();
+    }
+    public void OnButtonCopyTransformClick()
+    {
+        MainControl.Instance.CopyTransformGroup();
+    }
+    public void OnButtonCopyAllClick()
+    {
+        MainControl.Instance.CopyAllGroup();
+    }
+    private void OnButtonCopyAllSpiltClick()
+    {
+        MainControl.Instance.CopyAllGroupSpilt();
+    }
+
+    #endregion
+
+    
+    private List<GroupSelectedItemWidget> m_listGroupItem = new List<GroupSelectedItemWidget>();
+    private GroupSelectedItemWidget m_itemBackground;
+    private GroupSelectedItemWidget m_itemBackgroundCopy;
+
+    protected override void OnInit()
+    {
+        base.OnInit();
+        m_itemBackground = GroupSelectedItemWidget.CreateWidget(m_itemBackgroundTransform.gameObject);
+        m_itemBackground._OnTitleClick = OnBackgroundItemClicked;
+
+        m_itemBackgroundCopy = GroupSelectedItemWidget.CreateWidget(m_itemBackgroundTransformCopy.gameObject);
+        m_itemBackgroundCopy._OnTitleClick = OnBackgroundCopyItemClicked;
+    }
+    public override void OnPageShown()
+    {
+        base.OnPageShown();
+        RefreshAll();
+    }
+
+    public void RefreshAll()
+    {
+        ModelGroup group = MainControl.Instance.curGroup;
+        if (group == null)
+        {
+            SetListItem(m_listGroupItem, m_itemSelectedChara.gameObject, m_tfCharas, 0, OnGroupItemCreate);
+            return;
+        }
+        
+        var allModels = MainControl.Instance.models;
+        SetListItem(m_listGroupItem, m_itemSelectedChara.gameObject, m_tfCharas, allModels.Count, OnGroupItemCreate);
+        for (int i = 0; i < allModels.Count; i++)
+        {
+            var model = allModels[i];
+            var groupItem = m_listGroupItem[i];
+            groupItem.SetData(model.Name);
+            bool modelInGroup = group.modelAdjusters.Contains(model);
+            groupItem.SetStateStyle(modelInGroup ? UIStateStyle.UIState.Selected : UIStateStyle.UIState.Normal);
+        }
+
+        m_itemBackground.SetStateStyle(group.containBackground ? UIStateStyle.UIState.Selected : UIStateStyle.UIState.Normal);
+        m_itemBackgroundCopy.SetStateStyle(group.containBackgroundCopy ? UIStateStyle.UIState.Selected : UIStateStyle.UIState.Normal);
+    }
+
+    private void OnGroupItemCreate(GroupSelectedItemWidget widget)
+    {
+        widget._OnTitleClick = OnGroupItemClicked;
+    }
+
+    private void OnGroupItemClicked(GroupSelectedItemWidget widget)
+    {
+        ModelGroup group = MainControl.Instance.curGroup;
+        if (group == null)
+        {
+            return;
+        }
+        var model = MainControl.Instance.models[GetListItemIndex(m_listGroupItem, widget)];
+        bool contain = group.modelAdjusters.Contains(model);
+        if (contain)
+        {
+            group.modelAdjusters.Remove(model);
+        }
+        else
+        {
+            MainControl.Instance.AddModelToGroup(group, model);
+        }
+        RefreshAll();
+    }
+
+    private void OnBackgroundItemClicked(GroupSelectedItemWidget widget)
+    {
+        var group = MainControl.Instance.curGroup;
+        if (group == null)
+        {
+            return;
+        }
+        group.containBackground = !group.containBackground;
+        RefreshAll();
+    }
+
+    private void OnBackgroundCopyItemClicked(GroupSelectedItemWidget widget)
+    {
+        var group = MainControl.Instance.curGroup;
+        if (group == null)
+        {
+            return;
+        }
+        group.containBackgroundCopy = !group.containBackgroundCopy;
+        RefreshAll();
+    }
+}
+
+public class GroupSelectedItemWidget : UIItemWidget<GroupSelectedItemWidget>
+{
+    #region auto-generated code
+    private Button m_btnTitle;
+    private Image m_imgBG;
+    private Text m_lblTitle;
+    private MonoUIStyle m_styleTitle;
+
+    protected override void CodeGenBindMembers()
+    {
+        m_btnTitle = transform.Find("m_btnTitle").GetComponent<Button>();
+        m_imgBG = transform.Find("m_btnTitle/m_imgBG").GetComponent<Image>();
+        m_lblTitle = transform.Find("m_btnTitle/m_lblTitle").GetComponent<Text>();
+        m_styleTitle = transform.Find("m_btnTitle/m_styleTitle").GetComponent<MonoUIStyle>();
+        m_btnTitle.onClick.AddListener(OnTitleClick);
+    }
+    #endregion
+    #region auto-generated code event
+    public void OnTitleClick()
+    {
+        _OnTitleClick?.Invoke(this);
+    }
+    #endregion
+
+    public Action<GroupSelectedItemWidget> _OnTitleClick;
+
+    public void SetData(string name)
+    {
+        m_lblTitle.text = name;
+    }
+
+    public override void SetStateStyle(UIStateStyle.UIState state)
+    {
+        base.SetStateStyle(state);
+        StateStyle.SetColor(m_imgBG, state);
+        m_styleTitle.style.SetColor(m_lblTitle, state);
+    }
+}
+
+
+public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
+{
+    #region auto generated members
+    private Button m_btnChange;
+    private Transform m_itemPos;
+    private Transform m_itemScale;
+    private Transform m_itemRotation;
+    #endregion
+
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_btnChange = transform.Find("m_btnChange").GetComponent<Button>();
+        m_itemPos = transform.Find("m_itemPos").GetComponent<Transform>();
+        m_itemScale = transform.Find("m_itemScale").GetComponent<Transform>();
+        m_itemRotation = transform.Find("m_itemRotation").GetComponent<Transform>();
+
+        m_btnChange.onClick.AddListener(OnButtonChangeClick);
+    }
+    #endregion
+
+    #region auto generated events
+    private void OnButtonChangeClick()
+    {
+        if (string.IsNullOrEmpty(Global.BGPath))
+        {
+            MessageTipWindow.Instance.Show("错误", "请先设置背景文件夹");
+            return;
+        }
+
+        var result = L2DWUtils.OpenFileDialog("选择背景文件夹", "BGPath", "png|jpg");
+        if(result.Length > 0)
+        {
+            MainControl.Instance.LoadBackground(result[0]);
+        }
+    }
+    #endregion
+
+    private PageBackgroundFunctions m_pageBackgroundFunctions;
+    public void Inject(PageBackgroundFunctions pageBackgroundFunctions)
+    {
+        m_pageBackgroundFunctions = pageBackgroundFunctions;
+    }
+
+    private LabelInputFieldWidget m_liptPos;
+    private LabelInputFieldWidget m_liptScale;
+    private LabelInputFieldWidget m_liptRotation;
+    protected override void OnInit()
+    {
+        base.OnInit();
+        m_liptPos = LabelInputFieldWidget.CreateWidget(m_itemPos.gameObject);
+        m_liptScale = LabelInputFieldWidget.CreateWidget(m_itemScale.gameObject);
+        m_liptRotation = LabelInputFieldWidget.CreateWidget(m_itemRotation.gameObject);
+
+        m_liptPos.SetDataSubmit(OnPosXSubmit);
+        m_liptPos.SetDataSubmit2(OnPosYSubmit);
+        m_liptScale.SetDataSubmit(OnScaleSubmit);
+        m_liptRotation.SetDataSubmit(OnRotationSubmit);
+
+        m_liptPos.SetLockChange(OnUILockXChange);
+        m_liptPos.SetLockChange2(OnUILockYChange);
+    }
+
+    public override void OnPageShown()
+    {
+        base.OnPageShown();
+
+        UIEventBus.AddListener(UIEventType.BGTransformChanged, RefreshAll);
+        UIEventBus.AddListener(UIEventType.LockXChanged, OnLockXChange);
+        UIEventBus.AddListener(UIEventType.LockYChanged, OnLockYChange);
+
+        MainControl.Instance.editType = EditType.Background;
+
+        RefreshAll();
+    }
+
+    public override void OnPageHidden()
+    {
+        base.OnPageHidden();
+        UIEventBus.RemoveListener(UIEventType.BGTransformChanged, RefreshAll);
+        UIEventBus.RemoveListener(UIEventType.LockXChanged, OnLockXChange);
+        UIEventBus.RemoveListener(UIEventType.LockYChanged, OnLockYChange);
+    }
+
+    public void RefreshAll()
+    {
+        var bgContainer = MainControl.Instance.bgContainer;
+        m_liptPos.SetData(bgContainer.rootPosition.x.ToString());
+        m_liptPos.SetData2(bgContainer.rootPosition.y.ToString());
+        m_liptScale.SetData(bgContainer.rootScale.ToString());
+        m_liptRotation.SetData(bgContainer.rootRotation.ToString());
+
+        m_liptPos.SetLockValue(MainControl.Instance.LockX);
+        m_liptPos.SetLockValue2(MainControl.Instance.LockY);
+    }
+
+    private void OnLockXChange()
+    {
+        m_liptPos.SetLockValue(MainControl.Instance.LockX);
+    }
+
+    private void OnLockYChange()
+    {
+        m_liptPos.SetLockValue2(MainControl.Instance.LockY);
+    }
+
+    private void OnUILockXChange(Toggle toggle, bool value)
+    {
+        if (value == MainControl.Instance.LockX)
+        {
+            return;
+        }
+
+        MainControl.Instance.LockX = value;
+        UIEventBus.SendEvent(UIEventType.LockXChanged);
+    }
+
+    private void OnUILockYChange(Toggle toggle, bool value)
+    {
+        if (value == MainControl.Instance.LockY)
+        {
+            return;
+        }
+
+        MainControl.Instance.LockY = value;
+        UIEventBus.SendEvent(UIEventType.LockYChanged);
+    }
+
+    private void OnPosXSubmit(string value)
+    {
+        if (float.TryParse(value, out float x))
+        {
+            MainControl.Instance.bgContainer.SetPosition(x, MainControl.Instance.bgContainer.rootPosition.y);
+        }
+        else
+        {
+            m_liptPos.SetData(MainControl.Instance.bgContainer.rootPosition.x.ToString());
+        }
+    }
+
+    private void OnPosYSubmit(string value)
+    {
+        if (float.TryParse(value, out float y))
+        {
+            MainControl.Instance.bgContainer.SetPosition(MainControl.Instance.bgContainer.rootPosition.x, y);
+        }
+        else
+        {
+            m_liptPos.SetData2(MainControl.Instance.bgContainer.rootPosition.y.ToString());
+        }
+    }
+    
+    private void OnScaleSubmit(string value)
+    {
+        if (float.TryParse(value, out float scale))
+        {
+            MainControl.Instance.bgContainer.SetScale(scale);
+        }
+        else
+        {
+            m_liptScale.SetData(MainControl.Instance.bgContainer.rootScale.ToString());
+        }
+    }
+
+    private void OnRotationSubmit(string value)
+    {
+        if (float.TryParse(value, out float rotation))
+        {
+            MainControl.Instance.bgContainer.SetRotation(rotation);
+        }
+        else
+        {
+            m_liptRotation.SetData(MainControl.Instance.bgContainer.rootRotation.ToString());
+        }
+    }
+}
+
+
+public class PageBackgroundFunctions : UIPageWidget<PageBackgroundFunctions>
+{
+    #region auto generated members
+    private Button m_btnCopyScene;
+    private Button m_btnCopyTransform;
+    private Button m_btnCopyAll;
+    #endregion
+
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_btnCopyScene = transform.Find("m_btnCopyScene").GetComponent<Button>();
+        m_btnCopyTransform = transform.Find("m_btnCopyTransform").GetComponent<Button>();
+        m_btnCopyAll = transform.Find("m_btnCopyAll").GetComponent<Button>();
+
+        m_btnCopyScene.onClick.AddListener(OnButtonCopySceneClick);
+        m_btnCopyTransform.onClick.AddListener(OnButtonCopyTransformClick);
+        m_btnCopyAll.onClick.AddListener(OnButtonCopyAllClick);
+    }
+    #endregion
+
+    #region auto generated events
+    private void OnButtonCopySceneClick()
+    {
+        MainControl.Instance.CopyBackgroundChange();
+    }
+    private void OnButtonCopyTransformClick()
+    {
+        MainControl.Instance.CopyBackgroundTransform();
+    }
+    private void OnButtonCopyAllClick()
+    {
+        MainControl.Instance.CopyBackgroundAll();
+    }
+    #endregion
+}
