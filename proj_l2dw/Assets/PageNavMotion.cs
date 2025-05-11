@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -106,7 +107,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     }
     private void OnButtonEditClick()
     {
-        Debug.Log("OnButtonEditClick");
+        LoadFromMotion("idle01");
     }
     private void OnButtonSaveClick()
     {
@@ -126,7 +127,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     }
     private void OnInputFieldFilterChange(string value)
     {
-        Debug.Log("OnInputFieldFilterChange");
+        RefreshMotionTrackHeader();
     }
     private void OnInputFieldFilterEndEdit(string value)
     {
@@ -170,7 +171,11 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     }
     private void OnInputFieldDurationEndEdit(string value)
     {
-        Debug.Log("OnInputFieldDurationEndEdit");
+        if (int.TryParse(value, out int val))
+        {
+            m_motionData.info.frameCount = val;
+            RefreshAll();
+        }
     }
     private void OnInputFieldFrameChange(string value)
     {
@@ -235,6 +240,8 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         }
 
         curTarget.SetDisplayMode(ModelDisplayMode.MotionEditor);
+        m_motionData = Live2dMotionData.Create();
+        paramKeys = curTarget.GetEmotionEditorList().list;
         RefreshAll();
     }
 
@@ -314,12 +321,24 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         {
             return;
         }
+        RefreshMotionTrack();
+        RefreshMotionTrackHeader();
+        RefreshSlider();
+        m_iptDuration.SetTextWithoutNotify(m_motionData.info.frameCount.ToString());
+    }
 
-        var data = curTarget.MyGOConfig.motions["idle01"];
+    public void LoadFromMotion(string motionName)
+    {
+        var curTarget = MainControl.Instance.curTarget;
+        if (curTarget == null || !curTarget.SupportAnimationMode)
+        {
+            return;
+        }
+
+        var data = curTarget.MyGOConfig.motions[motionName];
         // 转换byte[]为string
         string text = System.Text.Encoding.UTF8.GetString(data);
         m_motionData = Live2dMotionData.Create(text);
-
         paramKeys = curTarget.GetEmotionEditorList().list;
         RefreshMotionTrack();
         RefreshMotionTrackHeader();
@@ -344,7 +363,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     public void RefreshSlider()
     {
         m_sliderH.maxValue = m_motionData.info.frameCount - MAX_FRAME_DISPLAY_COUNT;
-        m_sliderV.maxValue = paramKeys.Count - MAX_TRACK_DISPLAY_COUNT;
+        m_sliderV.maxValue = filteredParamKeys.Count - MAX_TRACK_DISPLAY_COUNT;
 
         m_sliderH.maxValue = Mathf.Max(m_sliderH.maxValue, 0);
         m_sliderV.maxValue = Mathf.Max(m_sliderV.maxValue, 0);
@@ -368,6 +387,22 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         return curTarget;
     }
 
+    private List<Live2DParamInfo> filteredParamKeys = new List<Live2DParamInfo>();
+    public void UpdateFilter()
+    {
+        if (string.IsNullOrWhiteSpace(m_iptFilter.text))
+        {
+            filteredParamKeys = paramKeys;
+        }
+        else
+        {
+            var filters = m_iptFilter.text.Split(' ').Where(s => !string.IsNullOrEmpty(s)).Select(s => s.ToLower());
+            filteredParamKeys = paramKeys.Where(x => filters.All(f => x.name.ToLower().Contains(f))).ToList();
+        }
+
+        m_sliderV.maxValue = filteredParamKeys.Count;
+    }
+
     public void RefreshMotionTrackHeader()
     {
         if (GetValidTarget() == null)
@@ -375,17 +410,19 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             return;
         }
 
+        UpdateFilter();
         var headerIndex = (int)m_sliderV.value;
-        var headerCount = Mathf.Min(paramKeys.Count - headerIndex, MAX_TRACK_DISPLAY_COUNT);
+        var headerCount = Mathf.Min(filteredParamKeys.Count - headerIndex, MAX_TRACK_DISPLAY_COUNT);
         SetListItem(m_listMotionTrackHeader, m_itemTrackHeader.gameObject, m_tfTrackHeaderRoot, headerCount, OnMotionTrackHeaderItemCreate);
         for (int i = 0; i < headerCount; i++)
         {
-            var paramInfo = paramKeys[headerIndex + i];
+            var paramInfo = filteredParamKeys[headerIndex + i];
             if (!m_motionData.info.TryGetKeyFrameValue(paramInfo.name, curFrameIndex, out float value))
             {
                 value = paramInfo.value;
             }
-            m_listMotionTrackHeader[i].SetData(paramInfo, value);
+            bool hasKeyFrame = m_motionData.TryGetTrack(paramInfo.name, true).HasKeyFrame(curFrameIndex);
+            m_listMotionTrackHeader[i].SetData(paramInfo, value, hasKeyFrame);
         }
 
         RefreshMotionTrack();
@@ -398,29 +435,86 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         widget._OnButtonStatusClick += OnMotionTrackHeaderButtonStatusClick;
     }
 
+    private Live2DParamInfo GetParamInfo(string paramName)
+    {
+        foreach (var param in paramKeys)
+        {
+            if (param.name == paramName)
+            {
+                return param;
+            }
+        }
+
+        return null;
+    }
+
+    public void SetTrackValue(string paramName, int frameIndex, float value)
+    {
+        var paramInfo = GetParamInfo(paramName);
+        if (paramInfo == null)
+        {
+            return;
+        }
+
+        var track = m_motionData.TryGetTrack(paramName, true);
+        track.keyFrames[frameIndex] = Mathf.Clamp(value, paramInfo.min, paramInfo.max);
+        m_motionData.BakeFrames(paramName);
+
+        SampleFrame();
+
+        RefreshAll();
+    }
+
+    public void RemoveTrackValue(string paramName, int frameIndex)
+    {
+        var track = m_motionData.TryGetTrack(paramName, true);
+        track.keyFrames.Remove(frameIndex);
+        m_motionData.BakeFrames(paramName);
+
+        SampleFrame();
+
+        RefreshAll();
+    }
+
     private void OnMotionTrackHeaderSliderValueChange(MotionTrackHeaderWidget widget, float value)
     {
-        Debug.Log("OnMotionTrackHeaderSliderValueChange");
+        SetTrackValue(widget.info.name, curFrameIndex, value);
     }
 
     private void OnMotionTrackHeaderInputFieldValueEndEdit(MotionTrackHeaderWidget widget, string value)
     {
-        Debug.Log("OnMotionTrackHeaderInputFieldValueEndEdit");
+        if (float.TryParse(value, out float val))
+        {
+            SetTrackValue(widget.info.name, curFrameIndex, val);
+        }
     }
 
     private void OnMotionTrackHeaderButtonStatusClick(MotionTrackHeaderWidget widget)
     {
-        Debug.Log("OnMotionTrackHeaderButtonStatusClick");
+        var track = m_motionData.TryGetTrack(widget.info.name, true);
+        if (track.HasKeyFrame(curFrameIndex))
+        {
+            RemoveTrackValue(widget.info.name, curFrameIndex);
+        }
+        else
+        {
+            if (!m_motionData.info.TryGetKeyFrameValue(widget.info.name, curFrameIndex, out float value))
+            {
+                value = widget.info.value;
+            }
+            SetTrackValue(widget.info.name, curFrameIndex, value);
+        }
     }
+
     public void RefreshMotionTrack()
     {
         var trackIndex = (int)m_sliderV.value;
         var frameIndex = (int)m_sliderH.value;
-        var trackCount = Mathf.Min(paramKeys.Count - trackIndex, MAX_TRACK_DISPLAY_COUNT);
+        var trackCount = Mathf.Min(filteredParamKeys.Count - trackIndex, MAX_TRACK_DISPLAY_COUNT);
         SetListItem(m_listMotionTrack, m_itemTrack.gameObject, m_tfTrackRoot, trackCount, OnMotionTrackItemCreate);
         for (int i = 0; i < trackCount; i++)
         {
-            m_listMotionTrack[i].SetData(m_motionData.TryGetTrack(paramKeys[trackIndex + i].name), frameIndex);
+            m_listMotionTrack[i].SetData(m_motionData.TryGetTrack(filteredParamKeys[trackIndex + i].name), frameIndex);
         }
         RefreshTrackLabels();
     }
@@ -438,6 +532,7 @@ public class MotionTrackHeaderWidget : UIItemWidget<MotionTrackHeaderWidget>
     private Slider m_sliderValue;
     private InputField m_iptValue;
     private Button m_btnStatus;
+    private MonoKeyUIStyle m_keystyleButton;
     #endregion
 
     #region auto generated binders
@@ -447,6 +542,7 @@ public class MotionTrackHeaderWidget : UIItemWidget<MotionTrackHeaderWidget>
         m_sliderValue = transform.Find("m_sliderValue").GetComponent<Slider>();
         m_iptValue = transform.Find("m_iptValue").GetComponent<InputField>();
         m_btnStatus = transform.Find("m_btnStatus").GetComponent<Button>();
+        m_keystyleButton = transform.Find("m_keystyleButton").GetComponent<MonoKeyUIStyle>();
 
         m_sliderValue.onValueChanged.AddListener(OnSliderValueChange);
         m_iptValue.onValueChanged.AddListener(OnInputFieldValueChange);
@@ -458,6 +554,11 @@ public class MotionTrackHeaderWidget : UIItemWidget<MotionTrackHeaderWidget>
     #region auto generated events
     private void OnSliderValueChange(float value)
     {
+        if (settingValues)
+        {
+            return;
+        }
+        
         _OnSliderValueChange?.Invoke(this, value);
     }
     private void OnInputFieldValueChange(string value)
@@ -478,13 +579,18 @@ public class MotionTrackHeaderWidget : UIItemWidget<MotionTrackHeaderWidget>
     public Action<MotionTrackHeaderWidget, string> _OnInputFieldValueEndEdit;
     public Action<MotionTrackHeaderWidget> _OnButtonStatusClick;
 
-    public void SetData(Live2DParamInfo info, float value)
+    bool settingValues = false;
+
+    public void SetData(Live2DParamInfo info, float value, bool hasKeyFrame)
     {
         this.info = info;
         m_lblTitle.text = info.name;
+        settingValues = true;
         m_sliderValue.minValue = info.min;
         m_sliderValue.maxValue = info.max;
+        settingValues = false;
         SetValue(value);
+        m_keystyleButton.style.ApplyObject(hasKeyFrame ? "has_key" : "no_key");
     }
 
     public void SetValue(float value)

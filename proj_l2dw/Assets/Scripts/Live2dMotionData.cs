@@ -141,7 +141,7 @@ public class Live2dMotionInfo
     public bool TryGetKeyFrameValue(string name, int frame, out float value)
     {
         var frames = GetKeyFrames(name);
-        if (frames == null)
+        if (frames == null || frames.Count == 0)
         {
             value = 0;
             return false;

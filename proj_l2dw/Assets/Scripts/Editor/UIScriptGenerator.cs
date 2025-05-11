@@ -26,6 +26,7 @@ public static class UIScriptGenerator
         { "m_rect", typeof(RectTransform).Name },
         { "m_dropdown", typeof(Dropdown).Name },
         { "m_touch", typeof(TouchArea).Name },
+        { "m_keystyle", typeof(MonoKeyUIStyle).Name },
     };
 
     private static Dictionary<string, string> reserverPrefixToComponentType = new Dictionary<string, string>();
