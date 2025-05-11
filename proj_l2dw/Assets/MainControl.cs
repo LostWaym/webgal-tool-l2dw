@@ -56,6 +56,8 @@ public class MainControl : MonoBehaviour
 
     public GameObject canvasRoot;
 
+    public Action UpdateBeat;
+
     void Awake()
     {
         Instance = this;
@@ -290,6 +292,8 @@ public class MainControl : MonoBehaviour
         {
             TakeSnapshot();
         }
+
+        UpdateBeat?.Invoke();
     }
 
     private void RenderBatch()

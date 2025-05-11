@@ -146,6 +146,15 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     }
     private void OnButtonPlayClick()
     {
+        if (isPlaying)
+        {
+            StopSample();
+        }
+        else
+        {
+            PlaySample();
+        }
+
     }
     private void OnButtonNavRightClick()
     {
@@ -194,7 +203,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private Live2dMotionData m_motionData;
 
     public const int MAX_TRACK_DISPLAY_COUNT = 13;
-    public const int MAX_FRAME_DISPLAY_COUNT = 15;
+    public const int MAX_FRAME_DISPLAY_COUNT = 31;
 
     public int curFrameIndex = 0;
 
@@ -216,6 +225,8 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     {
         base.OnPageShown();
 
+        MainControl.Instance.UpdateBeat += Update;
+
         var curTarget = GetValidTarget();
         if (curTarget == null)
         {
@@ -227,11 +238,48 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         RefreshAll();
     }
 
-    public void SetFrameIndex(int index)
+    public override void OnPageHidden()
+    {
+        base.OnPageHidden();
+        MainControl.Instance.UpdateBeat -= Update;
+    }
+
+    public bool isPlaying;
+    public float startTime;
+    public int startFrameIndex;
+    
+    private void Update()
+    {
+        if (isPlaying)
+        {
+            var delta = Time.time - startTime;
+            int frameIndex = startFrameIndex + (int)(delta * 30);
+            SetFrameIndex(frameIndex, false);
+        }
+    }
+
+    public void PlaySample()
+    {
+        isPlaying = true;
+        startTime = Time.time;
+        startFrameIndex = curFrameIndex;
+    }
+
+    public void StopSample()
+    {
+        isPlaying = false;
+    }
+
+    public void SetFrameIndex(int index, bool stopSample = true)
     {
         if (index == curFrameIndex)
         {
             return;
+        }
+
+        if (stopSample)
+        {
+            StopSample();
         }
 
         curFrameIndex = Mathf.Clamp(index, 0, m_motionData.info.frameCount - 1);
@@ -516,7 +564,7 @@ public class PageNavMotionLabelWidget : UIItemWidget<PageNavMotionLabelWidget>
     protected override void OnInit()
     {
         base.OnInit();
-        m_labels.AddRange(gameObject.GetComponentsInChildren<Text>());
+        m_labels.AddRange(gameObject.GetComponentsInChildren<Text>(true));
     }
 
     public void SetData(int index)
@@ -531,7 +579,7 @@ public class PageNavMotionLabelWidget : UIItemWidget<PageNavMotionLabelWidget>
     public bool GetLabelPosition(int frameIndex, out Vector2 position)
     {
         int min = startIndex;
-        int max = startIndex + 14;
+        int max = startIndex + 30;
         if (frameIndex < min || frameIndex > max)
         {
             position = Vector2.zero;
