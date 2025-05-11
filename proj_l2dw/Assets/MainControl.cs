@@ -297,7 +297,7 @@ public class MainControl : MonoBehaviour
         for (int i = models.Count - 1; i >= 0; i--)
         {
             ModelAdjusterBase model = models[i];
-            model.ZValue = i * 0.1f;
+            model.ZValue = i * 0.25f;
         }
     }
 

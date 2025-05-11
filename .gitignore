@@ -4,3 +4,6 @@
 /proj_l2dw/UserSettings
 /proj_l2dw/.vscode
 /proj_l2dw/*.sln
+/proj_l2dw/.vs/proj_l2dw/v17/*.suo
+/proj_l2dw/*.vsconfig
+/proj_l2dw/Temp

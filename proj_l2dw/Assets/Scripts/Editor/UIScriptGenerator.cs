@@ -25,6 +25,7 @@ public static class UIScriptGenerator
         { "m_go", typeof(GameObject).Name },
         { "m_rect", typeof(RectTransform).Name },
         { "m_dropdown", typeof(Dropdown).Name },
+        { "m_touch", typeof(TouchArea).Name },
     };
 
     private static Dictionary<string, string> reserverPrefixToComponentType = new Dictionary<string, string>();

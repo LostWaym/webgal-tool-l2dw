@@ -137,6 +137,8 @@ public class MyGOLive2DEx : MonoBehaviour
             NormalUpdate();
         else if (displayMode == ModelDisplayMode.EmotionEditor)
             EmotionEditorUpdate();
+        else if (displayMode == ModelDisplayMode.MotionEditor)
+            MotionUpdate();
     }
 
     private void NormalUpdate()
@@ -156,6 +158,11 @@ public class MyGOLive2DEx : MonoBehaviour
         double t = timeSec * 2 * Math.PI;
         live2DModel.setParamFloat("PARAM_BREATH", (float)(0.5f + 0.5f * Math.Sin(t / 3.0)));
 
+        live2DModel.update();
+    }
+
+    private void MotionUpdate()
+    {
         live2DModel.update();
     }
 
@@ -377,4 +384,5 @@ public enum ModelDisplayMode
 {
     Normal,
     EmotionEditor,
+    MotionEditor,
 }

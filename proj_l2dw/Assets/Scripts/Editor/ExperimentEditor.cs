@@ -1,6 +1,7 @@
 
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEditor;
@@ -53,5 +54,35 @@ public class ExperimentCommand : EditorWindow
 
             Debug.Log(transformObject.ToString(false));
         }
+    }
+}
+
+public class TestMotionParser : EditorWindow
+{
+    [MenuItem("Test/MotionParser")]
+    public static void ShowWindow()
+    {
+        GetWindow<TestMotionParser>("TestMotionParser");
+    }
+
+    private string motionPath;
+    private void OnGUI()
+    {
+        GUILayout.BeginHorizontal();
+        motionPath = GUILayout.TextField(motionPath);
+        if (GUILayout.Button("Parse"))
+        {
+            Parse();
+        }
+        GUILayout.EndHorizontal();
+    }
+
+    private void Parse()
+    {
+        var motionData = new Live2dMotionInfo();
+        var text = File.ReadAllText(motionPath);
+        motionData.Parse(text);
+        Debug.Log(motionData.Print());
+        GUIUtility.systemCopyBuffer = motionData.Print();
     }
 }

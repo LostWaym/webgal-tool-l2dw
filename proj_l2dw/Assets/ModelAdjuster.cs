@@ -50,6 +50,7 @@ public class ModelAdjuster : ModelAdjusterBase
     public override List<MotionPair> MotionPairs => MainModel.motionPairs;
 
     public override MygoExp CurExp => MainModel.expMgr.curExp;
+    public override MygoConfig MyGOConfig => MainModel.myGOConfig;
     [SerializeField]
     private Transform pivot;
     [SerializeField]
@@ -149,6 +150,14 @@ public class ModelAdjuster : ModelAdjusterBase
     public override string GetMotionEditorExpJson()
     {
         return MainModel.emotionEditor.ToMygoExpJson().PrintJson();
+    }
+
+    public override void Sample(string paramName, float value)
+    {
+        foreach (var pos in webgalPoses)
+        {
+            pos.model.Live2DModel.setParamFloat(paramName, value);
+        }
     }
 
     public override void SetDisplayMode(ModelDisplayMode mode)

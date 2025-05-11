@@ -72,11 +72,6 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
     }
 }
 
-public class PageNavMotion : UIPageWidget<PageNavMotion>
-{
-
-}
-
 public class PageNavPreview : UIPageWidget<PageNavPreview>
 {
 

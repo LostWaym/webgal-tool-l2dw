@@ -44,6 +44,7 @@ public class ModelAdjusterBase : MonoBehaviour
 
     public virtual MygoExp CurExp => null;
     public MyGOLive2DExMeta meta;
+    public virtual MygoConfig MyGOConfig => null;
     #endregion
 
 
@@ -113,6 +114,11 @@ public class ModelAdjusterBase : MonoBehaviour
     public virtual string GetMotionEditorExpJson()
     {
         return "";
+    }
+
+    public virtual void Sample(string paramName, float value)
+    {
+
     }
 
     public virtual void SetDisplayMode(ModelDisplayMode mode)
