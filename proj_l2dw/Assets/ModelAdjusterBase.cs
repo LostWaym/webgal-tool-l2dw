@@ -121,7 +121,7 @@ public class ModelAdjusterBase : MonoBehaviour
 
     }
 
-    public virtual void SetDisplayMode(ModelDisplayMode mode)
+    public virtual void SetDisplayMode(ModelDisplayMode mode, bool force = false)
     {
 
     }

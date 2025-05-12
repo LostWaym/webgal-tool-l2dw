@@ -160,9 +160,9 @@ public class ModelAdjuster : ModelAdjusterBase
         }
     }
 
-    public override void SetDisplayMode(ModelDisplayMode mode)
+    public override void SetDisplayMode(ModelDisplayMode mode, bool force = false)
     {
-        if (MainModel.displayMode == mode)
+        if (MainModel.displayMode == mode && !force)
         {
             return;
         }
@@ -188,6 +188,11 @@ public class ModelAdjuster : ModelAdjusterBase
                 }
             }
             else if (mode == ModelDisplayMode.EmotionEditor)
+            {
+                model.emotionEditor.Reset();
+                model.emotionEditor.ApplyValue(model.Live2DModel);
+            }
+            else if (mode == ModelDisplayMode.MotionEditor)
             {
                 model.emotionEditor.Reset();
                 model.emotionEditor.ApplyValue(model.Live2DModel);

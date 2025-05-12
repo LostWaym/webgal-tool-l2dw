@@ -90,6 +90,67 @@ public class Live2dMotionData
         info.keyFrames[trackName] = frames;
     }
 
+    public string Save()
+    {
+        var jsonobject = new JSONObject(JSONObject.Type.OBJECT);
+        jsonobject.AddField("name", "name");
+        jsonobject.AddField("fps", info.fps);
+        jsonobject.AddField("fadein", info.fadein);
+        jsonobject.AddField("fadeout", info.fadeout);
+        jsonobject.AddField("frameCount", info.frameCount);
+        var keyFramesObject = new JSONObject(JSONObject.Type.OBJECT);
+        foreach (KeyValuePair<string, Track> track in tracks)
+        {
+            var trackKeyFrames = track.Value.keyFrames;
+            if (trackKeyFrames.Count == 0)
+            {
+                continue;
+            }
+            var trackObject = new JSONObject(JSONObject.Type.OBJECT);
+            trackObject.AddField("name", track.Key);
+            var trackArray = new JSONObject(JSONObject.Type.ARRAY);
+            foreach (var keyFrame in trackKeyFrames)
+            {
+                var keyFrameObject = new JSONObject(JSONObject.Type.OBJECT);
+                keyFrameObject.AddField("frame", keyFrame.Key);
+                keyFrameObject.AddField("value", keyFrame.Value);
+                trackArray.Add(keyFrameObject);
+            }
+            trackObject.AddField("keyFrames", trackArray);
+
+            keyFramesObject.AddField(track.Key, trackObject);
+        }
+        jsonobject.AddField("keyFrames", keyFramesObject);
+        return jsonobject.print(true);
+    }
+
+    public void Load(string text)
+    {
+        var jsonobject = new JSONObject(text);
+        info = new Live2dMotionInfo();
+        tracks.Clear();
+        info.fps = (int)jsonobject.GetField("fps").f;
+        info.fadein = (int)jsonobject.GetField("fadein").f;
+        info.fadeout = (int)jsonobject.GetField("fadeout").f;
+        info.frameCount = (int)jsonobject.GetField("frameCount").f;
+        var keyFramesObject = jsonobject.GetField("keyFrames");
+        foreach (var trackKey in keyFramesObject.keys)
+        {
+            var trackObject = keyFramesObject.GetField(trackKey);
+            var trackName = trackObject.GetField("name").str;
+            var trackArray = trackObject.GetField("keyFrames").list;
+            var track = TryGetTrack(trackName, true);
+            foreach (var keyFrame in trackArray)
+            {
+                var frame = (int)keyFrame.GetField("frame").f;
+                var value = keyFrame.GetField("value").f;
+                track.keyFrames[frame] = value;
+            }
+        }
+
+        BakeAllFrames();
+    }
+
     public static Live2dMotionData Create()
     {
         var data = new Live2dMotionData();
@@ -252,6 +313,9 @@ public class Live2dMotionInfo
         }
         foreach (var param in keyFrames)
         {
+            if (param.Value.Count == 0)
+                continue;
+                
             sb.AppendLine($"{param.Key}={string.Join(",", param.Value)}");
             sb.AppendLine();
         }

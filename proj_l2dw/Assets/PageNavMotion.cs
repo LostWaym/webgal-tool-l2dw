@@ -16,7 +16,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private Button m_btnSave;
     private Button m_btnRecord;
     private Button m_btnOperation;
-    private Button m_btnFilter;
+    private Toggle m_toggleFilter;
     private InputField m_iptFilter;
     private Toggle m_toggleCurveMode;
     private Button m_btnNavHome;
@@ -28,6 +28,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private InputField m_iptFrame;
     private Transform m_itemLabels;
     private TouchArea m_touchLabels;
+    private InputField m_iptFrameIndex;
     private Transform m_tfTrackHeaderRoot;
     private Transform m_itemTrackHeader;
     private Transform m_tfTrackRoot;
@@ -47,7 +48,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_btnSave = transform.Find("CharaArea/ToolBar/m_btnSave").GetComponent<Button>();
         m_btnRecord = transform.Find("TimelineArea/ToolBar/Left/Top/m_btnRecord").GetComponent<Button>();
         m_btnOperation = transform.Find("TimelineArea/ToolBar/Left/Top/m_btnOperation").GetComponent<Button>();
-        m_btnFilter = transform.Find("TimelineArea/ToolBar/Left/Bottom/m_btnFilter").GetComponent<Button>();
+        m_toggleFilter = transform.Find("TimelineArea/ToolBar/Left/Bottom/m_toggleFilter").GetComponent<Toggle>();
         m_iptFilter = transform.Find("TimelineArea/ToolBar/Left/Bottom/m_iptFilter").GetComponent<InputField>();
         m_toggleCurveMode = transform.Find("TimelineArea/ToolBar/Right/Top/m_toggleCurveMode").GetComponent<Toggle>();
         m_btnNavHome = transform.Find("TimelineArea/ToolBar/Right/Top/GameObject/m_btnNavHome").GetComponent<Button>();
@@ -59,6 +60,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_iptFrame = transform.Find("TimelineArea/ToolBar/Right/Top/m_iptFrame").GetComponent<InputField>();
         m_itemLabels = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_itemLabels").GetComponent<Transform>();
         m_touchLabels = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_touchLabels").GetComponent<TouchArea>();
+        m_iptFrameIndex = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_iptFrameIndex").GetComponent<InputField>();
         m_tfTrackHeaderRoot = transform.Find("TimelineArea/Bottom/Left/m_tfTrackHeaderRoot").GetComponent<Transform>();
         m_itemTrackHeader = transform.Find("TimelineArea/Bottom/Left/m_tfTrackHeaderRoot/m_itemTrackHeader").GetComponent<Transform>();
         m_tfTrackRoot = transform.Find("TimelineArea/Bottom/Right/m_tfTrackRoot").GetComponent<Transform>();
@@ -74,7 +76,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_btnSave.onClick.AddListener(OnButtonSaveClick);
         m_btnRecord.onClick.AddListener(OnButtonRecordClick);
         m_btnOperation.onClick.AddListener(OnButtonOperationClick);
-        m_btnFilter.onClick.AddListener(OnButtonFilterClick);
+        m_toggleFilter.onValueChanged.AddListener(OnToggleFilterChange);
         m_iptFilter.onValueChanged.AddListener(OnInputFieldFilterChange);
         m_iptFilter.onEndEdit.AddListener(OnInputFieldFilterEndEdit);
         m_toggleCurveMode.onValueChanged.AddListener(OnToggleCurveModeChange);
@@ -87,10 +89,14 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_iptDuration.onEndEdit.AddListener(OnInputFieldDurationEndEdit);
         m_iptFrame.onValueChanged.AddListener(OnInputFieldFrameChange);
         m_iptFrame.onEndEdit.AddListener(OnInputFieldFrameEndEdit);
+        m_iptFrameIndex.onValueChanged.AddListener(OnInputFieldFrameIndexChange);
+        m_iptFrameIndex.onEndEdit.AddListener(OnInputFieldFrameIndexEndEdit);
         m_sliderH.onValueChanged.AddListener(OnSliderHChange);
         m_sliderV.onValueChanged.AddListener(OnSliderVChange);
     }
     #endregion
+
+
 
     #region auto generated events
     private void OnButtonCharaClick()
@@ -103,15 +109,28 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     }
     private void OnButtonApplyClick()
     {
-        Debug.Log("OnButtonApplyClick");
+        var curTarget = GetValidTarget();
+        if (curTarget == null)
+        {
+            return;
+        }
+        var json = GUIUtility.systemCopyBuffer;
+        m_motionData.Load(json);
+        curTarget.SetDisplayMode(ModelDisplayMode.MotionEditor, true);
+        RefreshAll();
     }
     private void OnButtonEditClick()
     {
-        LoadFromMotion("idle01");
+        var json = m_motionData.Save();
+        GUIUtility.systemCopyBuffer = json;
+        Debug.Log(json);
     }
     private void OnButtonSaveClick()
     {
-        Debug.Log("OnButtonSaveClick");
+        m_motionData.BakeAllFrames();
+        var text = m_motionData.info.Print();
+        Debug.Log(text);
+        GUIUtility.systemCopyBuffer = text;
     }
     private void OnButtonRecordClick()
     {
@@ -121,13 +140,13 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     {
         Debug.Log("OnButtonOperationClick");
     }
-    private void OnButtonFilterClick()
+    private void OnToggleFilterChange(bool value)
     {
-        Debug.Log("OnButtonFilterClick");
+        RefreshAll();
     }
     private void OnInputFieldFilterChange(string value)
     {
-        RefreshMotionTrackHeader();
+        RefreshAll();
     }
     private void OnInputFieldFilterEndEdit(string value)
     {
@@ -186,9 +205,24 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         var frameIndex = m_iptFrame.text;
         if (int.TryParse(frameIndex, out int frame))
         {
-            SetFrameIndex(frame);
+            SetFps(frame);
         }
     }
+    private void OnInputFieldFrameIndexChange(string value)
+    {
+        Debug.Log("OnInputFieldFrameIndexChange");
+    }
+    private void OnInputFieldFrameIndexEndEdit(string value)
+    {
+        if (int.TryParse(value, out int frameIndex))
+        {
+            SetFrameIndex(frameIndex - 1);
+            return;
+        }
+
+        RefreshAll();
+    }
+
     private void OnSliderHChange(float value)
     {
         RefreshMotionTrack();
@@ -196,6 +230,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private void OnSliderVChange(float value)
     {
         RefreshMotionTrackHeader();
+        RefreshMotionTrack();
     }
 
     #endregion
@@ -277,6 +312,12 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         isPlaying = false;
     }
 
+    public void SetFps(int fps)
+    {
+        m_motionData.info.fps = fps;
+        RefreshAll();
+    }
+
     public void SetFrameIndex(int index, bool stopSample = true)
     {
         if (index == curFrameIndex)
@@ -290,10 +331,26 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         }
 
         curFrameIndex = Mathf.Clamp(index, 0, m_motionData.info.frameCount - 1);
-        m_iptFrame.SetTextWithoutNotify(curFrameIndex.ToString());
-        RefreshFrameLine();
-        SampleFrame();
-        RefreshMotionTrackHeader();
+
+        int h = (int)m_sliderH.value;
+        int hmax = m_motionData.info.frameCount;
+        int hrange = h + MAX_FRAME_DISPLAY_COUNT;
+        if (hrange > hmax)
+        {
+            hrange = hmax;
+        }
+        
+        if (curFrameIndex < h)
+        {
+            m_sliderH.SetValueWithoutNotify(curFrameIndex);
+        }
+        else if (curFrameIndex >= hrange)
+        {
+            var val = curFrameIndex - MAX_FRAME_DISPLAY_COUNT + 1;
+            m_sliderH.SetValueWithoutNotify(val);
+        }
+        
+        RefreshAll();
     }
 
     public void SampleFrame()
@@ -321,10 +378,14 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         {
             return;
         }
-        RefreshMotionTrack();
         RefreshMotionTrackHeader();
+        RefreshMotionTrack();
         RefreshSlider();
+        SampleFrame();
+        RefreshTrackLabels();
         m_iptDuration.SetTextWithoutNotify(m_motionData.info.frameCount.ToString());
+        m_iptFrame.SetTextWithoutNotify(m_motionData.info.fps.ToString());
+        m_iptFrameIndex.SetTextWithoutNotify((curFrameIndex + 1).ToString());
     }
 
     public void LoadFromMotion(string motionName)
@@ -340,9 +401,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         string text = System.Text.Encoding.UTF8.GetString(data);
         m_motionData = Live2dMotionData.Create(text);
         paramKeys = curTarget.GetEmotionEditorList().list;
-        RefreshMotionTrack();
-        RefreshMotionTrackHeader();
-        RefreshSlider();
+        RefreshAll();
     }
 
     public void RefreshFrameLine()
@@ -400,6 +459,11 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             filteredParamKeys = paramKeys.Where(x => filters.All(f => x.name.ToLower().Contains(f))).ToList();
         }
 
+        if (m_toggleFilter.isOn)
+        {
+            filteredParamKeys = filteredParamKeys.Where(x => m_motionData.TryGetTrack(x.name, true).keyFrames.Count > 0).ToList();
+        }
+
         m_sliderV.maxValue = filteredParamKeys.Count;
     }
 
@@ -421,11 +485,11 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             {
                 value = paramInfo.value;
             }
-            bool hasKeyFrame = m_motionData.TryGetTrack(paramInfo.name, true).HasKeyFrame(curFrameIndex);
-            m_listMotionTrackHeader[i].SetData(paramInfo, value, hasKeyFrame);
+            var track = m_motionData.TryGetTrack(paramInfo.name, true);
+            bool hasKeyFrameInIndex = track.HasKeyFrame(curFrameIndex);
+            bool hasKeyFrames = track.keyFrames.Count > 0;
+            m_listMotionTrackHeader[i].SetData(paramInfo, value, hasKeyFrameInIndex, hasKeyFrames);
         }
-
-        RefreshMotionTrack();
     }
 
     private void OnMotionTrackHeaderItemCreate(MotionTrackHeaderWidget widget)
@@ -457,10 +521,13 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         }
 
         var track = m_motionData.TryGetTrack(paramName, true);
-        track.keyFrames[frameIndex] = Mathf.Clamp(value, paramInfo.min, paramInfo.max);
+        var finalValue = Mathf.Clamp(value, paramInfo.min, paramInfo.max);
+        if (!track.keyFrames.ContainsKey(0))
+        {
+            track.keyFrames[0] = finalValue;
+        }
+        track.keyFrames[frameIndex] = finalValue;
         m_motionData.BakeFrames(paramName);
-
-        SampleFrame();
 
         RefreshAll();
     }
@@ -470,8 +537,6 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         var track = m_motionData.TryGetTrack(paramName, true);
         track.keyFrames.Remove(frameIndex);
         m_motionData.BakeFrames(paramName);
-
-        SampleFrame();
 
         RefreshAll();
     }
@@ -533,6 +598,7 @@ public class MotionTrackHeaderWidget : UIItemWidget<MotionTrackHeaderWidget>
     private InputField m_iptValue;
     private Button m_btnStatus;
     private MonoKeyUIStyle m_keystyleButton;
+    private GameObject m_goMask;
     #endregion
 
     #region auto generated binders
@@ -543,6 +609,7 @@ public class MotionTrackHeaderWidget : UIItemWidget<MotionTrackHeaderWidget>
         m_iptValue = transform.Find("m_iptValue").GetComponent<InputField>();
         m_btnStatus = transform.Find("m_btnStatus").GetComponent<Button>();
         m_keystyleButton = transform.Find("m_keystyleButton").GetComponent<MonoKeyUIStyle>();
+        m_goMask = transform.Find("m_goMask").gameObject;
 
         m_sliderValue.onValueChanged.AddListener(OnSliderValueChange);
         m_iptValue.onValueChanged.AddListener(OnInputFieldValueChange);
@@ -550,6 +617,7 @@ public class MotionTrackHeaderWidget : UIItemWidget<MotionTrackHeaderWidget>
         m_btnStatus.onClick.AddListener(OnButtonStatusClick);
     }
     #endregion
+
 
     #region auto generated events
     private void OnSliderValueChange(float value)
@@ -581,7 +649,7 @@ public class MotionTrackHeaderWidget : UIItemWidget<MotionTrackHeaderWidget>
 
     bool settingValues = false;
 
-    public void SetData(Live2DParamInfo info, float value, bool hasKeyFrame)
+    public void SetData(Live2DParamInfo info, float value, bool hasKeyFrameInIndex, bool hasKeyFrames)
     {
         this.info = info;
         m_lblTitle.text = info.name;
@@ -590,7 +658,8 @@ public class MotionTrackHeaderWidget : UIItemWidget<MotionTrackHeaderWidget>
         m_sliderValue.maxValue = info.max;
         settingValues = false;
         SetValue(value);
-        m_keystyleButton.style.ApplyObject(hasKeyFrame ? "has_key" : "no_key");
+        m_keystyleButton.style.ApplyObject(hasKeyFrameInIndex ? "has_key" : "no_key");
+        m_goMask.SetActive(!hasKeyFrames);
     }
 
     public void SetValue(float value)
