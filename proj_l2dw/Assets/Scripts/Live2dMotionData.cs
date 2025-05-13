@@ -189,8 +189,8 @@ public class Live2dMotionInfo
     public int fadeout;
     public int frameCount;
 
-    public Dictionary<string, float> paramFadeout = new Dictionary<string, float>();
-    public Dictionary<string, float> paramFadein = new Dictionary<string, float>();
+    public Dictionary<string, int> paramFadeout = new Dictionary<string, int>();
+    public Dictionary<string, int> paramFadein = new Dictionary<string, int>();
 
     public Dictionary<string, List<float>> keyFrames = new Dictionary<string, List<float>>();
 
@@ -315,8 +315,8 @@ public class Live2dMotionInfo
         {
             if (param.Value.Count == 0)
                 continue;
-                
-            sb.AppendLine($"{param.Key}={string.Join(",", param.Value)}");
+            var values = param.Value.Select(v => v.ToString("F3")).ToList();
+            sb.AppendLine($"{param.Key}={string.Join(",", values)}");
             sb.AppendLine();
         }
         return sb.ToString();
