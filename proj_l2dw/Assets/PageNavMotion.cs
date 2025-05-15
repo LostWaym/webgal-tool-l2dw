@@ -18,6 +18,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private Button m_btnOperation;
     private Toggle m_toggleFilter;
     private InputField m_iptFilter;
+    private Toggle m_toggleDotSheetMode;
     private Toggle m_toggleCurveMode;
     private Button m_btnNavHome;
     private Button m_btnNavLeft;
@@ -50,14 +51,15 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_btnOperation = transform.Find("TimelineArea/ToolBar/Left/Top/m_btnOperation").GetComponent<Button>();
         m_toggleFilter = transform.Find("TimelineArea/ToolBar/Left/Bottom/m_toggleFilter").GetComponent<Toggle>();
         m_iptFilter = transform.Find("TimelineArea/ToolBar/Left/Bottom/m_iptFilter").GetComponent<InputField>();
-        m_toggleCurveMode = transform.Find("TimelineArea/ToolBar/Right/Top/m_toggleCurveMode").GetComponent<Toggle>();
-        m_btnNavHome = transform.Find("TimelineArea/ToolBar/Right/Top/GameObject/m_btnNavHome").GetComponent<Button>();
-        m_btnNavLeft = transform.Find("TimelineArea/ToolBar/Right/Top/GameObject/m_btnNavLeft").GetComponent<Button>();
-        m_btnPlay = transform.Find("TimelineArea/ToolBar/Right/Top/GameObject/m_btnPlay").GetComponent<Button>();
-        m_btnNavRight = transform.Find("TimelineArea/ToolBar/Right/Top/GameObject/m_btnNavRight").GetComponent<Button>();
-        m_btnNavEnd = transform.Find("TimelineArea/ToolBar/Right/Top/GameObject/m_btnNavEnd").GetComponent<Button>();
-        m_iptDuration = transform.Find("TimelineArea/ToolBar/Right/Top/m_iptDuration").GetComponent<InputField>();
-        m_iptFrame = transform.Find("TimelineArea/ToolBar/Right/Top/m_iptFrame").GetComponent<InputField>();
+        m_toggleDotSheetMode = transform.Find("TimelineArea/ToolBar/Right/Top/Container/ToggleGroup/m_toggleDotSheetMode").GetComponent<Toggle>();
+        m_toggleCurveMode = transform.Find("TimelineArea/ToolBar/Right/Top/Container/ToggleGroup/m_toggleCurveMode").GetComponent<Toggle>();
+        m_btnNavHome = transform.Find("TimelineArea/ToolBar/Right/Top/Container/GameObject/m_btnNavHome").GetComponent<Button>();
+        m_btnNavLeft = transform.Find("TimelineArea/ToolBar/Right/Top/Container/GameObject/m_btnNavLeft").GetComponent<Button>();
+        m_btnPlay = transform.Find("TimelineArea/ToolBar/Right/Top/Container/GameObject/m_btnPlay").GetComponent<Button>();
+        m_btnNavRight = transform.Find("TimelineArea/ToolBar/Right/Top/Container/GameObject/m_btnNavRight").GetComponent<Button>();
+        m_btnNavEnd = transform.Find("TimelineArea/ToolBar/Right/Top/Container/GameObject/m_btnNavEnd").GetComponent<Button>();
+        m_iptDuration = transform.Find("TimelineArea/ToolBar/Right/Top/Container/m_iptDuration").GetComponent<InputField>();
+        m_iptFrame = transform.Find("TimelineArea/ToolBar/Right/Top/Container/m_iptFrame").GetComponent<InputField>();
         m_itemLabels = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_itemLabels").GetComponent<Transform>();
         m_touchLabels = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_touchLabels").GetComponent<TouchArea>();
         m_iptFrameIndex = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_iptFrameIndex").GetComponent<InputField>();
@@ -79,6 +81,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_toggleFilter.onValueChanged.AddListener(OnToggleFilterChange);
         m_iptFilter.onValueChanged.AddListener(OnInputFieldFilterChange);
         m_iptFilter.onEndEdit.AddListener(OnInputFieldFilterEndEdit);
+        m_toggleDotSheetMode.onValueChanged.AddListener(OnToggleDotSheetModeChange);
         m_toggleCurveMode.onValueChanged.AddListener(OnToggleCurveModeChange);
         m_btnNavHome.onClick.AddListener(OnButtonNavHomeClick);
         m_btnNavLeft.onClick.AddListener(OnButtonNavLeftClick);
@@ -152,9 +155,13 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     {
         Debug.Log("OnInputFieldFilterEndEdit");
     }
+    private void OnToggleDotSheetModeChange(bool value)
+    {
+        Debug.Log($"OnToggleDotSheetModeChange:{value}");
+    }
     private void OnToggleCurveModeChange(bool value)
     {
-        Debug.Log("OnToggleCurveModeChange");
+        Debug.Log($"OnToggleCurveModeChange:{value}");
     }
     private void OnButtonNavHomeClick()
     {
