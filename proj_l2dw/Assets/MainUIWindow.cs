@@ -90,13 +90,13 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
         #region auto generated binders
         protected override void CodeGenBindMembers()
         {
-            m_toggleMove = transform.Find("Flow/m_toggleMove").GetComponent<Toggle>();
-            m_toggleRotate = transform.Find("Flow/m_toggleRotate").GetComponent<Toggle>();
-            m_toggleScale = transform.Find("Flow/m_toggleScale").GetComponent<Toggle>();
-            m_toggleMoveCamera = transform.Find("Flow/m_toggleMoveCamera").GetComponent<Toggle>();
-            m_toggleScaleCamera = transform.Find("Flow/m_toggleScaleCamera").GetComponent<Toggle>();
-            m_lblToolTitle = transform.Find("m_lblToolTitle").GetComponent<Text>();
-            m_dropdownInstCopy = transform.Find("m_dropdownInstCopy").GetComponent<Dropdown>();
+            m_toggleMove = transform.Find("ToolContainer/Flow/m_toggleMove").GetComponent<Toggle>();
+            m_toggleRotate = transform.Find("ToolContainer/Flow/m_toggleRotate").GetComponent<Toggle>();
+            m_toggleScale = transform.Find("ToolContainer/Flow/m_toggleScale").GetComponent<Toggle>();
+            m_toggleMoveCamera = transform.Find("ToolContainer/Flow/m_toggleMoveCamera").GetComponent<Toggle>();
+            m_toggleScaleCamera = transform.Find("ToolContainer/Flow/m_toggleScaleCamera").GetComponent<Toggle>();
+            m_lblToolTitle = transform.Find("ToolContainer/m_lblToolTitle").GetComponent<Text>();
+            m_dropdownInstCopy = transform.Find("NextAction/m_dropdownInstCopy").GetComponent<Dropdown>();
 
             m_toggleMove.onValueChanged.AddListener(OnToggleMoveChange);
             m_toggleRotate.onValueChanged.AddListener(OnToggleRotateChange);
@@ -714,7 +714,7 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
         m_itemPageCharaFunctions = transform.Find("Right/pages/m_itemPageCharaFunctions").GetComponent<Transform>();
         m_itemPageGroupFunctions = transform.Find("Right/pages/m_itemPageGroupFunctions").GetComponent<Transform>();
         m_itemPageBackgroundFunctions = transform.Find("Right/pages/m_itemPageBackgroundFunctions").GetComponent<Transform>();
-        m_itemTools = transform.Find("Center/m_itemTools").GetComponent<Transform>();
+        m_itemTools = transform.Find("Center/TopBar/m_itemTools").GetComponent<Transform>();
 
         m_toggleChara.onValueChanged.AddListener(OnToggleCharaChange);
         m_toggleGroup.onValueChanged.AddListener(OnToggleGroupChange);
