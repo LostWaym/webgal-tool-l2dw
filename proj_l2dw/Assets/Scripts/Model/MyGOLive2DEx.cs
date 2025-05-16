@@ -39,6 +39,14 @@ public class MyGOLive2DEx : MonoBehaviour
     public float left, up;
 
     public MygoConfig myGOConfig;
+    
+    // æ˜¯å¦ä¸ºä¸»æ¸²æŸ“å¾ªç¯
+    private bool isMainRenderLoop = true;
+    [SerializeField] private MeshRenderer meshRenderer;
+    private RenderTexture rt;
+    private Matrix4x4 modelMatrix;
+    private float canvasResolutionScale = 1.0f;
+    private FieldInfo canvasHackField;
 
     public void LoadConfig(MygoConfig config)
     {
@@ -60,10 +68,27 @@ public class MyGOLive2DEx : MonoBehaviour
         LoadExpPairs(config);
         paramInfoList.ReadFrom(live2DModel);
         emotionEditor.list = paramInfoList;
-
-        modelWidth = live2DModel.getCanvasWidth();
-        live2DCanvasPos = Matrix4x4.Ortho(left, modelWidth + left, modelWidth + up, up, -50.0f, 50.0f);
-        Debug.Log($"width: {modelWidth}, height:{live2DModel.getCanvasHeight()}");
+        
+        Debug.Log($"width: {live2DModel.getCanvasWidth()}, height:{live2DModel.getCanvasHeight()}");
+        
+        this.modelMatrix = Matrix4x4.Ortho(
+            0,
+            live2DModel.getCanvasWidth(),
+            live2DModel.getCanvasHeight(),
+            0,
+            -50.0f,
+            50.0f
+        );
+        if (this.rt)
+        {
+            rt.Release();
+        }
+        this.rt = new RenderTexture(
+            (int)(live2DModel.getCanvasWidth() * canvasResolutionScale),
+            (int)(live2DModel.getCanvasHeight() * canvasResolutionScale),
+            0
+        );
+        meshRenderer.material.mainTexture = this.rt;
     }
 
     public void ReloadTextures()
@@ -116,29 +141,28 @@ public class MyGOLive2DEx : MonoBehaviour
     void Start()
     {
         canRender = true;
-        live2DModel.setMatrix(transform.localToWorldMatrix * live2DCanvasPos);
-        live2DModel.update();
+        this.canvasHackField = typeof(Canvas).GetField("willRenderCanvases", BindingFlags.NonPublic | BindingFlags.Static);
     }
 
     void Update()
     {
         if (live2DModel == null)
             return;
-
-        live2DCanvasPos = Matrix4x4.Ortho(left, modelWidth + left, modelWidth + up, up, -50.0f, 50.0f);
-        live2DModel.setMatrix(transform.localToWorldMatrix * live2DCanvasPos);
+        
         if (!Application.isPlaying)
         {
             live2DModel.update();
             return;
         }
-
+        
         if (displayMode == ModelDisplayMode.Normal)
             NormalUpdate();
         else if (displayMode == ModelDisplayMode.EmotionEditor)
             EmotionEditorUpdate();
         else if (displayMode == ModelDisplayMode.MotionEditor)
             MotionUpdate();
+        
+        DrawLive2d();
     }
 
     private void NormalUpdate()
@@ -187,8 +211,45 @@ public class MyGOLive2DEx : MonoBehaviour
         if (live2DModel == null)
             return;
 
-        if (live2DModel.getRenderMode() == Live2D.L2D_RENDER_DRAW_MESH_NOW)
+        if (live2DModel.getRenderMode() == Live2D.L2D_RENDER_DRAW_MESH_NOW && !isMainRenderLoop)
+        {
             live2DModel.draw();
+        }
+    }
+
+    private void DrawLive2d()
+    {
+        if (!canRender)
+        {
+            return;
+        }
+        var camera = Camera.main;
+        if (camera == null)
+        {
+            Debug.LogError("Camera.main is null");
+            return;
+        }
+        
+        this.isMainRenderLoop = false;
+        var camPreLayer = camera.cullingMask;
+        var goPreLayer = gameObject.layer;
+        camera.cullingMask = LayerMask.NameToLayer("Isolate");
+        gameObject.layer = LayerMask.NameToLayer("Isolate");
+        camera.targetTexture = this.rt;
+        camera.projectionMatrix = this.modelMatrix;
+        live2DModel.setMatrix(Matrix4x4.identity);
+        live2DModel.update();
+        
+        var canvasHackObject = canvasHackField.GetValue(null);
+        canvasHackField.SetValue(null, null);
+        camera.Render();
+        canvasHackField.SetValue(null, canvasHackObject);
+        
+        this.isMainRenderLoop = true;
+        camera.cullingMask = camPreLayer;
+        gameObject.layer = goPreLayer;
+        camera.targetTexture = null;
+        camera.ResetProjectionMatrix();
     }
 
     public void PlayMotion(string name)
@@ -281,7 +342,7 @@ public class Live2DParamInfoList
     public string GetAllParamInfoTextOutput()
     {
         string paramList = string.Join("\n", list.Select(x => $"{x.name}: {x.value} ({x.min} ~ {x.max})"));
-        return $"²ÎÊı×ÜÊıÁ¿: {list.Count}\n{paramList}";
+        return $"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: {list.Count}\n{paramList}";
     }
 }
 
