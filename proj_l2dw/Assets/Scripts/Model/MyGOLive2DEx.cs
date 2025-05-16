@@ -89,6 +89,12 @@ public class MyGOLive2DEx : MonoBehaviour
             0
         );
         meshRenderer.material.mainTexture = this.rt;
+        // 我也不知道为什么是*-2.0，但这个数值是对的
+        meshRenderer.transform.localPosition += new Vector3(
+            left * -2.0f,
+            up * -2.0f,
+            0
+            );
     }
 
     public void ReloadTextures()
