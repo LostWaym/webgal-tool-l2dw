@@ -879,12 +879,12 @@ public class LabelInputFieldWidget : UIItemWidget<LabelInputFieldWidget>
     protected override void CodeGenBindMembers()
     {
         m_lblTitle = transform.Find("m_lblTitle").GetComponent<Text>();
-        m_iptValue = transform.Find("m_iptValue").GetComponent<InputField>();
-        m_lblPrefix = transform.Find("m_iptValue/m_lblPrefix").GetComponent<Text>();
-        m_toggleLock = transform.Find("m_iptValue/m_toggleLock").GetComponent<Toggle>();
-        m_iptValue2 = transform.Find("m_iptValue2").GetComponent<InputField>();
-        m_lblPrefix2 = transform.Find("m_iptValue2/m_lblPrefix2").GetComponent<Text>();
-        m_toggleLock2 = transform.Find("m_iptValue2/m_toggleLock2").GetComponent<Toggle>();
+        m_iptValue = transform.Find("Value/m_iptValue").GetComponent<InputField>();
+        m_lblPrefix = transform.Find("Value/m_iptValue/m_lblPrefix").GetComponent<Text>();
+        m_toggleLock = transform.Find("Value/m_iptValue/m_toggleLock").GetComponent<Toggle>();
+        m_iptValue2 = transform.Find("Value/m_iptValue2").GetComponent<InputField>();
+        m_lblPrefix2 = transform.Find("Value/m_iptValue2/m_lblPrefix2").GetComponent<Text>();
+        m_toggleLock2 = transform.Find("Value/m_iptValue2/m_toggleLock2").GetComponent<Toggle>();
     }
     #endregion
 
@@ -1941,13 +1941,13 @@ public class ExpEntryWidget : UIItemWidget<ExpEntryWidget>
         m_imgBG = transform.Find("m_btnTitle/m_imgBG").GetComponent<Image>();
         m_lblTitle = transform.Find("m_btnTitle/m_lblTitle").GetComponent<Text>();
         m_styleTitle = transform.Find("m_btnTitle/m_styleTitle").GetComponent<MonoUIStyle>();
-        m_sliderValue = transform.Find("m_sliderValue").GetComponent<Slider>();
-        m_imgSliderFill = transform.Find("m_sliderValue/Fill Area/m_imgSliderFill").GetComponent<Image>();
-        m_imgSliderHandle = transform.Find("m_sliderValue/Handle Slide Area/m_imgSliderHandle").GetComponent<Image>();
-        m_btnPreview = transform.Find("m_btnPreview").GetComponent<Button>();
-        m_imgBtnPreview = transform.Find("m_btnPreview/m_imgBtnPreview").GetComponent<Image>();
-        m_lblPreview = transform.Find("m_btnPreview/m_lblPreview").GetComponent<Text>();
-        m_styleButton = transform.Find("m_btnPreview/m_styleButton").GetComponent<MonoUIStyle>();
+        m_sliderValue = transform.Find("Value/m_sliderValue").GetComponent<Slider>();
+        m_imgSliderFill = transform.Find("Value/m_sliderValue/Fill Area/m_imgSliderFill").GetComponent<Image>();
+        m_imgSliderHandle = transform.Find("Value/m_sliderValue/Handle Slide Area/m_imgSliderHandle").GetComponent<Image>();
+        m_btnPreview = transform.Find("Value/m_btnPreview").GetComponent<Button>();
+        m_imgBtnPreview = transform.Find("Value/m_btnPreview/m_imgBtnPreview").GetComponent<Image>();
+        m_lblPreview = transform.Find("Value/m_btnPreview/m_lblPreview").GetComponent<Text>();
+        m_styleButton = transform.Find("Value/m_btnPreview/m_styleButton").GetComponent<MonoUIStyle>();
         m_iptValue = transform.Find("m_iptValue").GetComponent<InputField>();
         m_lblMin = transform.Find("m_iptValue/m_lblMin").GetComponent<Text>();
         m_lblMax = transform.Find("m_iptValue/m_lblMax").GetComponent<Text>();
@@ -2075,7 +2075,7 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
         m_scrollGroup = transform.Find("m_scrollGroup").GetComponent<ScrollRect>();
         m_tfGroupItems = transform.Find("m_scrollGroup/Viewport/m_tfGroupItems").GetComponent<Transform>();
         m_itemGroup = transform.Find("m_scrollGroup/Viewport/m_tfGroupItems/m_itemGroup").GetComponent<Transform>();
-        m_iptGroupName = transform.Find("GameObject/m_iptGroupName").GetComponent<InputField>();
+        m_iptGroupName = transform.Find("GroupName/Value/m_iptGroupName").GetComponent<InputField>();
         m_itemPos = transform.Find("m_itemPos").GetComponent<Transform>();
         m_btnSetPivotCenter = transform.Find("m_btnSetPivotCenter").GetComponent<Button>();
 
