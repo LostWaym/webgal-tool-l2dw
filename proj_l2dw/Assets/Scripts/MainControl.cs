@@ -292,6 +292,10 @@ public class MainControl : MonoBehaviour
         {
             TakeSnapshot();
         }
+        if (Input.GetKeyDown(KeyCode.F7))
+        {
+            TakeCharacterSnapShot();
+        }
 
         UpdateBeat?.Invoke();
     }
@@ -601,6 +605,17 @@ public class MainControl : MonoBehaviour
         ScreenCapture.CaptureScreenshot(path);
         screenshotCounter++;
         // messageTipWindow.Show("提示", $"截图成功！已保存为\n{path}");
+    }
+
+    public void TakeCharacterSnapShot()
+    {
+        if (curTarget == null)
+            return;
+
+        if (curTarget is ModelAdjuster modelAdjuster)
+        {
+            modelAdjuster.SaveImage();
+        }
     }
 
     #endregion

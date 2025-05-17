@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -247,7 +248,7 @@ public class ModelAdjuster : ModelAdjusterBase
         {
             if (!File.Exists(modelFilePath))
             {
-                Debug.LogError($"模型文件不存�?: {modelFilePath}");
+                Debug.LogError($"模型文件不存在: {modelFilePath}");
                 return null;
             }
 
@@ -355,11 +356,11 @@ public class ModelAdjuster : ModelAdjusterBase
 
     private Vector3 GetCharacterWorldPosition(float worldX, float worldY, Transform child)
     {
-        // 计算 b 当前的世界坐标相对于父物�? a 的偏移量
+        // 计算 b 当前的世界坐标相对于父物体 a 的偏移量
         float offsetX = child.position.x - root.position.x;
         float offsetY = child.position.y - root.position.y;
 
-        // 计算新的父物�? a 的位�?
+        // 计算新的父物体 a 的位置
         float newAPositionX = worldX - offsetX;
         float newAPositionY = worldY - offsetY;
 
@@ -445,5 +446,25 @@ public class ModelAdjuster : ModelAdjusterBase
         {
             pos.model.isMainRenderLoop = true;
         }
+    }
+
+    public void SaveImage()
+    {
+        var tex2d = new Texture2D(rt.width, rt.height);
+        RenderTexture.active = rt;
+        tex2d.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+        tex2d.Apply();
+        RenderTexture.active = null;
+        var bytes = tex2d.EncodeToPNG();
+        string fileName = $"{meta.name}_{DateTime.Now.ToString("yyyyMMddHHmmss")}.png";
+        var path = Path.Combine(Application.dataPath, "..", "Snapshots", fileName);
+        //确保目录存在
+        var dir = Path.GetDirectoryName(path);
+        if (!Directory.Exists(dir))
+        {
+            Directory.CreateDirectory(dir);
+        }
+        File.WriteAllBytes(path, bytes);
+        Debug.Log($"Save image to {path}");
     }
 }
