@@ -36,7 +36,7 @@ public class WebGalModelPos : MonoBehaviour
         transform.localScale = Vector3.one;
         transform.localEulerAngles = Vector3.zero;
         pivot.localScale = new Vector3(scale, scale, scale);
-        transform.localPosition = new Vector3(Constants.WebGalWidth / 2 + offsetX, -Constants.WebGalHeight / 1.2f + offsetY, 0);
+        transform.localPosition = new Vector3(Constants.WebGalWidth / 2 + offsetX, -Constants.WebGalHeight / 1.2f - offsetY, 0);
         // 似乎需要乘一个数来让偏移正确
         model.left = offsetX * 1.155f;
         model.up = offsetY * 1.155f;
@@ -69,7 +69,7 @@ public class WebGalModelPos : MonoBehaviour
         transform.localEulerAngles = Vector3.zero;
         pivot.localScale = new Vector3(scale, scale, scale);
         // pivot.transform.localPosition = new Vector3(0, Constants.WebGalHeight / 2, 0);
-        transform.localPosition = new Vector3(localX + offsetX, -localY + offsetY, 0);
+        transform.localPosition = new Vector3(localX + offsetX, -localY - offsetY, 0);
         // 似乎需要乘一个数来让偏移正确
         model.left = offsetX * 1.735f;
         model.up = offsetY * 1.735f;

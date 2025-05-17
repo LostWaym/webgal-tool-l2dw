@@ -247,7 +247,7 @@ public class ModelAdjuster : ModelAdjusterBase
         {
             if (!File.Exists(modelFilePath))
             {
-                Debug.LogError($"模型文件不存在: {modelFilePath}");
+                Debug.LogError($"模型文件不存�?: {modelFilePath}");
                 return null;
             }
 
@@ -305,7 +305,7 @@ public class ModelAdjuster : ModelAdjusterBase
         {
             WebGalModelPos pos = webgalPoses[i];
             meta.GetModelOffset(i, out var offsetX, out var offsetY);
-            pos.Adjust(offsetX, -offsetY);
+            pos.Adjust(offsetX, offsetY);
         }
 
         if (Global.__PIVOT_2_4)
@@ -355,11 +355,11 @@ public class ModelAdjuster : ModelAdjusterBase
 
     private Vector3 GetCharacterWorldPosition(float worldX, float worldY, Transform child)
     {
-        // 计算 b 当前的世界坐标相对于父物体 a 的偏移量
+        // 计算 b 当前的世界坐标相对于父物�? a 的偏移量
         float offsetX = child.position.x - root.position.x;
         float offsetY = child.position.y - root.position.y;
 
-        // 计算新的父物体 a 的位置
+        // 计算新的父物�? a 的位�?
         float newAPositionX = worldX - offsetX;
         float newAPositionY = worldY - offsetY;
 
