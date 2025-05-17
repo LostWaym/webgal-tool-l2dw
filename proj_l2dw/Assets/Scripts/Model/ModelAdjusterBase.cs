@@ -192,7 +192,7 @@ public class ModelAdjusterBase : MonoBehaviour
 
     }
 
-    public virtual void DoRender()
+    public virtual void DrawLive2D()
     {
 
     }

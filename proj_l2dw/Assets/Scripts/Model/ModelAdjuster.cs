@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using UnityEngine;
 
 public class ModelAdjuster : ModelAdjusterBase
@@ -57,6 +58,16 @@ public class ModelAdjuster : ModelAdjusterBase
     private WebGalModelPos webgalPosPrefab;
     private MyGOLive2DEx MainModel => webgalPoses[0].model;
     private List<WebGalModelPos> webgalPoses = new List<WebGalModelPos>();
+    
+    private RenderTexture rt;
+    private float canvasResolutionScale = 1.0f;
+    private Matrix4x4 modelMatrix;
+    private FieldInfo canvasHackField;
+
+    private void Start()
+    {
+        this.canvasHackField = typeof(Canvas).GetField("willRenderCanvases", BindingFlags.NonPublic | BindingFlags.Static);
+    }
     
     public override Live2DParamInfoList GetEmotionEditorList()
     {
@@ -236,7 +247,7 @@ public class ModelAdjuster : ModelAdjusterBase
         {
             if (!File.Exists(modelFilePath))
             {
-                Debug.LogError($"Ä£ĞÍÎÄ¼ş²»´æÔÚ: {modelFilePath}");
+                Debug.LogError($"æ¨¡å‹æ–‡ä»¶ä¸å­˜åœ¨: {modelFilePath}");
                 return null;
             }
 
@@ -244,11 +255,10 @@ public class ModelAdjuster : ModelAdjusterBase
             var model = pos.model;
             var config = Live2dLoadUtils.LoadConfig(modelFilePath);
             model.LoadConfig(config);
-            model.externalHandleRender = true;
-            model.modelWidth = 1;
             model.transform.localScale = Vector3.one;
             model.transform.localPosition = Vector3.zero;
             model.transform.localRotation = Quaternion.Euler(0, 0, 0);
+            model.meshRenderer.gameObject.SetActive(false);
 
             pos.transform.SetParent(pivot);
             pos.gameObject.SetActive(true);
@@ -262,6 +272,26 @@ public class ModelAdjuster : ModelAdjusterBase
         }
 
         webgalPoses.RemoveAll(pos => pos == null);
+        
+        if (this.rt)
+        {
+            rt.Release();
+        }
+        this.rt = new RenderTexture(
+            (int)(MainModel.Live2DModel.getCanvasWidth() * canvasResolutionScale),
+            (int)(MainModel.Live2DModel.getCanvasHeight() * canvasResolutionScale),
+            0
+        );
+        MainModel.meshRenderer.material.mainTexture = this.rt;
+        MainModel.meshRenderer.gameObject.SetActive(true);
+        this.modelMatrix = Matrix4x4.Ortho(
+            0,
+            MainModel.Live2DModel.getCanvasWidth(),
+            MainModel.Live2DModel.getCanvasHeight(),
+            0,
+            -500.0f,
+            500.0f
+        );
     }
 
     public override void Adjust()
@@ -325,15 +355,15 @@ public class ModelAdjuster : ModelAdjusterBase
 
     private Vector3 GetCharacterWorldPosition(float worldX, float worldY, Transform child)
     {
-        // ¼ÆËã b µ±Ç°µÄÊÀ½ç×ø±êÏà¶ÔÓÚ¸¸ÎïÌå a µÄÆ«ÒÆÁ¿
+        // è®¡ç®— b å½“å‰çš„ä¸–ç•Œåæ ‡ç›¸å¯¹äºçˆ¶ç‰©ä½“ a çš„åç§»é‡
         float offsetX = child.position.x - root.position.x;
         float offsetY = child.position.y - root.position.y;
 
-        // ¼ÆËãĞÂµÄ¸¸ÎïÌå a µÄÎ»ÖÃ
+        // è®¡ç®—æ–°çš„çˆ¶ç‰©ä½“ a çš„ä½ç½®
         float newAPositionX = worldX - offsetX;
         float newAPositionY = worldY - offsetY;
 
-        // ·µ»ØĞÂµÄÊÀ½ç×ø±ê
+        // è¿”å›æ–°çš„ä¸–ç•Œåæ ‡
         return new Vector3(newAPositionX, newAPositionY, root.position.z);
     }
 
@@ -381,11 +411,39 @@ public class ModelAdjuster : ModelAdjusterBase
         SetCharacterWorldPosition(oldPos.x, oldPos.y);
     }
 
-    public override void DoRender()
+    public override void DrawLive2D()
     {
+        var camera = Camera.main;
+        if (camera == null)
+        {
+            Debug.LogError("Camera.main is null");
+            return;
+        }
         foreach (var pos in webgalPoses)
         {
-            pos.model.DoRender();
+            pos.model.UpdateLive2D();
+            pos.model.isMainRenderLoop = false;
+        }
+        var camPreLayer = camera.cullingMask;
+        var goPreLayer = gameObject.layer;
+        camera.cullingMask = LayerMask.NameToLayer("Isolate");
+        gameObject.layer = LayerMask.NameToLayer("Isolate");
+        camera.targetTexture = rt;
+        camera.projectionMatrix = this.modelMatrix;
+        
+        var canvasHackObject = canvasHackField.GetValue(null);
+        canvasHackField.SetValue(null, null);
+        camera.Render();
+        canvasHackField.SetValue(null, canvasHackObject);
+        
+        camera.cullingMask = camPreLayer;
+        gameObject.layer = goPreLayer;
+        camera.targetTexture = null;
+        camera.ResetProjectionMatrix();
+        
+        foreach (var pos in webgalPoses)
+        {
+            pos.model.isMainRenderLoop = true;
         }
     }
 }

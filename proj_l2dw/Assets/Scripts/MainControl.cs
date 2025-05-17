@@ -81,7 +81,7 @@ public class MainControl : MonoBehaviour
 
     private void OnSaveImageSetting(ImageModelMeta meta)
     {
-        ShowDebugText("±£´æ³É¹¦£¡");
+        ShowDebugText("ä¿å­˜æˆåŠŸï¼");
         OnMetaChanged?.Invoke();
     }
 
@@ -128,7 +128,7 @@ public class MainControl : MonoBehaviour
         if(curTarget == null)
             return;
 
-        ShowDebugText("±£´æ³É¹¦£¡");
+        ShowDebugText("ä¿å­˜æˆåŠŸï¼");
         OnMetaChanged?.Invoke();
     }
 
@@ -164,9 +164,9 @@ public class MainControl : MonoBehaviour
 
     private void AddDefaultGroup()
     {
-        //Ìí¼ÓÒ»¸öÄ¬ÈÏµÄgroup
+        //æ·»åŠ ä¸€ä¸ªé»˜è®¤çš„group
         ModelGroup defaultGroup = Instantiate(modelGroupPrefab);
-        defaultGroup.groupName = "Ä¬ÈÏ×é";
+        defaultGroup.groupName = "é»˜è®¤ç»„";
         defaultGroup.gameObject.SetActive(true);
         modelGroups.Add(defaultGroup);
         SetGroup(defaultGroup);
@@ -205,12 +205,12 @@ public class MainControl : MonoBehaviour
 
         if (target == null)
         {
-            ShowErrorDebugText("ÇëÏÈÑ¡ÔñÒ»¸öÄ£ĞÍ");
+            ShowErrorDebugText("è¯·å…ˆé€‰æ‹©ä¸€ä¸ªæ¨¡å‹");
             return;
         }
 
         target.ReloadModels();
-        ShowDebugText("ÖØÔØÄ£ĞÍ³É¹¦£¡");
+        ShowDebugText("é‡è½½æ¨¡å‹æˆåŠŸï¼");
     }
     public bool AnyTopViewActive => settingWindow.IsShown || valueInputWindow.IsShown || settingUIWindow.IsShown || messageTipWindow.IsShown;
 
@@ -254,7 +254,7 @@ public class MainControl : MonoBehaviour
 
         if(!L2DWUtils.IsSubFolderOf(path, Global.BGPath))
         {
-            messageTipWindow.Show("´íÎó", "±³¾°Â·¾¶´íÎó£¡\nÄãÓ¦¸ÃÑ¡Ôñ±³¾°ÎÄ¼ş¼ĞÏÂµÄÍ¼Æ¬ÎÄ¼ş");
+            messageTipWindow.Show("é”™è¯¯", "èƒŒæ™¯è·¯å¾„é”™è¯¯ï¼\nä½ åº”è¯¥é€‰æ‹©èƒŒæ™¯æ–‡ä»¶å¤¹ä¸‹çš„å›¾ç‰‡æ–‡ä»¶");
             return;
         }
 
@@ -266,7 +266,7 @@ public class MainControl : MonoBehaviour
         Resources.UnloadUnusedAssets();
     }
 
-    #region ¿ì½İ¼ü£¬¸üĞÂÏà¹Ø
+    #region å¿«æ·é”®ï¼Œæ›´æ–°ç›¸å…³
     private void Update()
     {
         freezeProcessInputFrame--;
@@ -305,21 +305,21 @@ public class MainControl : MonoBehaviour
         }
     }
 
-    void OnRenderObject()
+    void LateUpdate()
     {
         for (int i = models.Count - 1; i >= 0; i--)
         {
             ModelAdjusterBase model = models[i];
             if (model.gameObject.activeInHierarchy)
-                model.DoRender();
+                model.DrawLive2D();
         }
     }
 
     #endregion
 
-    #region Ö¸ÁîÊä³öÏà¹Ø
+    #region æŒ‡ä»¤è¾“å‡ºç›¸å…³
 
-    #region Á¢»æ
+    #region ç«‹ç»˜
 
     public void CopyAllSpilt(bool motion = true, bool transform = true)
     {
@@ -332,7 +332,7 @@ public class MainControl : MonoBehaviour
         {
             if(string.IsNullOrEmpty(curTarget.curExpName) || string.IsNullOrEmpty(curTarget.curMotionName))
             {
-                ShowErrorDebugText("ÇëÏÈÉèÖÃ±íÇéºÍ¶¯×÷");
+                ShowErrorDebugText("è¯·å…ˆè®¾ç½®è¡¨æƒ…å’ŒåŠ¨ä½œ");
                 return;
             }
         }
@@ -359,7 +359,7 @@ public class MainControl : MonoBehaviour
             commands.AppendLine(output);
         }
         L2DWUtils.CopyInstructionToCopyBoard(commands.ToString());
-        ShowDebugText("¸´ÖÆ³É¹¦£¡");
+        ShowDebugText("å¤åˆ¶æˆåŠŸï¼");
     }
 
     public void CopyAll()
@@ -370,7 +370,7 @@ public class MainControl : MonoBehaviour
         var shouldMotion = curTarget.HasMotions;
         if(shouldMotion && (string.IsNullOrEmpty(curTarget.curExpName) || string.IsNullOrEmpty(curTarget.curMotionName)))
         {
-            ShowErrorDebugText("ÇëÏÈÉèÖÃ±íÇéºÍ¶¯×÷");
+            ShowErrorDebugText("è¯·å…ˆè®¾ç½®è¡¨æƒ…å’ŒåŠ¨ä½œ");
             return;
         }
 
@@ -381,7 +381,7 @@ public class MainControl : MonoBehaviour
             output = output.Replace($"%me_{i}%", curTarget.GetMotionExpressionParamsText() + $" -transform={GetTransformTextTarget(curTarget, i)}");
         }
         L2DWUtils.CopyInstructionToCopyBoard(output);
-        ShowDebugText("¸´ÖÆ³É¹¦£¡");
+        ShowDebugText("å¤åˆ¶æˆåŠŸï¼");
     }
     
 
@@ -408,7 +408,7 @@ public class MainControl : MonoBehaviour
 
     #endregion
 
-    #region ±³¾°
+    #region èƒŒæ™¯
 
     public string GetTransformTextBG()
     {
@@ -419,13 +419,13 @@ public class MainControl : MonoBehaviour
     {
         if (string.IsNullOrEmpty(Global.BGPath))
         {
-            MessageTipWindow.Instance.Show("´íÎó", "ÇëÏÈÉèÖÃ±³¾°ÎÄ¼ş¼Ğ");
+            MessageTipWindow.Instance.Show("é”™è¯¯", "è¯·å…ˆè®¾ç½®èƒŒæ™¯æ–‡ä»¶å¤¹");
             return false;
         }
         
         if (string.IsNullOrEmpty(MainControl.CurrentBGPath))
         {
-            MessageTipWindow.Instance.Show("´íÎó", "ÇëÏÈ¼ÓÔØÒ»ÕÅ±³¾°\nÄ¬ÈÏ±³¾°Ö»ÊÇÄÃÀ´¿´µÄ£¬²»»á±»µ¼³ö");
+            MessageTipWindow.Instance.Show("é”™è¯¯", "è¯·å…ˆåŠ è½½ä¸€å¼ èƒŒæ™¯\né»˜è®¤èƒŒæ™¯åªæ˜¯æ‹¿æ¥çœ‹çš„ï¼Œä¸ä¼šè¢«å¯¼å‡º");
             return false;
         }
 
@@ -442,7 +442,7 @@ public class MainControl : MonoBehaviour
         var result = template.Replace("%me%", relativePath);
         Debug.Log(result);
         L2DWUtils.CopyInstructionToCopyBoard(result);
-        ShowDebugText("¸´ÖÆ³É¹¦£¡");
+        ShowDebugText("å¤åˆ¶æˆåŠŸï¼");
     }
 
     public void CopyBackgroundTransform()
@@ -454,7 +454,7 @@ public class MainControl : MonoBehaviour
         var result = template.Replace("%me%", MainControl.Instance.GetTransformTextBG());
         Debug.Log(result);
         L2DWUtils.CopyInstructionToCopyBoard(result);
-        ShowDebugText("¸´ÖÆ³É¹¦£¡");
+        ShowDebugText("å¤åˆ¶æˆåŠŸï¼");
     }
 
     public void CopyBackgroundAll()
@@ -467,12 +467,12 @@ public class MainControl : MonoBehaviour
         var result = template.Replace("%me%", $"{relativePath} -transform={MainControl.Instance.GetTransformTextBG()}");
         Debug.Log(result);
         L2DWUtils.CopyInstructionToCopyBoard(result);
-        ShowDebugText("¸´ÖÆ³É¹¦£¡");
+        ShowDebugText("å¤åˆ¶æˆåŠŸï¼");
     }
 
     #endregion
 
-    #region Á¢»æ×é
+    #region ç«‹ç»˜ç»„
 
     public void CopyAllGroupSpilt(bool motion = true, bool transform = true)
     {
@@ -488,7 +488,7 @@ public class MainControl : MonoBehaviour
                 var shouldMotion = model.HasMotions;
                 if (shouldMotion && (string.IsNullOrEmpty(model.curExpName) || string.IsNullOrEmpty(model.curMotionName)))
                 {
-                    ShowErrorDebugText($"ÇëÏÈ¸ø ¡¾{model.Name}¡¿ ÉèÖÃ±íÇéºÍ¶¯×÷£¡");
+                    ShowErrorDebugText($"è¯·å…ˆç»™ ã€{model.Name}ã€‘ è®¾ç½®è¡¨æƒ…å’ŒåŠ¨ä½œï¼");
                     return;
                 }
             }
@@ -499,7 +499,7 @@ public class MainControl : MonoBehaviour
         {
             if (motion)
             {
-                //¶¯×÷±íÇé
+                //åŠ¨ä½œè¡¨æƒ…
                 var format2 = model.MotionTemplate;
                 var output2 = format2.Replace("%me%", model.GetMotionExpressionParamsText());
                 for (int i = 0; i < model.ModelCount; i++)
@@ -511,7 +511,7 @@ public class MainControl : MonoBehaviour
 
             if (transform)
             {
-                //±ä»»
+                //å˜æ¢
                 var format = model.TransformTemplate;
                 var output = format.Replace("%me%", GetTransformTextTarget(model));
                 for (int i = 0; i < model.ModelCount; i++)
@@ -533,7 +533,7 @@ public class MainControl : MonoBehaviour
         }
 
         L2DWUtils.CopyInstructionToCopyBoard(commands.ToString());
-        ShowDebugText("¸´ÖÆ³É¹¦£¡");
+        ShowDebugText("å¤åˆ¶æˆåŠŸï¼");
     }
     public void CopyAllGroup()
     {
@@ -547,7 +547,7 @@ public class MainControl : MonoBehaviour
             var shouldMotion = model.HasMotions;
             if (shouldMotion && (string.IsNullOrEmpty(model.curExpName) || string.IsNullOrEmpty(model.curMotionName)))
             {
-                ShowErrorDebugText($"ÇëÏÈ¸ø ¡¾{model.Name}¡¿ ÉèÖÃ±íÇéºÍ¶¯×÷£¡");
+                ShowErrorDebugText($"è¯·å…ˆç»™ ã€{model.Name}ã€‘ è®¾ç½®è¡¨æƒ…å’ŒåŠ¨ä½œï¼");
                 return;
             }
             
@@ -571,7 +571,7 @@ public class MainControl : MonoBehaviour
         }
 
         L2DWUtils.CopyInstructionToCopyBoard(commands.ToString());
-        ShowDebugText("¸´ÖÆ³É¹¦£¡");
+        ShowDebugText("å¤åˆ¶æˆåŠŸï¼");
     }
 
     public void CopyTransformGroup()
@@ -600,7 +600,7 @@ public class MainControl : MonoBehaviour
 
         ScreenCapture.CaptureScreenshot(path);
         screenshotCounter++;
-        // messageTipWindow.Show("ÌáÊ¾", $"½ØÍ¼³É¹¦£¡ÒÑ±£´æÎª\n{path}");
+        // messageTipWindow.Show("æç¤º", $"æˆªå›¾æˆåŠŸï¼å·²ä¿å­˜ä¸º\n{path}");
     }
 
     #endregion
@@ -608,7 +608,7 @@ public class MainControl : MonoBehaviour
     public void CopyMotionEditor()
     {
         GUIUtility.systemCopyBuffer = curTarget.GetMotionEditorExpJson();
-        ShowDebugText("±£´æ³É¹¦£¡");
+        ShowDebugText("ä¿å­˜æˆåŠŸï¼");
     }
 
     public void ShowDebugText(string text)
@@ -629,14 +629,14 @@ public class MainControl : MonoBehaviour
 
     #endregion
 
-    #region  ÅäÖÃ¼ÓÔØÏà¹Ø
+    #region  é…ç½®åŠ è½½ç›¸å…³
 
     private SFB.ExtensionFilter[] modelFilters = new SFB.ExtensionFilter[] {
-         new SFB.ExtensionFilter("Ä£ĞÍÎÄ¼ş", "json", "conf"),
+         new SFB.ExtensionFilter("æ¨¡å‹æ–‡ä»¶", "json", "conf"),
     };
     public void LoadModelConfig()
     {
-        var paths = SFB.StandaloneFileBrowser.OpenFilePanel("Ñ¡ÔñÄ£ĞÍÎÄ¼ş, jsonÖ»ÄÜÑ¡Ò»¸ö", PlayerPrefs.GetString("live2d_path", "."), modelFilters, true);
+        var paths = SFB.StandaloneFileBrowser.OpenFilePanel("é€‰æ‹©æ¨¡å‹æ–‡ä»¶, jsonåªèƒ½é€‰ä¸€ä¸ª", PlayerPrefs.GetString("live2d_path", "."), modelFilters, true);
         if (paths == null || paths.Length == 0)
             return;
 
@@ -645,7 +645,7 @@ public class MainControl : MonoBehaviour
             return;
 
         PlayerPrefs.SetString("live2d_path", Path.GetDirectoryName(path));
-        Debug.Log($"Ñ¡Ôñlive2dÎÄ¼ş: {path}");
+        Debug.Log($"é€‰æ‹©live2dæ–‡ä»¶: {path}");
         if (path.EndsWith(".json"))
         {
             LoadJsonModel(path);
@@ -686,7 +686,7 @@ public class MainControl : MonoBehaviour
         {
             SetCharacter(finalTarget);
             PlayerPrefs.SetString("conf_path", Path.GetDirectoryName(validPath));
-            ShowDebugText("¼ÓÔØ³É¹¦£¡");
+            ShowDebugText("åŠ è½½æˆåŠŸï¼");
             OnLoadConf?.Invoke();
         }
     }
@@ -737,7 +737,7 @@ public class MainControl : MonoBehaviour
 
     public void LoadConfig()
     {
-        var paths = SFB.StandaloneFileBrowser.OpenFilePanel("Ñ¡Ôñlive2dÎÄ¼ş", PlayerPrefs.GetString("live2d_path", "."), "json", false);
+        var paths = SFB.StandaloneFileBrowser.OpenFilePanel("é€‰æ‹©live2dæ–‡ä»¶", PlayerPrefs.GetString("live2d_path", "."), "json", false);
         if (paths == null || paths.Length == 0)
             return;
 
@@ -754,11 +754,11 @@ public class MainControl : MonoBehaviour
     {
         if (string.IsNullOrEmpty(Global.ModelPath))
         {
-            messageTipWindow.Show("´íÎó", "ÇëÏÈÉèÖÃÄ£ĞÍÎÄ¼ş¼Ğ");
+            messageTipWindow.Show("é”™è¯¯", "è¯·å…ˆè®¾ç½®æ¨¡å‹æ–‡ä»¶å¤¹");
             return;
         }
 
-        var paths = L2DWUtils.OpenFileDialog("Ñ¡ÔñÍ¼Æ¬ÎÄ¼ş", "img_path", "png|jpg");
+        var paths = L2DWUtils.OpenFileDialog("é€‰æ‹©å›¾ç‰‡æ–‡ä»¶", "img_path", "png|jpg");
         if (paths == null || paths.Length == 0)
             return;
 
@@ -768,7 +768,7 @@ public class MainControl : MonoBehaviour
 
         if (!L2DWUtils.TryGetRelativePath(path, Global.ModelPath, out var relativePath))
         {
-            messageTipWindow.Show("´íÎó", "Í¼Æ¬ÎÄ¼şÂ·¾¶´íÎó£¡\nÄãÓ¦¸ÃÑ¡ÔñÄ£ĞÍÎÄ¼ş¼ĞÏÂµÄÍ¼Æ¬ÎÄ¼ş");
+            messageTipWindow.Show("é”™è¯¯", "å›¾ç‰‡æ–‡ä»¶è·¯å¾„é”™è¯¯ï¼\nä½ åº”è¯¥é€‰æ‹©æ¨¡å‹æ–‡ä»¶å¤¹ä¸‹çš„å›¾ç‰‡æ–‡ä»¶");
             return;
         }
         
@@ -795,7 +795,7 @@ public class MainControl : MonoBehaviour
 
     public void LoadConf()
     {
-        var paths = SFB.StandaloneFileBrowser.OpenFilePanel("Ñ¡ÔñÅäÖÃ", PlayerPrefs.GetString("conf_path", "."), "conf", true);
+        var paths = SFB.StandaloneFileBrowser.OpenFilePanel("é€‰æ‹©é…ç½®", PlayerPrefs.GetString("conf_path", "."), "conf", true);
         if (paths == null || paths.Length == 0)
             return;
             
@@ -815,7 +815,7 @@ public class MainControl : MonoBehaviour
         if (curTarget == null)
             return;
 
-        var path = SFB.StandaloneFileBrowser.SaveFilePanel("±£´æÅäÖÃ", PlayerPrefs.GetString("conf_path", "."), $"{curMeta.name}.conf", "conf");
+        var path = SFB.StandaloneFileBrowser.SaveFilePanel("ä¿å­˜é…ç½®", PlayerPrefs.GetString("conf_path", "."), $"{curMeta.name}.conf", "conf");
         if (string.IsNullOrEmpty(path))
             return;
         
@@ -824,17 +824,17 @@ public class MainControl : MonoBehaviour
         curMeta.SetTransform(curTarget.RootPosition.x, curTarget.RootPosition.y, curTarget.RootScaleValue, curTarget.RootRotation);
         curMeta.reverseX = curTarget.ReverseXScale;
         curMeta.Save(path);
-        ShowDebugText("±£´æ³É¹¦£¡");
+        ShowDebugText("ä¿å­˜æˆåŠŸï¼");
     }
 
     #endregion
 
-    #region GroupÏà¹Ø
+    #region Groupç›¸å…³
 
     public void AddGroup()
     {
         var group = Instantiate(modelGroupPrefab);
-        group.groupName = "ĞÂ×é";
+        group.groupName = "æ–°ç»„";
         modelGroups.Add(group);
         SetGroup(group);
         group.gameObject.SetActive(true);
@@ -850,7 +850,7 @@ public class MainControl : MonoBehaviour
 
     public void AddModelToGroup(ModelGroup group, ModelAdjusterBase model)
     {
-        //ÏÖÔÚÖ§³Ö½ÇÉ«ÔÚ¶à¸ö×éÖĞ
+        //ç°åœ¨æ”¯æŒè§’è‰²åœ¨å¤šä¸ªç»„ä¸­
         // RemoveModelFromAllGroups(model);
         group.modelAdjusters.Add(model);
     }
@@ -867,7 +867,7 @@ public class MainControl : MonoBehaviour
 
     #endregion
 
-    #region Character»æÖÆÏà¹Ø
+    #region Characterç»˜åˆ¶ç›¸å…³
 
     public void SetModelVisible(ModelAdjusterBase model, bool visible)
     {
@@ -886,7 +886,7 @@ public class MainControl : MonoBehaviour
     }
     #endregion
 
-    #region ±íÇé¶¯×÷Ïà¹Ø
+    #region è¡¨æƒ…åŠ¨ä½œç›¸å…³
     public void PlayMotion(string motionName)
     {
         curTarget.PlayMotion(motionName);
