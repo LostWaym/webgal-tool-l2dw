@@ -100,7 +100,7 @@ public class ImageModel : ModelAdjusterBase
 
     public override void SetPosition(float x, float y)
     {
-        root.transform.localPosition = new Vector3(x, y, root.transform.position.z);
+        root.transform.localPosition = new Vector3(x, y, 0);
     }
 
     public override void SetReverseXScale(bool reverse)
@@ -111,7 +111,7 @@ public class ImageModel : ModelAdjusterBase
 
     public override void SetCharacterWorldPosition(float worldX, float worldY)
     {
-        root.transform.position = new Vector3(worldX, worldY, 0);
+        root.transform.position = new Vector3(worldX, worldY, root.transform.position.z);
     }
 
     public override Vector3 GetCharacterSpecWorldPosition(int modelIndex)
