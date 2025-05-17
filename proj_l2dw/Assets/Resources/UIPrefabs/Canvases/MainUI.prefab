@@ -4133,7 +4133,7 @@ RectTransform:
   - {fileID: 7118092079905405869}
   - {fileID: 1735523973265690437}
   - {fileID: 4690096302046759537}
-  - {fileID: 7631210863284096140}
+  - {fileID: 6730464597885761904}
   - {fileID: 6883980352070405439}
   m_Father: {fileID: 7567462745388387952}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -17265,7 +17265,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6298283958307897108}
+  - {fileID: 2414156822099251358}
   m_Father: {fileID: 6662729883405303634}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -28092,10 +28092,10 @@ RectTransform:
   - {fileID: 2777945664435460139}
   m_Father: {fileID: 6997921762801363618}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 50, y: -16}
-  m_SizeDelta: {x: 100, y: 32}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1524406978324471807
 CanvasRenderer:
@@ -36759,10 +36759,10 @@ RectTransform:
   - {fileID: 6560860947479555879}
   m_Father: {fileID: 1047220334388011621}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 50, y: -16}
-  m_SizeDelta: {x: 100, y: 32}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3610705064165704400
 CanvasRenderer:
@@ -42950,7 +42950,7 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8d22f5f2231e1e5479af90cdd7ae1123, type: 3}
---- !u!224 &6298283958307897108 stripped
+--- !u!224 &2414156822099251358 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1753837222932795805, guid: 8d22f5f2231e1e5479af90cdd7ae1123, type: 3}
   m_PrefabInstance: {fileID: 4167570730898915587}
@@ -43487,7 +43487,7 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1908563646108598033}
   m_SourcePrefab: {fileID: 100100000, guid: 6664172f93e832345b1a5a6ceed70889, type: 3}
---- !u!1 &6310335058600267067 stripped
+--- !u!1 &1360201930368858894 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8865311315813021573, guid: 6664172f93e832345b1a5a6ceed70889, type: 3}
   m_PrefabInstance: {fileID: 7631210863284096139}
@@ -43498,7 +43498,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6310335058600267067}
+  m_GameObject: {fileID: 1360201930368858894}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
@@ -43512,7 +43512,7 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
---- !u!224 &7631210863284096140 stripped
+--- !u!224 &6730464597885761904 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3783279036796777979, guid: 6664172f93e832345b1a5a6ceed70889, type: 3}
   m_PrefabInstance: {fileID: 7631210863284096139}
