@@ -59,6 +59,84 @@ public class Live2dMotionData
         }
     }
 
+    private bool IsSimilar(float a, float b, float threshold = 0.001f)
+    {
+        return Mathf.Abs(a - b) < threshold;
+    }
+
+    public void UnBakeAllFramesByLinear()
+    {
+        foreach (var track in tracks.Values)
+        {
+            var frames = info.GetKeyFrames(track.name);
+            if (frames == null || frames.Count == 0)
+            {
+                continue;
+            }
+            track.keyFrames.Clear();
+            
+            // 记录第一帧
+            if (frames.Count > 0)
+            {
+                track.keyFrames[0] = frames[0];
+            }
+            
+            int trend = 2; // 初始趋势设为增加
+            float prevDiff = 0;
+            
+            // 从第二帧开始检查趋势变化
+            for (int i = 1; i < frames.Count; i++)
+            {
+                float diff = frames[i] - frames[i-1];
+                
+                // 第一次计算差值时初始化趋势
+                if (i == 1)
+                {
+                    trend = diff > 0 ? 2 : (diff < 0 ? 0 : 1);
+                    prevDiff = diff;
+                    continue;
+                }
+                
+                // 计算当前趋势
+                int curTrend = diff > 0 ? 2 : (diff < 0 ? 0 : 1);
+                if (IsSimilar(diff, 0))
+                {
+                    curTrend = 1;
+                }
+                
+                // 检查趋势是否改变
+                if (curTrend != trend)
+                {
+                    // 趋势改变,记录关键帧
+                    track.keyFrames[i-1] = frames[i-1];
+                    trend = curTrend; // 更新趋势
+                }
+                
+                prevDiff = diff;
+            }
+
+            // // 删除相邻的相似帧（容差0.01）
+            // var keyFrames = track.keyFrames.OrderBy(kv => kv.Key).ToList();
+            // for (int i = keyFrames.Count - 1; i > 0; i--)
+            // {
+            //     float curValue = keyFrames[i].Value;
+            //     float prevValue = keyFrames[i - 1].Value;
+            //     if (IsSimilar(curValue, prevValue, 0.01f))
+            //     {
+            //         track.keyFrames.Remove(keyFrames[i].Key);
+            //     }
+            // }
+            
+            // 记录最后一帧
+            if (frames.Count > 0)
+            {
+                track.keyFrames[frames.Count - 1] = frames[frames.Count - 1];
+            }
+        }
+
+        BakeAllFrames();
+    }
+
     public void BakeFrames(string trackName)
     {
         var track = TryGetTrack(trackName, true);

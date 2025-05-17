@@ -9,15 +9,19 @@ using UnityEngine.UI;
 public class PageNavMotion : UIPageWidget<PageNavMotion>
 {
     #region auto generated members
-    private Button m_btnChara;
     private Button m_btnMotion;
+    private Text m_lblMotion;
+    private RectTransform m_rectSelectMotionArea;
     private Button m_btnApply;
     private Button m_btnEdit;
     private Button m_btnSave;
     private Button m_btnRecord;
     private Button m_btnOperation;
+    private RectTransform m_rectOperationTitleArea;
+    private RectTransform m_rectOperationContentArea;
     private Toggle m_toggleFilter;
     private InputField m_iptFilter;
+    private Button m_btnClearFilter;
     private Toggle m_toggleDotSheetMode;
     private Toggle m_toggleCurveMode;
     private Button m_btnNavHome;
@@ -42,15 +46,19 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_btnChara = transform.Find("CharaArea/ToolBar/m_btnChara").GetComponent<Button>();
         m_btnMotion = transform.Find("CharaArea/ToolBar/m_btnMotion").GetComponent<Button>();
+        m_lblMotion = transform.Find("CharaArea/ToolBar/m_btnMotion/m_lblMotion").GetComponent<Text>();
+        m_rectSelectMotionArea = transform.Find("CharaArea/ToolBar/m_btnMotion/m_rectSelectMotionArea").GetComponent<RectTransform>();
         m_btnApply = transform.Find("CharaArea/ToolBar/m_btnApply").GetComponent<Button>();
         m_btnEdit = transform.Find("CharaArea/ToolBar/m_btnEdit").GetComponent<Button>();
         m_btnSave = transform.Find("CharaArea/ToolBar/m_btnSave").GetComponent<Button>();
         m_btnRecord = transform.Find("TimelineArea/ToolBar/Left/Top/m_btnRecord").GetComponent<Button>();
         m_btnOperation = transform.Find("TimelineArea/ToolBar/Left/Top/m_btnOperation").GetComponent<Button>();
+        m_rectOperationTitleArea = transform.Find("TimelineArea/ToolBar/Left/Top/m_rectOperationTitleArea").GetComponent<RectTransform>();
+        m_rectOperationContentArea = transform.Find("TimelineArea/ToolBar/Left/Top/m_rectOperationTitleArea/m_rectOperationContentArea").GetComponent<RectTransform>();
         m_toggleFilter = transform.Find("TimelineArea/ToolBar/Left/Bottom/m_toggleFilter").GetComponent<Toggle>();
         m_iptFilter = transform.Find("TimelineArea/ToolBar/Left/Bottom/m_iptFilter").GetComponent<InputField>();
+        m_btnClearFilter = transform.Find("TimelineArea/ToolBar/Left/Bottom/m_iptFilter/m_btnClearFilter").GetComponent<Button>();
         m_toggleDotSheetMode = transform.Find("TimelineArea/ToolBar/Right/Top/Container/ToggleGroup/m_toggleDotSheetMode").GetComponent<Toggle>();
         m_toggleCurveMode = transform.Find("TimelineArea/ToolBar/Right/Top/Container/ToggleGroup/m_toggleCurveMode").GetComponent<Toggle>();
         m_btnNavHome = transform.Find("TimelineArea/ToolBar/Right/Top/Container/GameObject/m_btnNavHome").GetComponent<Button>();
@@ -71,7 +79,6 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_sliderH = transform.Find("TimelineArea/Bottom/Right/m_sliderH").GetComponent<Slider>();
         m_sliderV = transform.Find("TimelineArea/Bottom/Right/m_sliderV").GetComponent<Slider>();
 
-        m_btnChara.onClick.AddListener(OnButtonCharaClick);
         m_btnMotion.onClick.AddListener(OnButtonMotionClick);
         m_btnApply.onClick.AddListener(OnButtonApplyClick);
         m_btnEdit.onClick.AddListener(OnButtonEditClick);
@@ -81,6 +88,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_toggleFilter.onValueChanged.AddListener(OnToggleFilterChange);
         m_iptFilter.onValueChanged.AddListener(OnInputFieldFilterChange);
         m_iptFilter.onEndEdit.AddListener(OnInputFieldFilterEndEdit);
+        m_btnClearFilter.onClick.AddListener(OnButtonClearFilterClick);
         m_toggleDotSheetMode.onValueChanged.AddListener(OnToggleDotSheetModeChange);
         m_toggleCurveMode.onValueChanged.AddListener(OnToggleCurveModeChange);
         m_btnNavHome.onClick.AddListener(OnButtonNavHomeClick);
@@ -100,15 +108,30 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     #endregion
 
 
-
     #region auto generated events
-    private void OnButtonCharaClick()
-    {
-        Debug.Log("OnButtonCharaClick");
-    }
     private void OnButtonMotionClick()
     {
-        Debug.Log("OnButtonMotionClick");
+        var curTarget = GetValidTarget();
+        if (curTarget == null)
+        {
+            return;
+        }
+        var motionNames = curTarget.MyGOConfig.motions.Keys.ToList().OrderBy(x => x).ToList();
+        TargetSelectUI.Instance.SetData(m_btnMotion.gameObject.GetComponent<RectTransform>(), m_rectSelectMotionArea, motionNames);
+        TargetSelectUI.Instance._OnTargetItemClick = (motionName) =>
+        {
+            void OnSubmit()
+            {
+                TargetSelectUI.Instance.Close();
+                var bytes = curTarget.MyGOConfig.motions[motionName];
+                string text = System.Text.Encoding.UTF8.GetString(bytes);
+                m_motionData = Live2dMotionData.Create(text);
+                m_lblMotion.text = $"> {motionName}";
+                RefreshAll();
+            }
+
+            ConfirmUI.Instance.SetData("确定要导入motion吗？", "motion文件将替换当前motion\n请注意好保存数据！", OnSubmit, null);
+        };
     }
     private void OnButtonApplyClick()
     {
@@ -139,9 +162,30 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     {
         Debug.Log("OnButtonRecordClick");
     }
+    private const string OPERATION_LINEAR_UNBAKE = "线性反烘焙";
+    private List<string> m_listOperation = new List<string>()
+    {
+        OPERATION_LINEAR_UNBAKE,
+    };
     private void OnButtonOperationClick()
     {
-        Debug.Log("OnButtonOperationClick");
+        var curTarget = GetValidTarget();
+        if (curTarget == null)
+        {
+            return;
+        }
+
+        TargetSelectUI.Instance.SetData(m_rectOperationTitleArea, m_rectOperationContentArea, m_listOperation);
+        TargetSelectUI.Instance._OnTargetItemClick = (operationName) =>
+        {
+            TargetSelectUI.Instance.Close();
+            switch (operationName)
+            {
+                case OPERATION_LINEAR_UNBAKE:
+                    DoLinearUnbake();
+                    break;
+            }
+        };
     }
     private void OnToggleFilterChange(bool value)
     {
@@ -154,6 +198,11 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private void OnInputFieldFilterEndEdit(string value)
     {
         Debug.Log("OnInputFieldFilterEndEdit");
+    }
+    private void OnButtonClearFilterClick()
+    {
+        m_iptFilter.SetTextWithoutNotify("");
+        RefreshAll();
     }
     private void OnToggleDotSheetModeChange(bool value)
     {
@@ -291,6 +340,12 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     {
         base.OnPageHidden();
         MainControl.Instance.UpdateBeat -= Update;
+
+        var curTarget = GetValidTarget();
+        if (curTarget != null)
+        {
+            curTarget.SetDisplayMode(ModelDisplayMode.Normal);
+        }
     }
 
     public bool isPlaying;
@@ -301,10 +356,23 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     {
         if (isPlaying)
         {
+            var fps = m_motionData.info.fps;
             var delta = Time.time - startTime;
-            int frameIndex = startFrameIndex + (int)(delta * 30);
+            int frameIndex = startFrameIndex + (int)(delta * fps);
             SetFrameIndex(frameIndex, false);
         }
+    }
+
+    private void DoLinearUnbake()
+    {
+        var curTarget = GetValidTarget();
+        if (curTarget == null)
+        {
+            return;
+        }
+        
+        m_motionData.UnBakeAllFramesByLinear();
+        RefreshAll();
     }
 
     public void PlaySample()
@@ -322,6 +390,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     public void SetFps(int fps)
     {
         m_motionData.info.fps = fps;
+        isPlaying = false;
         RefreshAll();
     }
 
