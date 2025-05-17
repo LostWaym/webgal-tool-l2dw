@@ -76,8 +76,8 @@ public class MyGOLive2DEx : MonoBehaviour
             live2DModel.getCanvasWidth(),
             live2DModel.getCanvasHeight(),
             0,
-            -50.0f,
-            50.0f
+            -500.0f,
+            500.0f
         );
         if (this.rt)
         {
