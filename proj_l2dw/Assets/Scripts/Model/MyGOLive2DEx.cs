@@ -11,7 +11,6 @@ using UnityEngine;
 
 public class MyGOLive2DEx : MonoBehaviour
 {
-    public bool externalHandleRender = false;
     private Live2DModelUnity live2DModel;
     public Live2DModelUnity Live2DModel => live2DModel;
     private L2DPhysics physics;
@@ -31,23 +30,14 @@ public class MyGOLive2DEx : MonoBehaviour
 
     public ModelDisplayMode displayMode = ModelDisplayMode.Normal;
 
-    public bool canRender;
-    
-    private Matrix4x4 live2DCanvasPos;
-
-    public float modelWidth;
     public float left, up;
-
+    
     public MygoConfig myGOConfig;
     
     // 是否为主渲染循环
-    private bool isMainRenderLoop = true;
-    [SerializeField] private MeshRenderer meshRenderer;
-    private RenderTexture rt;
-    private Matrix4x4 modelMatrix;
-    private float canvasResolutionScale = 1.0f;
-    private FieldInfo canvasHackField;
-
+    public bool isMainRenderLoop = true;
+    public MeshRenderer meshRenderer;
+    
     public void LoadConfig(MygoConfig config)
     {
         myGOConfig = config;
@@ -70,31 +60,6 @@ public class MyGOLive2DEx : MonoBehaviour
         emotionEditor.list = paramInfoList;
         
         Debug.Log($"width: {live2DModel.getCanvasWidth()}, height:{live2DModel.getCanvasHeight()}");
-        
-        this.modelMatrix = Matrix4x4.Ortho(
-            0,
-            live2DModel.getCanvasWidth(),
-            live2DModel.getCanvasHeight(),
-            0,
-            -500.0f,
-            500.0f
-        );
-        if (this.rt)
-        {
-            rt.Release();
-        }
-        this.rt = new RenderTexture(
-            (int)(live2DModel.getCanvasWidth() * canvasResolutionScale),
-            (int)(live2DModel.getCanvasHeight() * canvasResolutionScale),
-            0
-        );
-        meshRenderer.material.mainTexture = this.rt;
-        // 我也不知道为什么是*-2.0，但这个数值是对的
-        meshRenderer.transform.localPosition += new Vector3(
-            left * -2.0f,
-            up * -2.0f,
-            0
-            );
     }
 
     public void ReloadTextures()
@@ -146,11 +111,9 @@ public class MyGOLive2DEx : MonoBehaviour
 
     void Start()
     {
-        canRender = true;
-        this.canvasHackField = typeof(Canvas).GetField("willRenderCanvases", BindingFlags.NonPublic | BindingFlags.Static);
     }
 
-    void Update()
+    public void UpdateLive2D()
     {
         if (live2DModel == null)
             return;
@@ -161,14 +124,20 @@ public class MyGOLive2DEx : MonoBehaviour
             return;
         }
         
+        live2DModel.setMatrix(
+            Matrix4x4.TRS(
+                new Vector3(left, up, 0),
+                Quaternion.identity,
+                Vector3.one
+            )
+        );
+        
         if (displayMode == ModelDisplayMode.Normal)
             NormalUpdate();
         else if (displayMode == ModelDisplayMode.EmotionEditor)
             EmotionEditorUpdate();
         else if (displayMode == ModelDisplayMode.MotionEditor)
             MotionUpdate();
-        
-        DrawLive2d();
     }
 
     private void NormalUpdate()
@@ -203,59 +172,14 @@ public class MyGOLive2DEx : MonoBehaviour
 
     void OnRenderObject()
     {
-        if (externalHandleRender)
+        if (
+            isMainRenderLoop
+            || live2DModel == null
+            || live2DModel.getRenderMode() != Live2D.L2D_RENDER_DRAW_MESH_NOW
+            )
             return;
-
-        DoRender();
-    }
-
-    public void DoRender()
-    {
-        if (!canRender)
-            return;
-
-        if (live2DModel == null)
-            return;
-
-        if (live2DModel.getRenderMode() == Live2D.L2D_RENDER_DRAW_MESH_NOW && !isMainRenderLoop)
-        {
-            live2DModel.draw();
-        }
-    }
-
-    private void DrawLive2d()
-    {
-        if (!canRender)
-        {
-            return;
-        }
-        var camera = Camera.main;
-        if (camera == null)
-        {
-            Debug.LogError("Camera.main is null");
-            return;
-        }
-        
-        this.isMainRenderLoop = false;
-        var camPreLayer = camera.cullingMask;
-        var goPreLayer = gameObject.layer;
-        camera.cullingMask = LayerMask.NameToLayer("Isolate");
-        gameObject.layer = LayerMask.NameToLayer("Isolate");
-        camera.targetTexture = this.rt;
-        camera.projectionMatrix = this.modelMatrix;
-        live2DModel.setMatrix(Matrix4x4.identity);
-        live2DModel.update();
-        
-        var canvasHackObject = canvasHackField.GetValue(null);
-        canvasHackField.SetValue(null, null);
-        camera.Render();
-        canvasHackField.SetValue(null, canvasHackObject);
-        
-        this.isMainRenderLoop = true;
-        camera.cullingMask = camPreLayer;
-        gameObject.layer = goPreLayer;
-        camera.targetTexture = null;
-        camera.ResetProjectionMatrix();
+    
+        live2DModel.draw();
     }
 
     public void PlayMotion(string name)
