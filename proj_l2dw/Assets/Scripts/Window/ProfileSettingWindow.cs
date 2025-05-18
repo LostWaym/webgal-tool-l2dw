@@ -21,14 +21,14 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>
     protected override void CodeGenBindMembers()
     {
         m_iptName = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/角色名/m_iptName").GetComponent<InputField>();
-        m_iptModelFilePath = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/主模型路径/m_iptModelFilePath").GetComponent<InputField>();
+        m_iptModelFilePath = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/主模型路径/Value/m_iptModelFilePath").GetComponent<InputField>();
         m_iptFormatText = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/立绘指令模板/m_iptFormatText").GetComponent<InputField>();
         m_iptTransformFormatText = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/变换指令模板/m_iptTransformFormatText").GetComponent<InputField>();
         m_tfSubModelRoot = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/子立绘路径/m_tfSubModelRoot").GetComponent<Transform>();
         m_itemSubModel = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/子立绘路径/m_tfSubModelRoot/m_itemSubModel").GetComponent<Transform>();
         m_btnAddSubModelPath = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/子立绘路径/GameObject/m_btnAddSubModelPath").GetComponent<Button>();
-        m_btnSave = transform.Find("bg/GameObject/m_btnSave").GetComponent<Button>();
-        m_btnCancel = transform.Find("bg/GameObject/m_btnCancel").GetComponent<Button>();
+        m_btnSave = transform.Find("bg/GameObject/Bottom/m_btnSave").GetComponent<Button>();
+        m_btnCancel = transform.Find("bg/GameObject/Top/m_btnCancel").GetComponent<Button>();
 
         m_iptName.onValueChanged.AddListener(OnInputFieldNameChange);
         m_iptName.onEndEdit.AddListener(OnInputFieldNameEndEdit);

@@ -26,20 +26,20 @@ public class SettingUIWindow : BaseWindow<SettingUIWindow>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_toggleGeneral = transform.Find("Image/Panel/Left/m_toggleGeneral").GetComponent<Toggle>();
-        m_toggleNavigation = transform.Find("Image/Panel/Left/m_toggleNavigation").GetComponent<Toggle>();
-        m_toggleExperiment = transform.Find("Image/Panel/Left/m_toggleExperiment").GetComponent<Toggle>();
-        m_toggleManual = transform.Find("Image/Panel/Left/m_toggleManual").GetComponent<Toggle>();
-        m_toggleAbout = transform.Find("Image/Panel/Left/m_toggleAbout").GetComponent<Toggle>();
-        m_toggleThanks = transform.Find("Image/Panel/Left/m_toggleThanks").GetComponent<Toggle>();
-        m_itemSettingPageGeneral = transform.Find("Image/Panel/Pages/m_itemSettingPageGeneral").GetComponent<Transform>();
-        m_itemSettingPageNavigation = transform.Find("Image/Panel/Pages/m_itemSettingPageNavigation").GetComponent<Transform>();
-        m_itemSettingPageExperiment = transform.Find("Image/Panel/Pages/m_itemSettingPageExperiment").GetComponent<Transform>();
-        m_itemSettingPageManual = transform.Find("Image/Panel/Pages/m_itemSettingPageManual").GetComponent<Transform>();
-        m_itemSettingPageAbout = transform.Find("Image/Panel/Pages/m_itemSettingPageAbout").GetComponent<Transform>();
-        m_itemSettingPageThanks = transform.Find("Image/Panel/Pages/m_itemSettingPageThanks").GetComponent<Transform>();
-        m_lblTitle = transform.Find("Image/Panel/m_lblTitle").GetComponent<Text>();
-        m_btnClose = transform.Find("Image/Panel/m_btnClose").GetComponent<Button>();
+        m_toggleGeneral = transform.Find("Image/Panel/Left/Viewport/Content/m_toggleGeneral").GetComponent<Toggle>();
+        m_toggleNavigation = transform.Find("Image/Panel/Left/Viewport/Content/m_toggleNavigation").GetComponent<Toggle>();
+        m_toggleExperiment = transform.Find("Image/Panel/Left/Viewport/Content/m_toggleExperiment").GetComponent<Toggle>();
+        m_toggleManual = transform.Find("Image/Panel/Left/Viewport/Content/m_toggleManual").GetComponent<Toggle>();
+        m_toggleAbout = transform.Find("Image/Panel/Left/Viewport/Content/m_toggleAbout").GetComponent<Toggle>();
+        m_toggleThanks = transform.Find("Image/Panel/Left/Viewport/Content/m_toggleThanks").GetComponent<Toggle>();
+        m_itemSettingPageGeneral = transform.Find("Image/Panel/Right/Pages/m_itemSettingPageGeneral").GetComponent<Transform>();
+        m_itemSettingPageNavigation = transform.Find("Image/Panel/Right/Pages/m_itemSettingPageNavigation").GetComponent<Transform>();
+        m_itemSettingPageExperiment = transform.Find("Image/Panel/Right/Pages/m_itemSettingPageExperiment").GetComponent<Transform>();
+        m_itemSettingPageManual = transform.Find("Image/Panel/Right/Pages/m_itemSettingPageManual").GetComponent<Transform>();
+        m_itemSettingPageAbout = transform.Find("Image/Panel/Right/Pages/m_itemSettingPageAbout").GetComponent<Transform>();
+        m_itemSettingPageThanks = transform.Find("Image/Panel/Right/Pages/m_itemSettingPageThanks").GetComponent<Transform>();
+        m_lblTitle = transform.Find("Image/Panel/Right/Top/m_lblTitle").GetComponent<Text>();
+        m_btnClose = transform.Find("Image/Panel/Right/Top/m_btnClose").GetComponent<Button>();
 
         m_toggleGeneral.onValueChanged.AddListener(OnToggleGeneralChange);
         m_toggleNavigation.onValueChanged.AddListener(OnToggleNavigationChange);
@@ -139,7 +139,7 @@ public class SettingPageGeneralWidget : UIItemWidget<SettingPageGeneralWidget>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_iptField = transform.Find("m_iptField").GetComponent<InputField>();
+        m_iptField = transform.Find("Value/m_iptField").GetComponent<InputField>();
 
         m_iptField.onValueChanged.AddListener(OnInputFieldFieldChange);
     }
@@ -180,11 +180,11 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_itemModelPath = transform.Find("m_itemModelPath").GetComponent<Transform>();
-        m_itemBGPath = transform.Find("m_itemBGPath").GetComponent<Transform>();
-        m_itemBGChangeTemplate = transform.Find("m_itemBGChangeTemplate").GetComponent<Transform>();
-        m_itemBGTransformTemplate = transform.Find("m_itemBGTransformTemplate").GetComponent<Transform>();
-        m_toggleCloseGreenLine = transform.Find("m_toggleCloseGreenLine").GetComponent<Toggle>();
+        m_itemModelPath = transform.Find("Viewport/Content/m_itemModelPath").GetComponent<Transform>();
+        m_itemBGPath = transform.Find("Viewport/Content/m_itemBGPath").GetComponent<Transform>();
+        m_itemBGChangeTemplate = transform.Find("Viewport/Content/m_itemBGChangeTemplate").GetComponent<Transform>();
+        m_itemBGTransformTemplate = transform.Find("Viewport/Content/m_itemBGTransformTemplate").GetComponent<Transform>();
+        m_toggleCloseGreenLine = transform.Find("Viewport/Content/m_toggleCloseGreenLine").GetComponent<Toggle>();
 
         m_toggleCloseGreenLine.onValueChanged.AddListener(OnToggleCloseGreenLineChange);
     }
@@ -284,9 +284,9 @@ public class SettingPageExperiment : SettingPageBase<SettingPageExperiment>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_toggleBlink = transform.Find("m_toggleBlink").GetComponent<Toggle>();
-        m_toggleWebgalExpSupport = transform.Find("m_toggleWebgalExpSupport").GetComponent<Toggle>();
-        m_toggle_2_4Support = transform.Find("m_toggle_2_4Support").GetComponent<Toggle>();
+        m_toggleBlink = transform.Find("Viewport/Content/m_toggleBlink").GetComponent<Toggle>();
+        m_toggleWebgalExpSupport = transform.Find("Viewport/Content/m_toggleWebgalExpSupport").GetComponent<Toggle>();
+        m_toggle_2_4Support = transform.Find("Viewport/Content/m_toggle_2_4Support").GetComponent<Toggle>();
 
         m_toggleBlink.onValueChanged.AddListener(OnToggleBlinkChange);
         m_toggleWebgalExpSupport.onValueChanged.AddListener(OnToggleWebgalExpSupportChange);

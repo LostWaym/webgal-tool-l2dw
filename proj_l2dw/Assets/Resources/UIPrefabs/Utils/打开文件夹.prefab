@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7603929867841290353}
   - component: {fileID: 3618785900092871073}
   - component: {fileID: 22111273924127782}
+  - component: {fileID: 8012703080048510576}
   m_Layer: 0
   m_Name: "\u6253\u5F00\u6587\u4EF6\u5939"
   m_TagString: Untagged
@@ -67,7 +68,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: efac2fd5127de5048aa0dde600507ff6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c3f6e379434a10841a96368abf6be1be, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -134,3 +135,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pathSource: {fileID: 0}
+  isFile: 0
+  isModelPath: 0
+--- !u!114 &8012703080048510576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5517901616137733685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: 32
+  m_MinHeight: 32
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
