@@ -58,6 +58,19 @@ public class MyGOLive2DEx : MonoBehaviour
         LoadExpPairs(config);
         paramInfoList.ReadFrom(live2DModel);
         emotionEditor.list = paramInfoList;
+
+        var plane = meshRenderer.transform;
+        plane.localPosition = new Vector3(
+            live2DModel.getCanvasWidth(),
+            live2DModel.getCanvasHeight() * -1.0f,
+            0.0f
+        );
+        plane.localRotation = Quaternion.Euler(90.0f, 0.0f, 180.0f);
+        plane.localScale = new Vector3(
+            live2DModel.getCanvasWidth() * 0.2f,
+            1.0f,
+            live2DModel.getCanvasHeight() * 0.2f
+        );
         
         Debug.Log($"width: {live2DModel.getCanvasWidth()}, height:{live2DModel.getCanvasHeight()}");
     }
