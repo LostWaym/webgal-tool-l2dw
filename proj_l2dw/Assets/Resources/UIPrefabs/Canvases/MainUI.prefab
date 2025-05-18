@@ -1517,7 +1517,7 @@ MonoBehaviour:
       m_Calls: []
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
-  m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
+  m_SelectionColor: {r: 0.05490196, g: 0.3254902, b: 0.62352943, a: 1}
   m_Text: 
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
@@ -3708,8 +3708,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 112, y: -453.5}
-  m_SizeDelta: {x: 224, y: 417}
+  m_AnchoredPosition: {x: 112, y: -403}
+  m_SizeDelta: {x: 224, y: 316}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8234445955046877074
 CanvasRenderer:
@@ -6675,8 +6675,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 112, y: -468.5}
-  m_SizeDelta: {x: 224, y: 309}
+  m_AnchoredPosition: {x: 112, y: -456}
+  m_SizeDelta: {x: 224, y: 284}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1843850747088067499
 CanvasRenderer:
@@ -11016,7 +11016,7 @@ MonoBehaviour:
       m_Calls: []
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
-  m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
+  m_SelectionColor: {r: 0.05490196, g: 0.3254902, b: 0.62352943, a: 1}
   m_Text: 
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
@@ -13868,8 +13868,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 224, y: -26.5}
-  m_SizeDelta: {x: 448, y: 53}
+  m_AnchoredPosition: {x: 237.5, y: -26.5}
+  m_SizeDelta: {x: 475, y: 53}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &5838173019494045420
 MonoBehaviour:
@@ -24787,7 +24787,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 320, y: -16}
+  m_AnchoredPosition: {x: 347, y: -16}
   m_SizeDelta: {x: 256, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2427416504010581795
@@ -28821,7 +28821,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 112, y: -660}
+  m_AnchoredPosition: {x: 112, y: -539}
   m_SizeDelta: {x: 224, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &8520726941269517861
@@ -35879,7 +35879,7 @@ MonoBehaviour:
       m_Calls: []
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
-  m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
+  m_SelectionColor: {r: 0.05490196, g: 0.3254902, b: 0.62352943, a: 1}
   m_Text: 
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
@@ -42539,7 +42539,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3783279036796777979, guid: 6664172f93e832345b1a5a6ceed70889, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -518
+      value: -397
       objectReference: {fileID: 0}
     - target: {fileID: 3783279036796777979, guid: 6664172f93e832345b1a5a6ceed70889, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -43437,7 +43437,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3783279036796777979, guid: 6664172f93e832345b1a5a6ceed70889, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -618
+      value: -497
       objectReference: {fileID: 0}
     - target: {fileID: 3783279036796777979, guid: 6664172f93e832345b1a5a6ceed70889, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -43893,7 +43893,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3783279036796777979, guid: 6664172f93e832345b1a5a6ceed70889, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -578
+      value: -457
       objectReference: {fileID: 0}
     - target: {fileID: 3783279036796777979, guid: 6664172f93e832345b1a5a6ceed70889, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
