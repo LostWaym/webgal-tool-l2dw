@@ -44,6 +44,8 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private Transform m_itemTrackHeader;
     private Transform m_tfTrackRoot;
     private Transform m_itemTrack;
+    private TouchArea m_touchTrackArea;
+    private Image m_imgRect;
     private Image m_imgLine;
     private Slider m_sliderH;
     private Slider m_sliderV;
@@ -83,6 +85,8 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_itemTrackHeader = transform.Find("TimelineArea/Bottom/Left/m_tfTrackHeaderRoot/m_itemTrackHeader").GetComponent<Transform>();
         m_tfTrackRoot = transform.Find("TimelineArea/Bottom/Right/m_tfTrackRoot").GetComponent<Transform>();
         m_itemTrack = transform.Find("TimelineArea/Bottom/Right/m_tfTrackRoot/m_itemTrack").GetComponent<Transform>();
+        m_touchTrackArea = transform.Find("TimelineArea/Bottom/Right/m_touchTrackArea").GetComponent<TouchArea>();
+        m_imgRect = transform.Find("TimelineArea/Bottom/Right/m_touchTrackArea/m_imgRect").GetComponent<Image>();
         m_imgLine = transform.Find("TimelineArea/Bottom/Right/m_imgLine").GetComponent<Image>();
         m_sliderH = transform.Find("TimelineArea/Bottom/Right/m_sliderH").GetComponent<Slider>();
         m_sliderV = transform.Find("TimelineArea/Bottom/Right/m_sliderV").GetComponent<Slider>();
@@ -171,9 +175,13 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         Debug.Log("OnButtonRecordClick");
     }
     private const string OPERATION_LINEAR_UNBAKE = "线性反烘焙";
+    private const string OPERATION_DELETE_SELECTED_DOT = "删除选中点";
+    private const string OPERATION_CLONE_SELECTED_DOT = "复制选中点到当前帧";
     private List<string> m_listOperation = new List<string>()
     {
         OPERATION_LINEAR_UNBAKE,
+        OPERATION_DELETE_SELECTED_DOT,
+        OPERATION_CLONE_SELECTED_DOT,
     };
     private void OnButtonOperationClick()
     {
@@ -191,6 +199,12 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             {
                 case OPERATION_LINEAR_UNBAKE:
                     DoLinearUnbake();
+                    break;
+                case OPERATION_DELETE_SELECTED_DOT:
+                    DoDeleteSelectedDot();
+                    break;
+                case OPERATION_CLONE_SELECTED_DOT:
+                    DoCloneSelectedDot();
                     break;
             }
         };
@@ -330,7 +344,91 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     {
         m_pageNavMotionLabel = PageNavMotionLabelBarWidget.CreateWidget(m_rectLabels.gameObject);
 
+        m_imgRect.gameObject.SetActive(false);
+
         m_touchLabels._OnPointerMove += OnTouchLabelsPointerMove;
+        m_touchTrackArea._OnPointerMove += OnTouchTrackAreaPointerMove;
+        m_touchTrackArea._OnPointerUp += OnTouchTrackAreaPointerUp;
+        m_touchTrackArea._OnPointerDown += OnTouchTrackAreaPointerDown;
+    }
+
+    private Vector2 m_selectStartPosition;
+    private void OnTouchTrackAreaPointerDown(Vector2 vector)
+    {
+        m_imgRect.gameObject.SetActive(true);
+        m_selectStartPosition = vector;
+    }
+
+    private void OnTouchTrackAreaPointerMove(Vector2 vector)
+    {
+        m_imgRect.gameObject.SetActive(true);
+        var pos1 = m_selectStartPosition;
+        var pos2 = vector;
+        var width = Mathf.Abs(pos1.x - pos2.x);
+        var height = Mathf.Abs(pos1.y - pos2.y);
+        m_imgRect.rectTransform.sizeDelta = new Vector2(width, height);
+        m_imgRect.rectTransform.position = Vector2.Lerp(pos1, pos2, 0.5f);
+    }
+
+    private void OnTouchTrackAreaPointerUp(Vector2 vector)
+    {
+        m_imgRect.gameObject.SetActive(false);
+        SelectDotArea();
+    }
+
+    public static Dictionary<string, HashSet<int>> s_selectedDotIndexes = new Dictionary<string, HashSet<int>>();
+
+    private void SelectDotArea()
+    {
+        var curTarget = GetValidTarget();
+        if (curTarget == null)
+        {
+            return;
+        }
+
+        s_selectedDotIndexes.Clear();
+
+        HashSet<int> TryGetSet(string key)
+        {
+            if (s_selectedDotIndexes.TryGetValue(key, out var set))
+            {
+                return set;
+            }
+
+            set = new HashSet<int>();
+            s_selectedDotIndexes[key] = set;
+            return set;
+        }
+
+        var selectedRect = m_imgRect.rectTransform;
+        var selectedArea = new Rect((Vector2)selectedRect.position - selectedRect.rect.size / 2, selectedRect.rect.size);
+        for (int i = 0; i < TrackItemCount; i++)
+        {
+            MotionTrackWidget track = m_listMotionTrack[i];
+            for (int j = 0; j < track.DotFrameCount; j++)
+            {
+                var dot = track.m_dots[j];
+                var dotWorldPos = dot.rectTransform.position;
+                var dotScreenPos = RectTransformUtility.WorldToScreenPoint(null, dotWorldPos);
+                if (selectedArea.Contains(dotScreenPos))
+                {
+                    var frameIndex = dot.frameIndex;
+                    var set = TryGetSet(track.track.name);
+                    set.Add(frameIndex);
+                }
+            }
+        }
+
+        RefreshAll();
+    }
+
+    public static bool IsDotSelected(string key, int frameIndex)
+    {
+        if (s_selectedDotIndexes.TryGetValue(key, out var set))
+        {
+            return set.Contains(frameIndex);
+        }
+        return false;
     }
 
     private void OnTouchLabelsPointerMove(Vector2 position)
@@ -395,8 +493,22 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             m_lastTrackDisplayCount = MAX_TRACK_DISPLAY_COUNT;
             RefreshAll();
         }
+
+        if (Input.GetKey(KeyCode.LeftControl))
+        {
+            var wheel = Input.GetAxis("Mouse ScrollWheel");
+            if (wheel != 0)
+            {
+                dot_space += wheel * 10;
+                dot_space = Mathf.Clamp(dot_space, 8, 32);
+                m_lastFrameDisplayCount = MAX_FRAME_DISPLAY_COUNT;
+                m_lastTrackDisplayCount = MAX_TRACK_DISPLAY_COUNT;
+                RefreshAll();
+            }
+        }
     }
 
+    #region 操作
     private void DoLinearUnbake()
     {
         var curTarget = GetValidTarget();
@@ -408,6 +520,92 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_motionData.UnBakeAllFramesByLinear();
         RefreshAll();
     }
+
+    private void DoDeleteSelectedDot()
+    {
+        var curTarget = GetValidTarget();
+        if (curTarget == null)
+        {
+            return;
+        }
+
+        foreach (var entry in s_selectedDotIndexes)
+        {
+            var track = m_motionData.TryGetTrack(entry.Key, false);
+            if (track == null)
+                continue;
+
+            foreach (var frameIndex in entry.Value)
+            {
+                track.keyFrames.Remove(frameIndex);
+            }
+        }
+
+        s_selectedDotIndexes.Clear();
+        m_motionData.BakeAllFrames();
+
+        RefreshAll();
+    }
+
+    private void DoCloneSelectedDot()
+    {
+        var curTarget = GetValidTarget();
+        if (curTarget == null)
+        {
+            return;
+        }
+
+        Dictionary<string, Dictionary<int, float>> trackCacheValues = new Dictionary<string, Dictionary<int, float>>();
+        Dictionary<int, float> TryGetDict(string key)
+        {
+            if (trackCacheValues.TryGetValue(key, out var dict))
+            {
+                return dict;
+            }
+
+            dict = new Dictionary<int, float>();
+            trackCacheValues[key] = dict;
+            return dict;
+        }
+
+        int minFrameIndex = int.MaxValue;
+        foreach (var entry in s_selectedDotIndexes)
+        {
+            foreach (var frameIndex in entry.Value)
+            {
+                minFrameIndex = Mathf.Min(minFrameIndex, frameIndex);
+            }
+        }
+
+        foreach (var entry in s_selectedDotIndexes)
+        {
+            var track = m_motionData.TryGetTrack(entry.Key, false);
+            if (track == null)
+                continue;
+
+            var dict = TryGetDict(track.name);
+            foreach (var frameIndex in entry.Value)
+            {
+                dict[frameIndex - minFrameIndex + curFrameIndex] = track.keyFrames[frameIndex];
+            }
+        }
+
+        foreach (var entry in trackCacheValues)
+        {
+            var track = m_motionData.TryGetTrack(entry.Key, true);
+            foreach (var entry2 in entry.Value)
+            {
+                var frameIndex = entry2.Key;
+                var value = entry2.Value;
+                track.keyFrames[frameIndex] = value;
+            }
+        }
+
+        s_selectedDotIndexes.Clear();
+        m_motionData.BakeAllFrames();
+        RefreshAll();
+    }
+    #endregion
 
     public void PlaySample()
     {
@@ -683,11 +881,18 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         }
     }
 
+    private int TrackItemCount
+    {
+        get
+        {
+            return Mathf.Min(filteredParamKeys.Count - (int)m_sliderV.value, MAX_TRACK_DISPLAY_COUNT);
+        }
+    }
     public void RefreshMotionTrack()
     {
         var trackIndex = (int)m_sliderV.value;
         var frameIndex = (int)m_sliderH.value;
-        var trackCount = Mathf.Min(filteredParamKeys.Count - trackIndex, MAX_TRACK_DISPLAY_COUNT);
+        var trackCount = TrackItemCount;
         SetListItem(m_listMotionTrack, m_itemTrack.gameObject, m_tfTrackRoot, trackCount, OnMotionTrackItemCreate);
         for (int i = 0; i < trackCount; i++)
         {
@@ -820,32 +1025,37 @@ public class MotionTrackWidget : UIItemWidget<MotionTrackWidget>
 
     public Live2dMotionData.Track track;
     public int startIndex;
-    private List<MotionTrackDotWidget> m_dots = new List<MotionTrackDotWidget>();
+    public List<MotionTrackDotWidget> m_dots = new List<MotionTrackDotWidget>();
+    private List<int> m_dotIndexes = new List<int>();
+    public int DotFrameCount => m_dotIndexes.Count;
     public void SetData(Live2dMotionData.Track track, int startIndex)
     {
         this.track = track;
         this.startIndex = startIndex;
 
-        List<int> dotIndexes = new List<int>();
+        m_dotIndexes.Clear();
         for (int i = 0; i < PageNavMotion.dot_count; i++)
         {
             int frame = startIndex + i;
             bool hasKeyFrame = track != null && track.HasKeyFrame(frame);
             if (hasKeyFrame)
             {
-                dotIndexes.Add(frame);
+                m_dotIndexes.Add(frame);
             }
         }
         
-        int shownDotCount = dotIndexes.Count;
+        int shownDotCount = m_dotIndexes.Count;
         SetListItem(m_dots, m_itemDot.gameObject, gameObject.transform, shownDotCount, OnDotItemCreate);
         for (int i = 0; i < shownDotCount; i++)
         {
             var dot = m_dots[i];
-            var relativeIndex = dotIndexes[i] - startIndex;
+            var relativeIndex = m_dotIndexes[i] - startIndex;
             var pos = dot.rectTransform.anchoredPosition;
             pos.x = relativeIndex * PageNavMotion.dot_space + PageNavMotion.dot_padding;
             dot.rectTransform.anchoredPosition = pos;
+            var key = track.name;
+            var isSelected = PageNavMotion.IsDotSelected(key, m_dotIndexes[i]);
+            dot.SetData(m_dotIndexes[i], isSelected);
         }
     }
 
@@ -857,11 +1067,19 @@ public class MotionTrackWidget : UIItemWidget<MotionTrackWidget>
 public class MotionTrackDotWidget : UIItemWidget<MotionTrackDotWidget>
 {
     public RectTransform rectTransform;
-
+    public Image imgDot;
+    public int frameIndex;
     protected override void OnInit()
     {
         base.OnInit();
         rectTransform = gameObject.GetComponent<RectTransform>();
+        imgDot = gameObject.GetComponent<Image>();
+    }
+
+    public void SetData(int frameIndex, bool isSelected)
+    {
+        this.frameIndex = frameIndex;
+        imgDot.color = isSelected ? Color.green : Color.white;
     }
 }
 public class PageNavMotionLabelBarWidget : UIItemWidget<PageNavMotionLabelBarWidget>
