@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -97,8 +98,6 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
         private Toggle m_toggleMove;
         private Toggle m_toggleRotate;
         private Toggle m_toggleScale;
-        private Toggle m_toggleMoveCamera;
-        private Toggle m_toggleScaleCamera;
         private Text m_lblToolTitle;
         private Dropdown m_dropdownInstCopy;
         #endregion
@@ -109,35 +108,17 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
             m_toggleMove = transform.Find("ToolContainer/Flow/m_toggleMove").GetComponent<Toggle>();
             m_toggleRotate = transform.Find("ToolContainer/Flow/m_toggleRotate").GetComponent<Toggle>();
             m_toggleScale = transform.Find("ToolContainer/Flow/m_toggleScale").GetComponent<Toggle>();
-            m_toggleMoveCamera = transform.Find("ToolContainer/Flow/m_toggleMoveCamera").GetComponent<Toggle>();
-            m_toggleScaleCamera = transform.Find("ToolContainer/Flow/m_toggleScaleCamera").GetComponent<Toggle>();
             m_lblToolTitle = transform.Find("ToolContainer/m_lblToolTitle").GetComponent<Text>();
             m_dropdownInstCopy = transform.Find("NextAction/m_dropdownInstCopy").GetComponent<Dropdown>();
 
             m_toggleMove.onValueChanged.AddListener(OnToggleMoveChange);
             m_toggleRotate.onValueChanged.AddListener(OnToggleRotateChange);
             m_toggleScale.onValueChanged.AddListener(OnToggleScaleChange);
-            m_toggleMoveCamera.onValueChanged.AddListener(OnToggleMoveCameraChange);
-            m_toggleScaleCamera.onValueChanged.AddListener(OnToggleScaleCameraChange);
             m_dropdownInstCopy.onValueChanged.AddListener(OnDropdownInstCopyChange);
         }
         #endregion
 
         #region auto generated events
-        private void OnToggleMoveCameraChange(bool value)
-        {
-            if (value)
-            {
-                SetCurrentToggle(m_toggleMoveCamera);
-            }
-        }
-        private void OnToggleScaleCameraChange(bool value)
-        {
-            if (value)
-            {
-                SetCurrentToggle(m_toggleScaleCamera);
-            }
-        }
         private void OnToggleMoveChange(bool value)
         {
             if (value)
@@ -181,11 +162,9 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
         protected override void OnInit()
         {
             base.OnInit();
-            m_keyToToggle[KeyCode.Q] = m_toggleMove;
-            m_keyToToggle[KeyCode.W] = m_toggleRotate;
-            m_keyToToggle[KeyCode.E] = m_toggleScale;
-            m_keyToToggle[KeyCode.R] = m_toggleMoveCamera;
-            m_keyToToggle[KeyCode.T] = m_toggleScaleCamera;
+            m_keyToToggle[KeyCode.W] = m_toggleMove;
+            m_keyToToggle[KeyCode.E] = m_toggleRotate;
+            m_keyToToggle[KeyCode.R] = m_toggleScale;
             SetCurrentToggle(m_toggleMove);
 
             m_dropdownInstCopy.SetValueWithoutNotify((int)Global.InstNextMode);
@@ -409,14 +388,12 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
 
         private void ProcessToolInput()
         {
+            // 永远执行镜头移动
+            ProcessCameraInput();
+            
             if (m_currentToggle == null)
             {
                 return;
-            }
-
-            if (m_currentToggle == m_toggleMoveCamera || m_currentToggle == m_toggleScaleCamera)
-            {
-                ProcessCameraInput();
             }
             else if (MainControl.Instance.editType == EditType.Group && MainControl.Instance.curGroup != null)
             {
@@ -436,40 +413,32 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
 
         private void ProcessCameraInput()
         {
-            if (m_currentToggle == m_toggleMoveCamera)
+            if (isMouseOnUI)
+                return;
+            
+            if (IsMouseButton(2))
             {
-                if (IsMouseButtonDown(0))
-                {
-                    moveProcessable = !isMouseOnUI;
-                }
-
-                if (IsMouseButton(0) && moveProcessable)
-                {
-                    var delta = Input.mousePosition - prevMousePos;
-                    var camera = MainControl.Instance.mainCamera;
-                    var worldDelta = -(camera.ScreenToWorldPoint(delta) - camera.ScreenToWorldPoint(Vector3.zero));
-                    camera.transform.position += new Vector3(worldDelta.x, worldDelta.y, 0);
-                    UIEventBus.SendEvent(UIEventType.CameraTransformChanged);
-                }
-                else
-                {
-                    moveProcessable = false;
-                }
+                var delta = Input.mousePosition - prevMousePos;
+                var camera = MainControl.Instance.mainCamera;
+                var worldDelta = -(camera.ScreenToWorldPoint(delta) - camera.ScreenToWorldPoint(Vector3.zero));
+                camera.transform.position += new Vector3(worldDelta.x, worldDelta.y, 0);
+                UIEventBus.SendEvent(UIEventType.CameraTransformChanged);
             }
-            else if (m_currentToggle == m_toggleScaleCamera && !isMouseOnUI)
+            if (HasWheel())
             {
+                var delta = 0f;
                 if (HasWheel())
                 {
-                    var delta = 0f;
-                    if (HasWheel())
-                    {
-                        delta = -Input.GetAxis("Mouse ScrollWheel") * 0.05f;
-                    }
-                    var camera = MainControl.Instance.mainCamera;
-                    bool isBoost = Input.GetKey(KeyCode.LeftControl);
-                    camera.orthographicSize *= 1 + delta * (isBoost ? 5 : 1);
-                    UIEventBus.SendEvent(UIEventType.CameraTransformChanged);
+                    delta = -Input.GetAxis("Mouse ScrollWheel");
                 }
+                var camera = MainControl.Instance.mainCamera;
+                bool isBoost = Input.GetKey(KeyCode.LeftControl);
+                var zoomFactor = (isBoost ? Global.CameraZoomBoostFactor : Global.CameraZoomFactor);
+                if (math.sign(delta) > 0)
+                    camera.orthographicSize *= zoomFactor;
+                else
+                    camera.orthographicSize /= zoomFactor;
+                UIEventBus.SendEvent(UIEventType.CameraTransformChanged);
             }
         }
 
@@ -478,12 +447,12 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
             var group = MainControl.Instance.curGroup;
             if (m_currentToggle == m_toggleMove)
             {
-                if (IsMouseButtonDown(2) || IsMouseButtonDown(1) || IsMouseButtonDown(0))
+                if (IsKeyboardDown(KeyCode.P) || IsMouseButtonDown(1) || IsMouseButtonDown(0))
                 {
                     moveProcessable = !isMouseOnUI;
                 }
 
-                if ((IsMouseButton(2) || IsMouseButton(1) || IsMouseButton(0)) && moveProcessable)
+                if ((IsKeyboard(KeyCode.P) || IsMouseButton(1) || IsMouseButton(0)) && moveProcessable)
                 {
                     var worldPos = MainControl.Instance.mainCamera.ScreenToWorldPoint(Input.mousePosition);
                     if (IsMouseButton(0))
@@ -499,11 +468,11 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
                         worldPos.y = group.root.position.y;
                     }
                     worldPos.z = group.root.position.z;
-                    if (IsMouseButton(2) || IsMouseButton(0))
+                    if (IsMouseButton(1) || IsMouseButton(0))
                     {
                         group.SetPosition(worldPos);
                     }
-                    else if (IsMouseButton(1))
+                    else if (IsKeyboard(KeyCode.P))
                     {
                         group.SetPivotPositon(worldPos);
                     }
@@ -515,30 +484,56 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
             }
             else if (m_currentToggle == m_toggleRotate && !isMouseOnUI)
             {
-                if (HasWheel())
+                if (IsMouseButtonDown(0))
                 {
-                    var value = 0f;
-                    bool isBoost = Input.GetKey(KeyCode.LeftControl);
-                    if (HasWheel())
-                    {
-                        value = Input.GetAxis("Mouse ScrollWheel") * 5f;
-                    }
+                    moveProcessable = !isMouseOnUI;
+                }
 
-                    group.SetRotation(value * (isBoost ? 5 : 1));
+                if ((IsMouseButton(0)) && moveProcessable)
+                {
+                    var worldPos = MainControl.Instance.mainCamera.ScreenToWorldPoint(Input.mousePosition);
+                    var oldVector = new Vector3(
+                        worldPos.x - worldDelta.x - group.root.position.x,
+                        worldPos.y - worldDelta.y - group.root.position.y,
+                        0
+                    );
+                    var newVector = new Vector3(
+                        worldPos.x - group.root.position.x,
+                        worldPos.y - group.root.position.y,
+                        0
+                    );
+                    group.SetRotation(Vector3.SignedAngle(oldVector, newVector, Vector3.forward));
+                }
+                else
+                {
+                    moveProcessable = false;
                 }
             }
             else if (m_currentToggle == m_toggleScale && !isMouseOnUI)
             {
-                if (HasWheel())
+                if (IsMouseButtonDown(0))
                 {
-                    var value = 0f;
-                    bool isBoost = Input.GetKey(KeyCode.LeftControl);
-                    if (HasWheel())
-                    {
-                        value = Input.GetAxis("Mouse ScrollWheel") * 0.05f;
-                    }
+                    moveProcessable = !isMouseOnUI;
+                }
 
-                    group.SetScale(value * (isBoost ? 5 : 1));
+                if ((IsMouseButton(0)) && moveProcessable)
+                {
+                    var worldPos = MainControl.Instance.mainCamera.ScreenToWorldPoint(Input.mousePosition);
+                    var oldDistance = new Vector3(
+                        worldPos.x - worldDelta.x - group.root.position.x,
+                        worldPos.y - worldDelta.y - group.root.position.y,
+                        0
+                    ).magnitude;
+                    var newDistance = new Vector3(
+                        worldPos.x - group.root.position.x,
+                        worldPos.y - group.root.position.y,
+                        0
+                    ).magnitude;
+                    group.SetScale(newDistance / oldDistance);
+                }
+                else
+                {
+                    moveProcessable = false;
                 }
             }
         }
@@ -548,12 +543,12 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
             var target = MainControl.Instance.curTarget;
             if (m_currentToggle == m_toggleMove)
             {
-                if (IsMouseButtonDown(2) || IsMouseButtonDown(0))
+                if (IsMouseButtonDown(1) || IsMouseButtonDown(0))
                 {
                     moveProcessable = !isMouseOnUI;
                 }
 
-                if ((IsMouseButton(2) || IsMouseButton(0)) && moveProcessable)
+                if ((IsMouseButton(1) || IsMouseButton(0)) && moveProcessable)
                 {
                     var worldPos = MainControl.Instance.mainCamera.ScreenToWorldPoint(Input.mousePosition);
                     if (IsMouseButton(0))
@@ -578,36 +573,62 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
             }
             else if (m_currentToggle == m_toggleRotate && !isMouseOnUI)
             {
-                if (HasWheel())
+                if (IsMouseButtonDown(0))
                 {
-                    var value = 0f;
-                    bool isBoost = Input.GetKey(KeyCode.LeftControl);
-                    if (HasWheel())
-                    {
-                        value = Input.GetAxis("Mouse ScrollWheel") * 5f;
-                    }
+                    moveProcessable = !isMouseOnUI;
+                }
 
+                if ((IsMouseButton(0)) && moveProcessable)
+                {
                     var oldPos = target.MainPos.position;
-                    target.SetRotation(target.RootRotation + value * (isBoost ? 5 : 1));
+                    var worldPos = MainControl.Instance.mainCamera.ScreenToWorldPoint(Input.mousePosition);
+                    var oldVector = new Vector3(
+                        worldPos.x - worldDelta.x - target.MainPos.position.x,
+                        worldPos.y - worldDelta.y - target.MainPos.position.y,
+                        0
+                    );
+                    var newVector = new Vector3(
+                        worldPos.x - target.MainPos.position.x,
+                        worldPos.y - target.MainPos.position.y,
+                        0
+                    );
+                    target.SetRotation(target.RootRotation + Vector3.SignedAngle(oldVector, newVector, Vector3.forward));
                     target.SetCharacterWorldPosition(oldPos.x, oldPos.y);
                     UIEventBus.SendEvent(UIEventType.ModelTransformChanged);
+                }
+                else
+                {
+                    moveProcessable = false;
                 }
             }
             else if (m_currentToggle == m_toggleScale && !isMouseOnUI)
             {
-                if (HasWheel())
+                if (IsMouseButtonDown(0))
                 {
-                    var value = 0f;
-                    bool isBoost = Input.GetKey(KeyCode.LeftControl);
-                    if (HasWheel())
-                    {
-                        value = Input.GetAxis("Mouse ScrollWheel") * 0.05f;
-                    }
+                    moveProcessable = !isMouseOnUI;
+                }
 
+                if ((IsMouseButton(0)) && moveProcessable)
+                {
                     var oldPos = target.MainPos.position;
-                    target.SetScale(target.RootScaleValue + value * (isBoost ? 5 : 1));
+                    var worldPos = MainControl.Instance.mainCamera.ScreenToWorldPoint(Input.mousePosition);
+                    var oldDistance = new Vector3(
+                        worldPos.x - worldDelta.x - target.MainPos.position.x,
+                        worldPos.y - worldDelta.y - target.MainPos.position.y,
+                        0
+                    ).magnitude;
+                    var newDistance = new Vector3(
+                        worldPos.x - target.MainPos.position.x,
+                        worldPos.y - target.MainPos.position.y,
+                        0
+                    ).magnitude;
+                    target.SetScale(target.RootScaleValue * (newDistance / oldDistance));
                     target.SetCharacterWorldPosition(oldPos.x, oldPos.y);
                     UIEventBus.SendEvent(UIEventType.ModelTransformChanged);
+                }
+                else
+                {
+                    moveProcessable = false;
                 }
             }
         }
@@ -617,12 +638,12 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
             var bgContainer = MainControl.Instance.bgContainer;
             if (m_currentToggle == m_toggleMove)
             {
-                if (IsMouseButtonDown(2) || IsMouseButtonDown(0))
+                if (IsMouseButtonDown(1) || IsMouseButtonDown(0))
                 {
                     moveProcessable = !isMouseOnUI;
                 }
 
-                if ((IsMouseButton(2) || IsMouseButton(0)) && moveProcessable)
+                if ((IsMouseButton(1) || IsMouseButton(0)) && moveProcessable)
                 {
                     var mainCamera = MainControl.Instance.mainCamera;
                     var worldPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
@@ -647,34 +668,72 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
             }
             else if (m_currentToggle == m_toggleRotate && !isMouseOnUI)
             {
-                if (HasWheel())
+                if (IsMouseButtonDown(0))
                 {
-                    var value = 0f;
-                    bool isBoost = Input.GetKey(KeyCode.LeftControl);
-                    if (HasWheel())
-                    {
-                        value = Input.GetAxis("Mouse ScrollWheel") * 5f;
-                    }
-                    bgContainer.SetRotation(bgContainer.rootRotation + value * (isBoost ? 5 : 1));
+                    moveProcessable = !isMouseOnUI;
+                }
+
+                if ((IsMouseButton(0)) && moveProcessable)
+                {
+                    var worldPos = MainControl.Instance.mainCamera.ScreenToWorldPoint(Input.mousePosition);
+                    var oldVector = new Vector3(
+                        worldPos.x - worldDelta.x - bgContainer.root.position.x,
+                        worldPos.y - worldDelta.y - bgContainer.root.position.y,
+                        0
+                    );
+                    var newVector = new Vector3(
+                        worldPos.x - bgContainer.root.position.x,
+                        worldPos.y - bgContainer.root.position.y,
+                        0
+                    );
+                    bgContainer.SetRotation(bgContainer.rootRotation + Vector3.SignedAngle(oldVector, newVector, Vector3.forward));
+                }
+                else
+                {
+                    moveProcessable = false;
                 }
             }
             else if (m_currentToggle == m_toggleScale && !isMouseOnUI)
             {
-                if (HasWheel())
+                if (IsMouseButtonDown(0))
                 {
-                    var value = 0f;
-                    bool isBoost = Input.GetKey(KeyCode.LeftControl);
-                    if (HasWheel())
-                    {
-                        value = Input.GetAxis("Mouse ScrollWheel") * 0.05f;
-                    }
-                    bgContainer.SetScale(bgContainer.rootScale + value * (isBoost ? 5 : 1));
+                    moveProcessable = !isMouseOnUI;
+                }
+
+                if ((IsMouseButton(0)) && moveProcessable)
+                {
+                    var worldPos = MainControl.Instance.mainCamera.ScreenToWorldPoint(Input.mousePosition);
+                    var oldDistance = new Vector3(
+                        worldPos.x - worldDelta.x - bgContainer.root.position.x,
+                        worldPos.y - worldDelta.y - bgContainer.root.position.y,
+                        0
+                    ).magnitude;
+                    var newDistance = new Vector3(
+                        worldPos.x - bgContainer.root.position.x,
+                        worldPos.y - bgContainer.root.position.y,
+                        0
+                    ).magnitude;
+                    bgContainer.SetScale(bgContainer.rootScale * (newDistance / oldDistance));
+                }
+                else
+                {
+                    moveProcessable = false;
                 }
             }
         }
 
         #endregion
 
+        private bool IsKeyboard(KeyCode keyCode)
+        {
+            return !isMouseOnUI && Input.GetKey(keyCode);
+        }
+        
+        private bool IsKeyboardDown(KeyCode keyCode)
+        {
+            return Input.GetKeyDown(keyCode)  || inFreezeProcess && IsKeyboard(keyCode);
+        }
+        
         private bool IsMouseButton(int button)
         {
             return Input.GetMouseButton(button);

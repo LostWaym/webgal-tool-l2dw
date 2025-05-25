@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -333,12 +334,114 @@ public class SettingPageExperiment : SettingPageBase<SettingPageExperiment>
     }
 }
 
-public class SettingPageNavigation : SettingPageBase<SettingPageNavigation>
+public class SettingPageNavigationWidget : UIItemWidget<SettingPageNavigationWidget>
 {
-    protected override string Title => "导航";
+    #region auto generated members
+    private InputField m_iptField;
+    #endregion
+
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_iptField = transform.Find("Value/m_iptField").GetComponent<InputField>();
+
+        m_iptField.onValueChanged.AddListener(OnInputFieldFieldChange);
+        m_iptField.onEndEdit.AddListener(OnInputFieldEndEdit);
+    }
+    #endregion
+
+    #region auto generated events
+    private void OnInputFieldFieldChange(string value)
+    {
+        _OnValueChanged?.Invoke(value);
+    }
+    private void OnInputFieldEndEdit(string value)
+    {
+        _OnEndEdit?.Invoke(value);
+    }
+    #endregion
+
+    public event Action<string> _OnValueChanged;
+    public event Action<string> _OnEndEdit;
+
+
     protected override void OnInit()
     {
         base.OnInit();
+    }
+
+    public void SetValue(string value)
+    {
+        m_iptField.SetTextWithoutNotify(value);
+    }
+}
+
+public class SettingPageNavigation : SettingPageBase<SettingPageNavigation>
+{
+    #region auto generated members
+    private Transform m_itemCameraZoomFactor;
+    private Transform m_itemCameraZoomBoostFactor;
+    #endregion
+    
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_itemCameraZoomFactor = transform.Find("ScrollView/Viewport/Content/m_itemCameraZoomFactor").GetComponent<Transform>();
+        m_itemCameraZoomBoostFactor = transform.Find("ScrollView/Viewport/Content/m_itemCameraZoomBoostFactor").GetComponent<Transform>();
+    }
+    #endregion
+    
+    protected override string Title => "导航";
+
+    private SettingPageNavigationWidget m_itemCameraZoomFactorWidget;
+    private SettingPageNavigationWidget m_itemCameraZoomBoostFactorWidget;
+    protected override void OnInit()
+    {
+        base.OnInit();
+        m_itemCameraZoomFactorWidget = SettingPageNavigationWidget.CreateWidget(m_itemCameraZoomFactor.gameObject);
+        m_itemCameraZoomBoostFactorWidget = SettingPageNavigationWidget.CreateWidget(m_itemCameraZoomBoostFactor.gameObject);
+
+        m_itemCameraZoomFactorWidget._OnEndEdit += OnCameraZoomFactorEndEdit;
+        m_itemCameraZoomBoostFactorWidget._OnEndEdit += OnCameraZoomFactorBoostEndEdit;
+    }
+
+    private void OnCameraZoomFactorEndEdit(string value)
+    {
+        try
+        {
+            var num = float.Parse(value);
+            Global.CameraZoomFactor = math.max(num, 1.0f);
+        }
+        catch
+        {
+            Global.CameraZoomFactor = 1.0f;
+        }
+        m_itemCameraZoomFactorWidget.SetValue(Global.CameraZoomFactor.ToString());
+    }
+    
+    private void OnCameraZoomFactorBoostEndEdit(string value)
+    {
+        try
+        {
+            var num = float.Parse(value);
+            Global.CameraZoomBoostFactor = num;
+        }
+        catch
+        {
+            Global.CameraZoomBoostFactor = 1.0f;
+        }
+        m_itemCameraZoomBoostFactorWidget.SetValue(Global.CameraZoomBoostFactor.ToString());
+    }
+
+    public override void OnPageShown()
+    {
+        base.OnPageShown();
+
+        if (Global.IsLoaded)
+        {
+            m_itemCameraZoomFactorWidget.SetValue(Global.CameraZoomFactor.ToString());
+            m_itemCameraZoomBoostFactorWidget.SetValue(Global.CameraZoomBoostFactor.ToString());
+        }
     }
 }
 

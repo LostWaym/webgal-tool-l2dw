@@ -30,7 +30,6 @@ public class BaseWindow<T> : BaseWindow where T : BaseWindow<T>
         canvas = GetComponent<Canvas>();
         canvasScaler = GetComponent<CanvasScaler>();
         canvasScaler.scaleFactor = math.max(1.0f, Screen.dpi / 100.0f);
-        Debug.Log(Screen.dpi);
         base.Awake();
     }
 

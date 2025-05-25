@@ -1,5 +1,6 @@
 
 
+using Unity.Mathematics;
 using UnityEngine;
 
 public static class Global
@@ -9,10 +10,23 @@ public static class Global
     public static string BGChangeTemplate = "";
     public static string BGTransformTemplate = "";
     public static InstDealOperation InstNextMode = 0;
+    private static float _CameraZoomFactor = 1.1f;
+    public static float CameraZoomFactor
+    {
+        get { return _CameraZoomFactor; }
+        set { _CameraZoomFactor = math.max(value, 1.0f); }
+    }
+    private static float _CameraZoomBoostFactor = 1.5f;
+    public static float CameraZoomBoostFactor
+    {
+        get { return _CameraZoomBoostFactor; }
+        set { _CameraZoomBoostFactor = math.max(value, 1.0f); }
+    }
 
     public static bool __PIVOT_2_4 = false;
 
     public static bool IsLoaded = false;
+    
 
     public static void Save()
     {
@@ -25,6 +39,8 @@ public static class Global
         PlayerPrefs.SetString("Global.BGTransformTemplate", BGTransformTemplate);
         PlayerPrefs.SetInt("Global.__PIVOT_2_4", __PIVOT_2_4 ? 1 : 0);
         PlayerPrefs.SetInt("Global.InstNextMode", (int)InstNextMode);
+        PlayerPrefs.SetFloat("Global.CameraZoomFactor", CameraZoomFactor);
+        PlayerPrefs.SetFloat("Global.CameraZoomBoostFactor", CameraZoomBoostFactor);
     }
 
     public static void Load()
@@ -36,6 +52,8 @@ public static class Global
         BGTransformTemplate = PlayerPrefs.GetString("Global.BGTransformTemplate", "");
         __PIVOT_2_4 = PlayerPrefs.GetInt("Global.__PIVOT_2_4", 0) == 1;
         InstNextMode = (InstDealOperation)PlayerPrefs.GetInt("Global.InstNextMode", 0);
+        CameraZoomFactor = PlayerPrefs.GetFloat("Global.CameraZoomFactor", 1.1f);
+        CameraZoomBoostFactor = PlayerPrefs.GetFloat("Global.CameraZoomBoostFactor", 1.5f);
 
         if (string.IsNullOrEmpty(BGChangeTemplate))
         {

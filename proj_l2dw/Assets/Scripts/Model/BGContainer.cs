@@ -48,7 +48,7 @@ public class BGContainer : MonoBehaviour
 
     public void SetWorldPosition(float x, float y)
     {
-        root.position = new Vector3(x, y, 0);
+        root.position = new Vector3(x, y, root.position.z);
         UIEventBus.SendEvent(UIEventType.BGTransformChanged);
     }
 

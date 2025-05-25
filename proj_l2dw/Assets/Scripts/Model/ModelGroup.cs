@@ -101,7 +101,6 @@ public class ModelGroup : MonoBehaviour
     {
         RemoveInvalidModel();
         MoveModelRootToRoot();
-        scale = scale + 1;
         root.transform.localScale = new Vector3(scale, scale, scale);
 
         MoveModelRootToModel();
