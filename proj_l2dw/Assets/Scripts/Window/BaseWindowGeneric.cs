@@ -2,7 +2,9 @@
 
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BaseWindow<T> : BaseWindow where T : BaseWindow<T>
 {
@@ -19,12 +21,16 @@ public class BaseWindow<T> : BaseWindow where T : BaseWindow<T>
     }
     protected static T instance;
     protected Canvas canvas;
+    protected CanvasScaler canvasScaler;
     public bool IsShown => gameObject.activeSelf && canvas.enabled;
 
     protected sealed override void Awake()
     {
         instance = this as T;
         canvas = GetComponent<Canvas>();
+        canvasScaler = GetComponent<CanvasScaler>();
+        canvasScaler.scaleFactor = math.max(1.0f, Screen.dpi / 100.0f);
+        Debug.Log(Screen.dpi);
         base.Awake();
     }
 
