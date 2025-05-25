@@ -500,7 +500,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             if (wheel != 0)
             {
                 dot_space += wheel * 10;
-                dot_space = Mathf.Clamp(dot_space, 8, 32);
+                dot_space = Mathf.Clamp(dot_space, 4, 32);
                 m_lastFrameDisplayCount = MAX_FRAME_DISPLAY_COUNT;
                 m_lastTrackDisplayCount = MAX_TRACK_DISPLAY_COUNT;
                 RefreshAll();
