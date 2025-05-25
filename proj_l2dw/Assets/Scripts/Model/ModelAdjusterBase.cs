@@ -215,4 +215,25 @@ public class ModelAdjusterBase : MonoBehaviour
     }
 
     #endregion
+
+    #region Filter
+
+    public Dictionary<string, float> filterValues = new Dictionary<string, float>();
+    public void SetFilterValue(string name, float value)
+    {
+        filterValues[name] = value;
+        OnFilterChanged(name, value);
+    }
+
+    public float GetFilterValue(string name)
+    {
+        return filterValues.ContainsKey(name) ? filterValues[name] : 0;
+    }
+
+    protected virtual void OnFilterChanged(string name, float value)
+    {
+
+    }
+
+    #endregion
 }
