@@ -13,9 +13,11 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
     #region auto generated members
     private Toggle m_togglePreview;
     private Toggle m_toggleMotion;
+    private Toggle m_toggleInstructions;
     private Button m_btnSetting;
     private Transform m_itemPageNavPreview;
     private Transform m_itemPageNavMotion;
+    private Transform m_itemPageNavInstructions;
     #endregion
 
     #region auto generated binders
@@ -23,15 +25,19 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
     {
         m_togglePreview = transform.Find("GameObject/toggles/m_togglePreview").GetComponent<Toggle>();
         m_toggleMotion = transform.Find("GameObject/toggles/m_toggleMotion").GetComponent<Toggle>();
+        m_toggleInstructions = transform.Find("GameObject/toggles/m_toggleInstructions").GetComponent<Toggle>();
         m_btnSetting = transform.Find("GameObject/m_btnSetting").GetComponent<Button>();
         m_itemPageNavPreview = transform.Find("pages/m_itemPageNavPreview").GetComponent<Transform>();
         m_itemPageNavMotion = transform.Find("pages/m_itemPageNavMotion").GetComponent<Transform>();
+        m_itemPageNavInstructions = transform.Find("pages/m_itemPageNavInstructions").GetComponent<Transform>();
 
         m_togglePreview.onValueChanged.AddListener(OnTogglePreviewChange);
         m_toggleMotion.onValueChanged.AddListener(OnToggleMotionChange);
+        m_toggleInstructions.onValueChanged.AddListener(OnToggleInstructionsChange);
         m_btnSetting.onClick.AddListener(OnButtonSettingClick);
     }
     #endregion
+
 
 
 
@@ -42,6 +48,9 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
     private void OnToggleMotionChange(bool value)
     {
     }
+    private void OnToggleInstructionsChange(bool value)
+    {
+    }
     private void OnButtonSettingClick()
     {
         MainControl.Instance.ShowSettingUIWindow();
@@ -50,6 +59,7 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
 
     private PageNavPreview m_pageNavPreview;
     private PageNavMotion m_pageNavMotion;
+    private PageNavInstructions m_pageNavInstructions;
     protected override void OnInit()
     {
         base.OnInit();
@@ -57,6 +67,8 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
         m_pageNavPreview.BindToToggle(m_togglePreview);
         m_pageNavMotion = PageNavMotion.CreateWidget(m_itemPageNavMotion.gameObject);
         m_pageNavMotion.BindToToggle(m_toggleMotion);
+        m_pageNavInstructions = PageNavInstructions.CreateWidget(m_itemPageNavInstructions.gameObject);
+        m_pageNavInstructions.BindToToggle(m_toggleInstructions);
     }
 
     public void Update()
@@ -70,6 +82,10 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
             // m_pageNavMotion.Update();
         }
     }
+}
+
+internal class PageNavInstructions : UIPageWidget<PageNavInstructions>
+{
 }
 
 public class PageNavPreview : UIPageWidget<PageNavPreview>
