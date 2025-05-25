@@ -8,6 +8,10 @@ using UnityEngine.UI;
 
 public class PageNavMotion : UIPageWidget<PageNavMotion>
 {
+    public static float dot_space = 16;
+    public static float dot_padding = 8;
+    public static int dot_count = 5;
+
     #region auto generated members
     private Button m_btnMotion;
     private Text m_lblMotion;
@@ -32,7 +36,8 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private Button m_btnNavEnd;
     private InputField m_iptDuration;
     private InputField m_iptFrame;
-    private Transform m_itemLabels;
+    private RectTransform m_rectLabels;
+    private Text m_lblLabelIndex;
     private TouchArea m_touchLabels;
     private InputField m_iptFrameIndex;
     private Transform m_tfTrackHeaderRoot;
@@ -70,7 +75,8 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_btnNavEnd = transform.Find("TimelineArea/ToolBar/Right/Top/Container/GameObject/m_btnNavEnd").GetComponent<Button>();
         m_iptDuration = transform.Find("TimelineArea/ToolBar/Right/Top/Container/m_iptDuration").GetComponent<InputField>();
         m_iptFrame = transform.Find("TimelineArea/ToolBar/Right/Top/Container/m_iptFrame").GetComponent<InputField>();
-        m_itemLabels = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_itemLabels").GetComponent<Transform>();
+        m_rectLabels = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_rectLabels").GetComponent<RectTransform>();
+        m_lblLabelIndex = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_rectLabels/m_lblLabelIndex").GetComponent<Text>();
         m_touchLabels = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_touchLabels").GetComponent<TouchArea>();
         m_iptFrameIndex = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_iptFrameIndex").GetComponent<InputField>();
         m_tfTrackHeaderRoot = transform.Find("TimelineArea/Bottom/Left/m_tfTrackHeaderRoot").GetComponent<Transform>();
@@ -295,19 +301,34 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
 
     private List<MotionTrackWidget> m_listMotionTrack = new List<MotionTrackWidget>();
     private List<MotionTrackHeaderWidget> m_listMotionTrackHeader = new List<MotionTrackHeaderWidget>();
-    private PageNavMotionLabelWidget m_pageNavMotionLabel;
+    private PageNavMotionLabelBarWidget m_pageNavMotionLabel;
     private List<Live2DParamInfo> paramKeys = new List<Live2DParamInfo>();
 
     private Live2dMotionData m_motionData;
 
-    public const int MAX_TRACK_DISPLAY_COUNT = 13;
-    public const int MAX_FRAME_DISPLAY_COUNT = 31;
+    public int MAX_TRACK_DISPLAY_COUNT
+    {
+        get
+        {
+            var rect = m_tfTrackHeaderRoot.GetComponent<RectTransform>();
+            var size = rect.rect.height;
+            var height = m_itemTrackHeader.GetComponent<RectTransform>().sizeDelta.y;
+            int count = Mathf.FloorToInt((size / height) + 0.5f);
+            return count;
+        }
+    }
+    public int MAX_FRAME_DISPLAY_COUNT {
+        get
+        {
+            return (int)(m_rectLabels.rect.width / PageNavMotion.dot_space);
+        }
+    }
 
     public int curFrameIndex = 0;
 
     protected override void OnInit()
     {
-        m_pageNavMotionLabel = PageNavMotionLabelWidget.CreateWidget(m_itemLabels.gameObject);
+        m_pageNavMotionLabel = PageNavMotionLabelBarWidget.CreateWidget(m_rectLabels.gameObject);
 
         m_touchLabels._OnPointerMove += OnTouchLabelsPointerMove;
     }
@@ -458,6 +479,8 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         {
             return;
         }
+        dot_count = (int)(m_rectLabels.rect.width / PageNavMotion.dot_space);
+
         RefreshMotionTrackHeader();
         RefreshMotionTrack();
         RefreshSlider();
@@ -752,17 +775,21 @@ public class MotionTrackHeaderWidget : UIItemWidget<MotionTrackHeaderWidget>
 public class MotionTrackWidget : UIItemWidget<MotionTrackWidget>
 {
     #region auto generated members
+    private Transform m_itemDot;
     #endregion
 
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
+        m_itemDot = transform.Find("m_itemDot").GetComponent<Transform>();
 
     }
     #endregion
 
     #region auto generated events
     #endregion
+
+
 
     private List<Button> m_buttons = new List<Button>();
     public Action<Live2dMotionData.Track, int> _OnDotClicked;
@@ -784,64 +811,116 @@ public class MotionTrackWidget : UIItemWidget<MotionTrackWidget>
 
     public Live2dMotionData.Track track;
     public int startIndex;
+    private List<MotionTrackDotWidget> m_dots = new List<MotionTrackDotWidget>();
     public void SetData(Live2dMotionData.Track track, int startIndex)
     {
         this.track = track;
         this.startIndex = startIndex;
 
-        for (int i = 0; i < m_buttons.Count; i++)
+        List<int> dotIndexes = new List<int>();
+        for (int i = 0; i < PageNavMotion.dot_count; i++)
         {
             int frame = startIndex + i;
-            Button button = m_buttons[i];
             bool hasKeyFrame = track != null && track.HasKeyFrame(frame);
-            button.gameObject.SetActive(hasKeyFrame);
+            if (hasKeyFrame)
+            {
+                dotIndexes.Add(frame);
+            }
         }
+        
+        int shownDotCount = dotIndexes.Count;
+        SetListItem(m_dots, m_itemDot.gameObject, gameObject.transform, shownDotCount, OnDotItemCreate);
+        for (int i = 0; i < shownDotCount; i++)
+        {
+            var dot = m_dots[i];
+            var relativeIndex = dotIndexes[i] - startIndex;
+            var pos = dot.rectTransform.anchoredPosition;
+            pos.x = relativeIndex * PageNavMotion.dot_space + PageNavMotion.dot_padding;
+            dot.rectTransform.anchoredPosition = pos;
+        }
+    }
+
+    private void OnDotItemCreate(MotionTrackDotWidget dot)
+    {
     }
 }
 
-public class PageNavMotionLabelWidget : UIItemWidget<PageNavMotionLabelWidget>
+public class MotionTrackDotWidget : UIItemWidget<MotionTrackDotWidget>
+{
+    public RectTransform rectTransform;
+
+    protected override void OnInit()
+    {
+        base.OnInit();
+        rectTransform = gameObject.GetComponent<RectTransform>();
+    }
+}
+public class PageNavMotionLabelBarWidget : UIItemWidget<PageNavMotionLabelBarWidget>
 {
     #region auto generated members
+    private Text m_lblLabelIndex;
     #endregion
 
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
+        m_lblLabelIndex = transform.Find("m_lblLabelIndex").GetComponent<Text>();
 
     }
     #endregion
+
 
     #region auto generated events
     #endregion
 
     private List<Text> m_labels = new List<Text>();
+    private RectTransform rectTransform;
     private int startIndex;
+    private int labelCount;
+    private int dotCount => PageNavMotion.dot_count;
     protected override void OnInit()
     {
         base.OnInit();
         m_labels.AddRange(gameObject.GetComponentsInChildren<Text>(true));
+        rectTransform = gameObject.GetComponent<RectTransform>();
     }
+
+    private List<PageNavMotionLabelWidget> m_labelWidgets = new List<PageNavMotionLabelWidget>();
 
     public void SetData(int index)
     {
-        this.startIndex = index;
-        for (int i = 0; i < m_labels.Count; i++)
+        startIndex = index;
+        labelCount = dotCount / 5 + 1;
+        SetListItem(m_labelWidgets, m_lblLabelIndex.gameObject, gameObject.transform, labelCount, OnLabelItemCreate);
+        for (int i = 0; i < labelCount; i++)
         {
-            m_labels[i].text = (index + i + 1).ToString();
+            var label = PageNavMotionLabelWidget.CreateWidget(m_labelWidgets[i].gameObject);
+            var pos = label.rectTransform.anchoredPosition;
+            pos.x = i * PageNavMotion.dot_space * 5 + PageNavMotion.dot_padding;
+            label.rectTransform.anchoredPosition = pos;
+            var frameIndex = startIndex + i * 5 + 1;
+            label.label.text = frameIndex.ToString();
         }
+    }
+
+    private void OnLabelItemCreate(PageNavMotionLabelWidget widget)
+    {
     }
 
     public bool GetLabelPosition(int frameIndex, out Vector2 position)
     {
         int min = startIndex;
-        int max = startIndex + 30;
+        int max = startIndex + dotCount - 1;
         if (frameIndex < min || frameIndex > max)
         {
             position = Vector2.zero;
             return false;
         }
 
-        position = m_labels[frameIndex - startIndex].rectTransform.position;
+        int relativeFrameIndex = frameIndex - startIndex;
+        var pos = m_labelWidgets[0].rectTransform.position;
+        pos.x += relativeFrameIndex * PageNavMotion.dot_space;
+        position = pos;
         return true;
     }
 
@@ -849,9 +928,10 @@ public class PageNavMotionLabelWidget : UIItemWidget<PageNavMotionLabelWidget>
     {
         float minDistance = float.MaxValue;
         int minIndex = 0;
-        for (int i = 0; i < m_labels.Count; i++)
+        var startPosX = m_labelWidgets[0].rectTransform.position.x;
+        for (int i = 0; i < dotCount; i++)
         {
-            var dist = Vector2.Distance(position, m_labels[i].rectTransform.position);
+            var dist = Mathf.Abs(position.x - (startPosX + i * PageNavMotion.dot_space));
             if (dist < minDistance)
             {
                 minDistance = dist;
@@ -859,5 +939,18 @@ public class PageNavMotionLabelWidget : UIItemWidget<PageNavMotionLabelWidget>
             }
         }
         return minIndex + startIndex;
+    }
+}
+
+public class PageNavMotionLabelWidget : UIItemWidget<PageNavMotionLabelWidget>
+{
+    public Text label;
+    public RectTransform rectTransform;
+
+    protected override void OnInit()
+    {
+        base.OnInit();
+        label = gameObject.GetComponent<Text>();
+        rectTransform = gameObject.GetComponent<RectTransform>();
     }
 }
