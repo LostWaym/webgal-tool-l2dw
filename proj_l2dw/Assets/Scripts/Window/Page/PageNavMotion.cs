@@ -376,7 +376,9 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     public bool isPlaying;
     public float startTime;
     public int startFrameIndex;
-    
+
+    private int m_lastFrameDisplayCount;
+    private int m_lastTrackDisplayCount;
     private void Update()
     {
         if (isPlaying)
@@ -385,6 +387,13 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             var delta = Time.time - startTime;
             int frameIndex = startFrameIndex + (int)(delta * fps);
             SetFrameIndex(frameIndex, false);
+        }
+        
+        if (MAX_FRAME_DISPLAY_COUNT != m_lastFrameDisplayCount || MAX_TRACK_DISPLAY_COUNT != m_lastTrackDisplayCount)
+        {
+            m_lastFrameDisplayCount = MAX_FRAME_DISPLAY_COUNT;
+            m_lastTrackDisplayCount = MAX_TRACK_DISPLAY_COUNT;
+            RefreshAll();
         }
     }
 
@@ -479,7 +488,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         {
             return;
         }
-        dot_count = (int)(m_rectLabels.rect.width / PageNavMotion.dot_space);
+        dot_count = MAX_FRAME_DISPLAY_COUNT;
 
         RefreshMotionTrackHeader();
         RefreshMotionTrack();
