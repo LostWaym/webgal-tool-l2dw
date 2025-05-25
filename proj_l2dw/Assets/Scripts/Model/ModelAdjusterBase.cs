@@ -62,6 +62,11 @@ public class ModelAdjusterBase : MonoBehaviour
 
     #region live2d
 
+    public virtual Texture GetCharaTexture()
+    {
+        return null;
+    }
+
     public virtual Live2DParamInfoList GetEmotionEditorList()
     {
         return null;

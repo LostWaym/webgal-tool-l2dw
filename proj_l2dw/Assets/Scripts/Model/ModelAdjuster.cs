@@ -467,4 +467,9 @@ public class ModelAdjuster : ModelAdjusterBase
         File.WriteAllBytes(path, bytes);
         Debug.Log($"Save image to {path}");
     }
+
+    public override Texture GetCharaTexture()
+    {
+        return rt;
+    }
 }

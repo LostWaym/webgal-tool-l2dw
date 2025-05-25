@@ -15,6 +15,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private Button m_btnApply;
     private Button m_btnEdit;
     private Button m_btnSave;
+    private RawImage m_rawChara;
     private Button m_btnRecord;
     private Button m_btnOperation;
     private RectTransform m_rectOperationTitleArea;
@@ -52,6 +53,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_btnApply = transform.Find("CharaArea/ToolBar/m_btnApply").GetComponent<Button>();
         m_btnEdit = transform.Find("CharaArea/ToolBar/m_btnEdit").GetComponent<Button>();
         m_btnSave = transform.Find("CharaArea/ToolBar/m_btnSave").GetComponent<Button>();
+        m_rawChara = transform.Find("CharaArea/m_rawChara").GetComponent<RawImage>();
         m_btnRecord = transform.Find("TimelineArea/ToolBar/Left/Top/m_btnRecord").GetComponent<Button>();
         m_btnOperation = transform.Find("TimelineArea/ToolBar/Left/Top/m_btnOperation").GetComponent<Button>();
         m_rectOperationTitleArea = transform.Find("TimelineArea/ToolBar/Left/Top/m_rectOperationTitleArea").GetComponent<RectTransform>();
@@ -324,8 +326,9 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         MainControl.Instance.UpdateBeat += Update;
 
         var curTarget = GetValidTarget();
-        if (curTarget == null)
+        if (curTarget == null || !curTarget.SupportAnimationMode)
         {
+            m_rawChara.texture = null;
             RefreshAll();
             return;
         }
@@ -333,6 +336,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         curTarget.SetDisplayMode(ModelDisplayMode.MotionEditor);
         m_motionData = Live2dMotionData.Create();
         paramKeys = curTarget.GetEmotionEditorList().list;
+        m_rawChara.texture = curTarget.GetCharaTexture();
         RefreshAll();
     }
 
