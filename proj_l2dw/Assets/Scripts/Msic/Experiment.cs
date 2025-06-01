@@ -69,8 +69,11 @@ public static class Experiment
                         braceLevel--;
                     }
                 }
-
-                if (c == ' ' && braceLevel == 0) // Token boundary
+                
+                // 空格后是否紧接着-
+                var isBeforeArg = (i + 1) < remainingAfterCommand.Length
+                    && remainingAfterCommand[i + 1] == '-';
+                if (c == ' ' && isBeforeArg && braceLevel == 0) // Token boundary
                 {
                     if (currentToken.Length > 0)
                     {
