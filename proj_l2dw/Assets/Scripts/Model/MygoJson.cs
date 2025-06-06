@@ -163,15 +163,33 @@ public class MygoExp
             var modelValue = model.getParamFloat(item.id);
             cacheValues[item.id] = modelValue;
             float expValue = item.val;
-            if (item.calc == "mult" && !MainControl.WebGalExpressionSupport)
+            expValue = Mathf.Lerp(modelValue, expValue, t);
+            
+            if (MainControl.WebGalExpressionSupport)
             {
-                expValue = Mathf.Lerp(modelValue, modelValue * expValue, t);
+                model.setParamFloat(item.id, expValue);
             }
             else
             {
-                expValue = Mathf.Lerp(modelValue, expValue, t);
+                switch (item.calc)
+                {
+                    case "mult":
+                    {
+                        model.multParamFloat(item.id, expValue);
+                        break;
+                    }
+                    case "set":
+                    {
+                        model.setParamFloat(item.id, expValue);
+                        break;
+                    }
+                    default:
+                    {
+                        model.addToParamFloat(item.id, expValue);
+                        break;
+                    }
+                }
             }
-            model.setParamFloat(item.id, expValue);
         }
     }
 
