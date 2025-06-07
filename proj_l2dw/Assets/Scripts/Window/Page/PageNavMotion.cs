@@ -203,6 +203,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         var json = GUIUtility.systemCopyBuffer;
         m_motionData.Load(json);
         curTarget.SetDisplayMode(ModelDisplayMode.MotionEditor, true);
+        CheckAndFixName(m_motionData);
         RefreshAll();
     }
     private void DoSaveMotionToClipboard()
@@ -518,13 +519,18 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
 
     private void AddMotionData(Live2dMotionData motionData)
     {
+        m_listMotionData.Add(motionData);
+        CheckAndFixName(motionData);
+    }
+
+    private void CheckAndFixName(Live2dMotionData motionData)
+    {
         motionData.motionDataName = motionData.motionDataName.Trim();
         var sameNameCount = m_listMotionData.Count(x => x.motionDataName == motionData.motionDataName);
-        if (sameNameCount > 0)
+        if (sameNameCount > 1)
         {
             motionData.motionDataName = $"{motionData.motionDataName} ({motionData.GetHashCode()})";
         }
-        m_listMotionData.Add(motionData);
     }
 
     private bool motionDataDirty = false;
@@ -636,11 +642,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     {
         MotionDataSettingUI.Instance.SetData(m_motionData, (motionData) =>
         {
-            var sameNameCount = m_listMotionData.Count(x => x.motionDataName == motionData.motionDataName);
-            if (sameNameCount > 1)
-            {
-                motionData.motionDataName = $"{motionData.motionDataName} ({motionData.GetHashCode()})";
-            }
+            CheckAndFixName(motionData);
             SelectMotionData(motionData);
             RefreshAll();
         });
