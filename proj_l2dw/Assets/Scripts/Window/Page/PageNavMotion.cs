@@ -13,6 +13,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     public static int dot_count = 5;
 
     #region auto generated members
+    private Button m_btnDelete;
     private Button m_btnMotion;
     private Text m_lblMotion;
     private RectTransform m_rectSelectMotionArea;
@@ -56,6 +57,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
+        m_btnDelete = transform.Find("CharaArea/ToolBar/m_btnDelete").GetComponent<Button>();
         m_btnMotion = transform.Find("CharaArea/ToolBar/m_btnMotion").GetComponent<Button>();
         m_lblMotion = transform.Find("CharaArea/ToolBar/m_btnMotion/m_lblMotion").GetComponent<Text>();
         m_rectSelectMotionArea = transform.Find("CharaArea/ToolBar/m_btnMotion/m_rectSelectMotionArea").GetComponent<RectTransform>();
@@ -95,6 +97,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_sliderH = transform.Find("TimelineArea/Bottom/m_goRight/m_sliderH").GetComponent<Slider>();
         m_sliderV = transform.Find("TimelineArea/Bottom/m_goRight/m_sliderV").GetComponent<Slider>();
 
+        m_btnDelete.onClick.AddListener(OnButtonDeleteClick);
         m_btnMotion.onClick.AddListener(OnButtonMotionClick);
         m_btnApply.onClick.AddListener(OnButtonApplyClick);
         m_btnEdit.onClick.AddListener(OnButtonEditClick);
@@ -124,31 +127,73 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     #endregion
 
     #region auto generated events
+    private void OnButtonDeleteClick()
+    {
+        var motionName = m_motionData.motionDataName;
+        ConfirmUI.Instance.SetData($"确定要删除{motionName}吗？", "删除后将无法恢复", () =>
+        {
+            m_listMotionData.Remove(m_motionData);
+            if (m_listMotionData.Count > 0)
+            {
+                SelectMotionData(m_listMotionData[0]);
+            }
+            else
+            {
+                SelectOrCreateDefaultMotionData();
+            }
+            RefreshAll();
+        }, null);
+    }
     private void OnButtonMotionClick()
     {
-        var curTarget = GetValidTarget();
-        if (curTarget == null)
-        {
-            return;
-        }
-        var motionNames = curTarget.MyGOConfig.motions.Keys.ToList().OrderBy(x => x).ToList();
-        TargetSelectUI.Instance.SetData(m_btnMotion.gameObject.GetComponent<RectTransform>(), m_rectSelectMotionArea, motionNames);
-        TargetSelectUI.Instance._OnTargetItemClick = (motionName) =>
-        {
-            void OnSubmit()
-            {
-                TargetSelectUI.Instance.Close();
-                var bytes = curTarget.MyGOConfig.motions[motionName];
-                string text = System.Text.Encoding.UTF8.GetString(bytes);
-                m_motionData = Live2dMotionData.Create(text);
-                m_lblMotion.text = $"> {motionName}";
-                RefreshAll();
-            }
-
-            ConfirmUI.Instance.SetData("确定要导入motion吗？", "motion文件将替换当前motion\n请注意好保存数据！", OnSubmit, null);
-        };
+        OpenMotionDataSelectDialog();
     }
     private void OnButtonApplyClick()
+    {
+        OpenLoadMotionDialog();
+    }
+    private void OnButtonEditClick()
+    {
+        OpenMotionProfileDialog();
+    }
+
+    #region 保存按钮相关
+    private const string SAVE_OPT_SAVE_PROJ_TO_CLIPBOARD = "保存工程到剪贴板";
+    private const string SAVE_OPT_LOAD_PROJ_FROM_CLIPBOARD = "从剪贴板加载覆盖当前工程";
+    private const string SAVE_OPT_SAVE_MOTION_TO_CLIPBOARD = "保存motion到剪贴板";
+    private List<string> m_listSaveOpt = new List<string>()
+    {
+        SAVE_OPT_SAVE_PROJ_TO_CLIPBOARD,
+        SAVE_OPT_LOAD_PROJ_FROM_CLIPBOARD,
+        SAVE_OPT_SAVE_MOTION_TO_CLIPBOARD,
+    };
+    private void OnButtonSaveClick()
+    {
+        TargetSelectUI.Instance.SetData(m_rectOperationTitleArea, m_rectOperationContentArea, m_listSaveOpt);
+        TargetSelectUI.Instance._OnTargetItemClick = (operationName) =>
+        {
+            TargetSelectUI.Instance.Close();
+            switch (operationName)
+            {
+                case SAVE_OPT_SAVE_PROJ_TO_CLIPBOARD:
+                    DoSaveProjToClipboard();
+                    break;
+                case SAVE_OPT_LOAD_PROJ_FROM_CLIPBOARD:
+                    DoLoadProjFromClipboard();
+                    break;
+                case SAVE_OPT_SAVE_MOTION_TO_CLIPBOARD:
+                    DoSaveMotionToClipboard();
+                    break;
+            }
+        };
+    }
+    private void DoSaveProjToClipboard()
+    {
+        var json = m_motionData.Save();
+        GUIUtility.systemCopyBuffer = json;
+        Debug.Log(json);
+    }
+    private void DoLoadProjFromClipboard()
     {
         var curTarget = GetValidTarget();
         if (curTarget == null)
@@ -160,31 +205,31 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         curTarget.SetDisplayMode(ModelDisplayMode.MotionEditor, true);
         RefreshAll();
     }
-    private void OnButtonEditClick()
-    {
-        var json = m_motionData.Save();
-        GUIUtility.systemCopyBuffer = json;
-        Debug.Log(json);
-    }
-    private void OnButtonSaveClick()
+    private void DoSaveMotionToClipboard()
     {
         m_motionData.BakeAllFrames();
         var text = m_motionData.info.Print();
         Debug.Log(text);
         GUIUtility.systemCopyBuffer = text;
     }
+    #endregion
+
     private void OnButtonRecordClick()
     {
         Debug.Log("OnButtonRecordClick");
     }
     private const string OPERATION_LINEAR_UNBAKE = "线性反烘焙";
-    private const string OPERATION_DELETE_SELECTED_DOT = "删除选中点";
-    private const string OPERATION_CLONE_SELECTED_DOT = "复制选中点到当前帧";
+    private const string OPERATION_DELETE_SELECTED_DOT = "删除框选点";
+    private const string OPERATION_CLONE_SELECTED_DOT = "复制框选点到当前帧";
+    private const string OPERATION_CACHE_CUR_FRAME = "缓存当前帧";
+    private const string OPERATION_RESTORE_CUR_FRAME = "缓存帧覆盖到当前帧";
     private List<string> m_listOperation = new List<string>()
     {
         OPERATION_LINEAR_UNBAKE,
         OPERATION_DELETE_SELECTED_DOT,
         OPERATION_CLONE_SELECTED_DOT,
+        OPERATION_CACHE_CUR_FRAME,
+        OPERATION_RESTORE_CUR_FRAME,
     };
     private void OnButtonOperationClick()
     {
@@ -208,6 +253,12 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
                     break;
                 case OPERATION_CLONE_SELECTED_DOT:
                     DoCloneSelectedDot();
+                    break;
+                case OPERATION_CACHE_CUR_FRAME:
+                    DoCacheCurFrame();
+                    break;
+                case OPERATION_RESTORE_CUR_FRAME:
+                    DoRestoreCurFrame();
                     break;
             }
         };
@@ -322,6 +373,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private List<Live2DParamInfo> paramKeys = new List<Live2DParamInfo>();
 
     private Live2dMotionData m_motionData;
+    private List<Live2dMotionData> m_listMotionData = new List<Live2dMotionData>();
 
     public int MAX_TRACK_DISPLAY_COUNT
     {
@@ -456,10 +508,43 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         }
 
         curTarget.SetDisplayMode(ModelDisplayMode.MotionEditor);
-        m_motionData = Live2dMotionData.Create();
+        SelectOrCreateDefaultMotionData();
         paramKeys = curTarget.GetEmotionEditorList().list;
         m_rawChara.texture = curTarget.GetCharaTexture();
         RefreshAll();
+    }
+
+    private void AddMotionData(Live2dMotionData motionData)
+    {
+        motionData.motionDataName = motionData.motionDataName.Trim();
+        var sameNameCount = m_listMotionData.Count(x => x.motionDataName == motionData.motionDataName);
+        if (sameNameCount > 0)
+        {
+            motionData.motionDataName = $"{motionData.motionDataName} ({motionData.GetHashCode()})";
+        }
+        m_listMotionData.Add(motionData);
+    }
+
+    private bool motionDataDirty = false;
+    private void SelectMotionData(Live2dMotionData motionData)
+    {
+        m_motionData = motionData;
+        m_lblMotion.text = $"> {motionData.motionDataName}";
+        motionDataDirty = true;
+    }
+
+    private void SelectOrCreateDefaultMotionData()
+    {
+        if (m_listMotionData.Count == 0)
+        {
+            var motionData = Live2dMotionData.Create();
+            AddMotionData(motionData);
+            SelectMotionData(motionData);
+        }
+        else
+        {
+            SelectMotionData(m_listMotionData[0]);
+        }
     }
 
     public override void OnPageHidden()
@@ -529,7 +614,137 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         }
     }
 
+    private void OpenMotionDataSelectDialog()
+    {
+        var motionNames = m_listMotionData.Select(x => x.motionDataName).ToList();
+        TargetSelectUI.Instance.SetData(m_btnMotion.gameObject.GetComponent<RectTransform>(), m_rectSelectMotionArea, motionNames);
+        TargetSelectUI.Instance._OnTargetItemClick = (motionName) =>
+        {
+            TargetSelectUI.Instance.Close();
+            var motionData = m_listMotionData.FirstOrDefault(x => x.motionDataName == motionName);
+            if (motionData != null)
+            {
+                SelectMotionData(motionData);
+                RefreshAll();
+            }
+        };
+    }
+
+    private void OpenMotionProfileDialog()
+    {
+        MotionDataSettingUI.Instance.SetData(m_motionData, (motionData) =>
+        {
+            var sameNameCount = m_listMotionData.Count(x => x.motionDataName == motionData.motionDataName);
+            if (sameNameCount > 1)
+            {
+                motionData.motionDataName = $"{motionData.motionDataName} ({motionData.GetHashCode()})";
+            }
+            SelectMotionData(motionData);
+            RefreshAll();
+        });
+        MotionDataSettingUI.Instance.Show();
+    }
+
+    private void OpenLoadMotionDialog()
+    {
+        var curTarget = GetValidTarget();
+        if (curTarget == null)
+        {
+            return;
+        }
+        var motionNames = curTarget.MyGOConfig.motions.Keys.ToList().OrderBy(x => x).ToList();
+        motionNames.Insert(0, "空白工程");
+        TargetSelectUI.Instance.SetData(m_btnMotion.gameObject.GetComponent<RectTransform>(), m_rectSelectMotionArea, motionNames);
+        TargetSelectUI.Instance._OnTargetItemClick = (motionName) =>
+        {
+            bool isEmptyMotion = motionName == "空白工程";
+            void OnSubmit()
+            {
+                TargetSelectUI.Instance.Close();
+                if (!isEmptyMotion)
+                {
+                    var bytes = curTarget.MyGOConfig.motions[motionName];
+                    string text = System.Text.Encoding.UTF8.GetString(bytes);
+                    var motionData = Live2dMotionData.Create(text);
+                    motionData.motionDataName = $"{motionName} (clone)";
+                    AddMotionData(motionData);
+                    SelectMotionData(motionData);
+                    RefreshAll();
+                }
+                else
+                {
+                    var motionData = Live2dMotionData.Create();
+                    AddMotionData(motionData);
+                    SelectMotionData(motionData);
+                    RefreshAll();
+                }
+            }
+
+            // 保留该注释
+            // ConfirmUI.Instance.SetData("确定要导入motion吗？", "motion文件将替换当前motion\n请注意好保存数据！", OnSubmit, null);
+            OnSubmit();
+        };
+    }
+
     #region 操作
+
+    private class CacheEntry
+    {
+        public string trackName;
+        public int frameIndex;
+        public float value;
+    }
+
+    private List<CacheEntry> m_cacheEntries = new List<CacheEntry>();
+
+    private void DoCacheCurFrame()
+    {
+        var curTarget = GetValidTarget();
+        if (curTarget == null)
+        {
+            return;
+        }
+
+        m_cacheEntries.Clear();
+        foreach (var entry in m_motionData.tracks)
+        {
+            var track = entry.Value;
+            bool hasKeyFrames = track.keyFrames.Count > 0;
+            if (hasKeyFrames)
+            {
+                if (m_motionData.info.TryGetFrame(entry.Key, curFrameIndex, out float value))
+                {
+                    m_cacheEntries.Add(new CacheEntry()
+                    {
+                        trackName = entry.Key,
+                        frameIndex = curFrameIndex,
+                        value = value,
+                    });
+                }
+            }
+        }
+    }
+
+    private void DoRestoreCurFrame()
+    {
+        var curTarget = GetValidTarget();
+        if (curTarget == null)
+        {
+            return;
+        }
+
+        foreach (var entry in m_cacheEntries)
+        {
+            var track = m_motionData.TryGetTrack(entry.trackName, false);
+            if (track == null)
+                continue;
+            
+            track.keyFrames[entry.frameIndex] = entry.value;
+        }
+
+        m_motionData.BakeAllFrames();
+        RefreshAll();
+    }
     private void DoLinearUnbake()
     {
         var curTarget = GetValidTarget();
@@ -709,6 +924,12 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         }
         dot_count = MAX_FRAME_DISPLAY_COUNT;
 
+        if (motionDataDirty)
+        {
+            motionDataDirty = false;
+            curTarget.SetDisplayMode(ModelDisplayMode.MotionEditor, true);
+        }
+
         RefreshMotionTrackHeader();
         RefreshMotionTrack();
         RefreshSlider();
@@ -727,11 +948,14 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             return;
         }
 
+        paramKeys = curTarget.GetEmotionEditorList().list;
         var data = curTarget.MyGOConfig.motions[motionName];
         // 转换byte[]为string
         string text = System.Text.Encoding.UTF8.GetString(data);
-        m_motionData = Live2dMotionData.Create(text);
-        paramKeys = curTarget.GetEmotionEditorList().list;
+        var motionData = Live2dMotionData.Create(text);
+        motionData.motionDataName = motionName;
+        AddMotionData(motionData);
+        SelectMotionData(motionData);
         RefreshAll();
     }
 

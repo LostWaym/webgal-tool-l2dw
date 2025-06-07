@@ -16,6 +16,7 @@ public class Live2dMotionData
             return keyFrames.ContainsKey(frame);
         }
     }
+    public string motionDataName = "未命名";
     public Live2dMotionInfo info;
     public Dictionary<string, Track> tracks = new Dictionary<string, Track>();
 
@@ -178,7 +179,7 @@ public class Live2dMotionData
     public string Save()
     {
         var jsonobject = new JSONObject(JSONObject.Type.OBJECT);
-        jsonobject.AddField("name", "name");
+        jsonobject.AddField("name", motionDataName);
         jsonobject.AddField("fps", info.fps);
         jsonobject.AddField("fadein", info.fadein);
         jsonobject.AddField("fadeout", info.fadeout);
@@ -214,6 +215,7 @@ public class Live2dMotionData
         var jsonobject = new JSONObject(text);
         info = new Live2dMotionInfo();
         tracks.Clear();
+        motionDataName = jsonobject.GetField("name").str;
         info.fps = (int)jsonobject.GetField("fps").f;
         info.fadein = (int)jsonobject.GetField("fadein").f;
         info.fadeout = (int)jsonobject.GetField("fadeout").f;
@@ -415,5 +417,17 @@ public class Live2dMotionInfo
             return 0;
         }
         return frames[frame];
+    }
+
+    public bool TryGetFrame(string name, int frame, out float value)
+    {
+        var frames = TryGetKeyFrames(name);
+        if (frames.Count <= frame)
+        {
+            value = 0;
+            return false;
+        }
+        value = frames[frame];
+        return true;
     }
 }
