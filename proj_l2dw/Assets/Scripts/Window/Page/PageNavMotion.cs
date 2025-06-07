@@ -982,7 +982,7 @@ public class MotionTrackHeaderWidget : UIItemWidget<MotionTrackHeaderWidget>
     public void SetValue(float value)
     {
         m_sliderValue.SetValueWithoutNotify(value);
-        m_iptValue.SetTextWithoutNotify(value.ToString());
+        m_iptValue.SetTextWithoutNotify(L2DWUtils.GetShortNumberString(value));
     }
 }
 

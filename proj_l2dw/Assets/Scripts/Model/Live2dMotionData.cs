@@ -393,7 +393,7 @@ public class Live2dMotionInfo
         {
             if (param.Value.Count == 0)
                 continue;
-            var values = param.Value.Select(v => v.ToString("F3")).ToList();
+            var values = param.Value.Select(v => L2DWUtils.GetShortNumberString(v)).ToList();
             sb.AppendLine($"{param.Key}={string.Join(",", values)}");
             sb.AppendLine();
         }

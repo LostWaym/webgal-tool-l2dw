@@ -609,7 +609,7 @@ public void GetField(ref double field, string name, FieldNotFound fail = null) {
                     // 1.0 -> 1
                     // 1.1 -> 1.1  
                     // 1.123456 -> 1.123
-                    str += ((int)number == number) ? ((int)number).ToString() : number.ToString("F3").TrimEnd('0').TrimEnd('.');
+                    str += L2DWUtils.GetShortNumberString(number);
                 break;
 
             case JSONObject.Type.OBJECT:

@@ -155,4 +155,12 @@ public static class L2DWUtils
         var texture = LoadTexture(path);
         return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
     }
+
+    public static string GetShortNumberString(double value, int precision = 3)
+    {
+        string ret = ((int)value == value) ? ((int)value).ToString() : value.ToString($"F{precision}").TrimEnd('0').TrimEnd('.');
+        if (ret == "" || ret == "-")
+            ret = "0";
+        return ret;
+    }
 }
