@@ -20,11 +20,11 @@ public class TargetSelectUI : BaseWindow<TargetSelectUI>
     protected override void CodeGenBindMembers()
     {
         m_btnClose = transform.Find("m_btnClose").GetComponent<Button>();
-        m_rectRoot = transform.Find("m_btnClose/m_rectRoot").GetComponent<RectTransform>();
-        m_iptSearch = transform.Find("m_btnClose/m_rectRoot/m_iptSearch").GetComponent<InputField>();
-        m_btnClearFilter = transform.Find("m_btnClose/m_rectRoot/m_iptSearch/m_btnClearFilter").GetComponent<Button>();
-        m_tfItemRoot = transform.Find("m_btnClose/m_rectRoot/Scroll View/Viewport/m_tfItemRoot").GetComponent<Transform>();
-        m_itemSelectedItem = transform.Find("m_btnClose/m_rectRoot/Scroll View/Viewport/m_tfItemRoot/m_itemSelectedItem").GetComponent<Transform>();
+        m_rectRoot = transform.Find("m_rectRoot").GetComponent<RectTransform>();
+        m_iptSearch = transform.Find("m_rectRoot/m_iptSearch").GetComponent<InputField>();
+        m_btnClearFilter = transform.Find("m_rectRoot/m_iptSearch/m_btnClearFilter").GetComponent<Button>();
+        m_tfItemRoot = transform.Find("m_rectRoot/Scroll View/Viewport/m_tfItemRoot").GetComponent<Transform>();
+        m_itemSelectedItem = transform.Find("m_rectRoot/Scroll View/Viewport/m_tfItemRoot/m_itemSelectedItem").GetComponent<Transform>();
 
         m_btnClose.onClick.AddListener(OnButtonCloseClick);
         m_iptSearch.onValueChanged.AddListener(OnInputFieldSearchChange);
@@ -32,7 +32,6 @@ public class TargetSelectUI : BaseWindow<TargetSelectUI>
         m_btnClearFilter.onClick.AddListener(OnButtonClearFilterClick);
     }
     #endregion
-
 
     #region auto generated events
     private void OnButtonCloseClick()
