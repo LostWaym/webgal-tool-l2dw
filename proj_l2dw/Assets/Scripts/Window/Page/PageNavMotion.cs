@@ -204,6 +204,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_motionData.Load(json);
         curTarget.SetDisplayMode(ModelDisplayMode.MotionEditor, true);
         CheckAndFixName(m_motionData);
+        SelectMotionData(m_motionData);
         RefreshAll();
     }
     private void DoSaveMotionToClipboard()
