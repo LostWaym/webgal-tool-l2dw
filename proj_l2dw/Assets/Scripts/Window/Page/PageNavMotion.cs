@@ -230,8 +230,8 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         OPERATION_LINEAR_UNBAKE,
         OPERATION_DELETE_SELECTED_DOT,
         OPERATION_CLONE_SELECTED_DOT,
-        OPERATION_CACHE_CUR_FRAME,
-        OPERATION_RESTORE_CUR_FRAME,
+        // OPERATION_CACHE_CUR_FRAME,
+        // OPERATION_RESTORE_CUR_FRAME,
     };
     private void OnButtonOperationClick()
     {
