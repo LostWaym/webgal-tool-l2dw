@@ -155,6 +155,10 @@ public class MygoExp
         t = elapsedTime;
     }
 
+    public const string CALC_TYPE_MULT = "mult";
+    public const string CALC_TYPE_SET = "set";
+    public const string CALC_TYPE_ADD = "add";
+
     public void Apply(ALive2DModel model)
     {
         cacheValues.Clear();
@@ -163,31 +167,28 @@ public class MygoExp
             var modelValue = model.getParamFloat(item.id);
             cacheValues[item.id] = modelValue;
             float expValue = item.val;
-            expValue = Mathf.Lerp(modelValue, expValue, t);
-            
+            string calc = item.calc;
             if (MainControl.WebGalExpressionSupport)
             {
-                model.setParamFloat(item.id, expValue);
+                calc = CALC_TYPE_SET;
             }
-            else
+
+            switch (calc)
             {
-                switch (item.calc)
+                case CALC_TYPE_MULT:
                 {
-                    case "mult":
-                    {
-                        model.multParamFloat(item.id, expValue);
-                        break;
-                    }
-                    case "set":
-                    {
-                        model.setParamFloat(item.id, expValue);
-                        break;
-                    }
-                    default:
-                    {
-                        model.addToParamFloat(item.id, expValue);
-                        break;
-                    }
+                    model.multParamFloat(item.id, Mathf.Lerp(1, expValue, t));
+                    break;
+                }
+                case CALC_TYPE_SET:
+                {
+                    model.setParamFloat(item.id, Mathf.Lerp(modelValue, expValue, t));
+                    break;
+                }
+                default:
+                {
+                    model.addToParamFloat(item.id, Mathf.Lerp(0, expValue, t));
+                    break;
                 }
             }
         }
