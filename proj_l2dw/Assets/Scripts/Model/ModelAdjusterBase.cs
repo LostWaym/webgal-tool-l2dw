@@ -46,6 +46,7 @@ public class ModelAdjusterBase : MonoBehaviour
     public virtual MygoExp CurExp => null;
     public MyGOLive2DExMeta meta;
     public virtual MygoConfig MyGOConfig => null;
+    public List<Live2dMotionData> motionDataList = new List<Live2dMotionData>();
     #endregion
 
 

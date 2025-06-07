@@ -373,7 +373,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private List<Live2DParamInfo> paramKeys = new List<Live2DParamInfo>();
 
     private Live2dMotionData m_motionData;
-    private List<Live2dMotionData> m_listMotionData = new List<Live2dMotionData>();
+    private List<Live2dMotionData> m_listMotionData;
 
     public int MAX_TRACK_DISPLAY_COUNT
     {
@@ -503,11 +503,13 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         if (curTarget == null || !curTarget.SupportAnimationMode)
         {
             m_rawChara.texture = null;
+            m_listMotionData = null;
             RefreshAll();
             return;
         }
 
         curTarget.SetDisplayMode(ModelDisplayMode.MotionEditor);
+        m_listMotionData = curTarget.motionDataList;
         SelectOrCreateDefaultMotionData();
         paramKeys = curTarget.GetEmotionEditorList().list;
         m_rawChara.texture = curTarget.GetCharaTexture();
