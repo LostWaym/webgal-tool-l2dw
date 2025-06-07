@@ -407,7 +407,21 @@ public class MainControl : MonoBehaviour
     private string GetTransformTextTarget(ModelAdjusterBase target, int modelIndex = 0)
     {
         var localPos = target.GetCharacterSpecWorldPosition(modelIndex);
-        return $"{{\"position\":{{\"x\":{localPos.x:F3},\"y\":{-localPos.y:F3} }},\"scale\":{{\"x\":{target.RootScale.x:F3},\"y\":{target.RootScale.y:F3} }},\"rotation\":{target.GetWebGalRotation():F3} }}";
+        var jsonObject = new JSONObject();
+        var posObject = new JSONObject();
+        posObject.AddField("x", localPos.x);
+        posObject.AddField("y", -localPos.y);
+        jsonObject.AddField("position", posObject);
+        var scaleObject = new JSONObject();
+        scaleObject.AddField("x", target.RootScale.x);
+        scaleObject.AddField("y", target.RootScale.y);
+        jsonObject.AddField("scale", scaleObject);
+        jsonObject.AddField("rotation", target.GetWebGalRotation());
+        target.filterSetData.ApplyToJson(jsonObject);
+        return jsonObject.ToString(false);
+
+        //留着做备份，这个注释是给cursor看的
+        // return $"{{\"position\":{{\"x\":{localPos.x:F3},\"y\":{-localPos.y:F3} }},\"scale\":{{\"x\":{target.RootScale.x:F3},\"y\":{target.RootScale.y:F3} }},\"rotation\":{target.GetWebGalRotation():F3} }}";
     }
 
     #endregion

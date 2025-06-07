@@ -1,6 +1,7 @@
 
 
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ModelAdjusterBase : MonoBehaviour
@@ -217,23 +218,116 @@ public class ModelAdjusterBase : MonoBehaviour
     #endregion
 
     #region Filter
+    public FilterSetData filterSetData = new FilterSetData();
 
-    public Dictionary<string, float> filterValues = new Dictionary<string, float>();
-    public void SetFilterValue(string name, float value)
-    {
-        filterValues[name] = value;
-        OnFilterChanged(name, value);
-    }
-
-    public float GetFilterValue(string name)
-    {
-        return filterValues.ContainsKey(name) ? filterValues[name] : 0;
-    }
-
-    protected virtual void OnFilterChanged(string name, float value)
+    public virtual void OnFilterSetDataChanged()
     {
 
     }
 
     #endregion
+}
+
+public class FilterSetData
+{
+    private float alpha = 1;
+    public float Alpha
+    {
+        get => alpha;
+        set
+        {
+            value = Mathf.Clamp01(value);
+            alpha = value;
+        }
+    }
+
+    private int blur;
+    public int Blur
+    {
+        get => blur;
+        set => blur = value;
+    }
+
+    private bool oldFilm;
+    public bool OldFilm
+    {
+        get => oldFilm;
+        set => oldFilm = value;
+    }
+
+    private bool dotFilm;
+    public bool DotFilm
+    {
+        get => dotFilm;
+        set => dotFilm = value;
+    }
+
+    private bool reflectionFilm;
+    public bool ReflectionFilm
+    {
+        get => reflectionFilm;
+        set => reflectionFilm = value;
+    }
+
+    private bool glitchFilm;
+    public bool GlitchFilm
+    {
+        get => glitchFilm;
+        set => glitchFilm = value;
+    }
+
+    private bool rgbFilm;
+    public bool RgbFilm
+    {
+        get => rgbFilm;
+        set => rgbFilm = value;
+    }
+
+    private bool godrayFilm;
+    public bool GodrayFilm
+    {
+        get => godrayFilm;
+        set => godrayFilm = value;
+    }
+
+    public void ApplyToJson(JSONObject json)
+    {
+        ApplyToJson_21_24(json);
+    }
+
+    private void ApplyToJson_21_24(JSONObject json)
+    {
+        ApplyIfNotApproximately(json, "alpha", alpha, 1);
+        ApplyIfNot(json, "blur", blur, 0);
+        ApplyIfTrue(json, "oldFilm", oldFilm);
+        ApplyIfTrue(json, "dotFilm", dotFilm);
+        ApplyIfTrue(json, "reflectionFilm", reflectionFilm);
+        ApplyIfTrue(json, "glitchFilm", glitchFilm);
+        ApplyIfTrue(json, "rgbFilm", rgbFilm);
+        ApplyIfTrue(json, "godrayFilm", godrayFilm);
+    }
+
+    private void ApplyIfNot(JSONObject json, string key, int value, int notValue)
+    {
+        if (value != notValue)
+        {
+            json.AddField(key, value);
+        }
+    }
+
+    private void ApplyIfNotApproximately(JSONObject json, string key, float value, float notValue)
+    {
+        if (!Mathf.Approximately(value, notValue))
+        {
+            json.AddField(key, value);
+        }
+    }
+
+    private void ApplyIfTrue(JSONObject json, string key, bool value)
+    {
+        if (value)
+        {
+            json.AddField(key, 1);
+        }
+    }
 }

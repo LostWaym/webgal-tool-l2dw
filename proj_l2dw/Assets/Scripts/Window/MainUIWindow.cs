@@ -1514,31 +1514,59 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
 
 public class PageCharaFunctions : UIPageWidget<PageCharaFunctions>
 {
-    public PageCharacterPreview PageCharacterPreview => m_pageCharacterPreview;
-    public PageExpressionEditor PageExpressionEditor => m_pageExpressionEditor;
-    private PageCharacterPreview m_pageCharacterPreview;
-    private PageExpressionEditor m_pageExpressionEditor;
 
-    #region auto-generated code
+    #region auto generated members
     private Transform m_tfFunctions;
     private Toggle m_togglePreview;
     private Toggle m_toggleEdit;
+    private Toggle m_toggleFilterSet;
     private Toggle m_toggleAnim;
-    private Transform m_itemPageExpressionEdit;
     private Transform m_itemPageCharacterPreview;
+    private Transform m_itemPageExpressionEdit;
+    private Transform m_itemPageFilterSet;
+    #endregion
 
+    #region auto generated binders
     protected override void CodeGenBindMembers()
     {
         m_tfFunctions = transform.Find("m_tfFunctions").GetComponent<Transform>();
         m_togglePreview = transform.Find("m_tfFunctions/m_togglePreview").GetComponent<Toggle>();
         m_toggleEdit = transform.Find("m_tfFunctions/m_toggleEdit").GetComponent<Toggle>();
+        m_toggleFilterSet = transform.Find("m_tfFunctions/m_toggleFilterSet").GetComponent<Toggle>();
         m_toggleAnim = transform.Find("m_tfFunctions/m_toggleAnim").GetComponent<Toggle>();
-        m_itemPageExpressionEdit = transform.Find("pages/m_itemPageExpressionEdit").GetComponent<Transform>();
         m_itemPageCharacterPreview = transform.Find("pages/m_itemPageCharacterPreview").GetComponent<Transform>();
+        m_itemPageExpressionEdit = transform.Find("pages/m_itemPageExpressionEdit").GetComponent<Transform>();
+        m_itemPageFilterSet = transform.Find("pages/m_itemPageFilterSet").GetComponent<Transform>();
+
+        m_togglePreview.onValueChanged.AddListener(OnTogglePreviewChange);
+        m_toggleEdit.onValueChanged.AddListener(OnToggleEditChange);
+        m_toggleFilterSet.onValueChanged.AddListener(OnToggleFilterSetChange);
+        m_toggleAnim.onValueChanged.AddListener(OnToggleAnimChange);
     }
     #endregion
-    #region auto-generated code event
+
+    #region auto generated events
+    private void OnTogglePreviewChange(bool value)
+    {
+    }
+    private void OnToggleEditChange(bool value)
+    {
+    }
+    private void OnToggleFilterSetChange(bool value)
+    {
+    }
+    private void OnToggleAnimChange(bool value)
+    {
+    }
     #endregion
+
+
+    public PageCharacterPreview PageCharacterPreview => m_pageCharacterPreview;
+    public PageExpressionEditor PageExpressionEditor => m_pageExpressionEditor;
+    public PageFilterSet PageFilterSet => m_pageFilterSet;
+    private PageCharacterPreview m_pageCharacterPreview;
+    private PageExpressionEditor m_pageExpressionEditor;
+    private PageFilterSet m_pageFilterSet;
 
     protected override void OnInit()
     {
@@ -1547,6 +1575,7 @@ public class PageCharaFunctions : UIPageWidget<PageCharaFunctions>
         m_pageCharacterPreview = PageCharacterPreview.CreateWidget(m_itemPageCharacterPreview.gameObject);
         m_pageExpressionEditor = PageExpressionEditor.CreateWidget(m_itemPageExpressionEdit.gameObject);
         //m_pageAnimationEditor = PageAnimationEditor.CreateWidget(m_itemPageAnimationEditor.gameObject);
+        m_pageFilterSet = PageFilterSet.CreateWidget(m_itemPageFilterSet.gameObject);
     }
 
     public override void OnPageShown()
@@ -1554,7 +1583,175 @@ public class PageCharaFunctions : UIPageWidget<PageCharaFunctions>
         base.OnPageShown();
         m_pageCharacterPreview.BindToToggle(m_togglePreview);
         m_pageExpressionEditor.BindToToggle(m_toggleEdit);
+        m_pageFilterSet.BindToToggle(m_toggleFilterSet);
     }
+}
+
+public class PageFilterSet : UIPageWidget<PageFilterSet>
+{
+    #region auto generated members
+    private InputField m_iptAlpha;
+    private InputField m_iptBlur;
+    private Toggle m_toggleOldFilm;
+    private Toggle m_toggleDotFilm;
+    private Toggle m_toggleReflectionFilm;
+    private Toggle m_toggleGlitchFilm;
+    private Toggle m_toggleRgbFilm;
+    private Toggle m_toggleGodrayFilm;
+    #endregion
+
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_iptAlpha = transform.Find("Scroll/Viewport/Content/透明度/m_iptAlpha").GetComponent<InputField>();
+        m_iptBlur = transform.Find("Scroll/Viewport/Content/高斯模糊/m_iptBlur").GetComponent<InputField>();
+        m_toggleOldFilm = transform.Find("Scroll/Viewport/Content/老电影/m_toggleOldFilm").GetComponent<Toggle>();
+        m_toggleDotFilm = transform.Find("Scroll/Viewport/Content/点状电影/m_toggleDotFilm").GetComponent<Toggle>();
+        m_toggleReflectionFilm = transform.Find("Scroll/Viewport/Content/反射电影/m_toggleReflectionFilm").GetComponent<Toggle>();
+        m_toggleGlitchFilm = transform.Find("Scroll/Viewport/Content/故障电影/m_toggleGlitchFilm").GetComponent<Toggle>();
+        m_toggleRgbFilm = transform.Find("Scroll/Viewport/Content/RGB电影/m_toggleRgbFilm").GetComponent<Toggle>();
+        m_toggleGodrayFilm = transform.Find("Scroll/Viewport/Content/光辉电影/m_toggleGodrayFilm").GetComponent<Toggle>();
+
+        m_iptAlpha.onValueChanged.AddListener(OnInputFieldAlphaChange);
+        m_iptAlpha.onEndEdit.AddListener(OnInputFieldAlphaEndEdit);
+        m_iptBlur.onValueChanged.AddListener(OnInputFieldBlurChange);
+        m_iptBlur.onEndEdit.AddListener(OnInputFieldBlurEndEdit);
+        m_toggleOldFilm.onValueChanged.AddListener(OnToggleOldFilmChange);
+        m_toggleDotFilm.onValueChanged.AddListener(OnToggleDotFilmChange);
+        m_toggleReflectionFilm.onValueChanged.AddListener(OnToggleReflectionFilmChange);
+        m_toggleGlitchFilm.onValueChanged.AddListener(OnToggleGlitchFilmChange);
+        m_toggleRgbFilm.onValueChanged.AddListener(OnToggleRgbFilmChange);
+        m_toggleGodrayFilm.onValueChanged.AddListener(OnToggleGodrayFilmChange);
+    }
+    #endregion
+
+    #region auto generated events
+    private void OnInputFieldAlphaChange(string value)
+    {
+    }
+    private void OnInputFieldAlphaEndEdit(string value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        if (float.TryParse(value, out float alpha))
+        {
+            model.filterSetData.Alpha = alpha;
+            model.OnFilterSetDataChanged();
+        }
+        RefreshFilterSet();
+    }
+    private void OnInputFieldBlurChange(string value)
+    {
+    }
+    private void OnInputFieldBlurEndEdit(string value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        if (int.TryParse(value, out int blur))
+        {
+            model.filterSetData.Blur = blur;
+            model.OnFilterSetDataChanged();
+        }
+        RefreshFilterSet();
+    }
+    private void OnToggleOldFilmChange(bool value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        model.filterSetData.OldFilm = value;
+        model.OnFilterSetDataChanged();
+        RefreshFilterSet();
+    }
+    private void OnToggleDotFilmChange(bool value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        model.filterSetData.DotFilm = value;
+        model.OnFilterSetDataChanged();
+        RefreshFilterSet();
+    }
+    private void OnToggleReflectionFilmChange(bool value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        model.filterSetData.ReflectionFilm = value;
+        model.OnFilterSetDataChanged();
+        RefreshFilterSet();
+    }
+    private void OnToggleGlitchFilmChange(bool value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        model.filterSetData.GlitchFilm = value;
+        model.OnFilterSetDataChanged();
+        RefreshFilterSet();
+    }
+    private void OnToggleRgbFilmChange(bool value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        model.filterSetData.RgbFilm = value;
+        model.OnFilterSetDataChanged();
+        RefreshFilterSet();
+    }
+    private void OnToggleGodrayFilmChange(bool value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        model.filterSetData.GodrayFilm = value;
+        model.OnFilterSetDataChanged();
+        RefreshFilterSet();
+    }
+    #endregion
+
+    public override void OnPageShown()
+    {
+        base.OnPageShown();
+        RefreshFilterSet();
+    }
+
+    public void RefreshFilterSet()
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+
+        m_iptAlpha.SetTextWithoutNotify(model.filterSetData.Alpha.ToString("F2"));
+        m_iptBlur.SetTextWithoutNotify(model.filterSetData.Blur.ToString());
+        m_toggleOldFilm.SetIsOnWithoutNotify(model.filterSetData.OldFilm);
+        m_toggleDotFilm.SetIsOnWithoutNotify(model.filterSetData.DotFilm);
+        m_toggleReflectionFilm.SetIsOnWithoutNotify(model.filterSetData.ReflectionFilm);
+        m_toggleGlitchFilm.SetIsOnWithoutNotify(model.filterSetData.GlitchFilm);
+        m_toggleRgbFilm.SetIsOnWithoutNotify(model.filterSetData.RgbFilm);
+        m_toggleGodrayFilm.SetIsOnWithoutNotify(model.filterSetData.GodrayFilm);
+    }
+
 }
 
 public class PageCharacterPreview : UIPageWidget<PageCharacterPreview>
