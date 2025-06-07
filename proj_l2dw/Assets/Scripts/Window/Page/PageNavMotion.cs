@@ -40,8 +40,10 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private Text m_lblLabelIndex;
     private TouchArea m_touchLabels;
     private InputField m_iptFrameIndex;
+    private GameObject m_goLeft;
     private Transform m_tfTrackHeaderRoot;
     private Transform m_itemTrackHeader;
+    private GameObject m_goRight;
     private Transform m_tfTrackRoot;
     private Transform m_itemTrack;
     private TouchArea m_touchTrackArea;
@@ -81,15 +83,17 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_lblLabelIndex = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_rectLabels/m_lblLabelIndex").GetComponent<Text>();
         m_touchLabels = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_touchLabels").GetComponent<TouchArea>();
         m_iptFrameIndex = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_iptFrameIndex").GetComponent<InputField>();
-        m_tfTrackHeaderRoot = transform.Find("TimelineArea/Bottom/Left/m_tfTrackHeaderRoot").GetComponent<Transform>();
-        m_itemTrackHeader = transform.Find("TimelineArea/Bottom/Left/m_tfTrackHeaderRoot/m_itemTrackHeader").GetComponent<Transform>();
-        m_tfTrackRoot = transform.Find("TimelineArea/Bottom/Right/m_tfTrackRoot").GetComponent<Transform>();
-        m_itemTrack = transform.Find("TimelineArea/Bottom/Right/m_tfTrackRoot/m_itemTrack").GetComponent<Transform>();
-        m_touchTrackArea = transform.Find("TimelineArea/Bottom/Right/m_touchTrackArea").GetComponent<TouchArea>();
-        m_imgRect = transform.Find("TimelineArea/Bottom/Right/m_touchTrackArea/m_imgRect").GetComponent<Image>();
-        m_imgLine = transform.Find("TimelineArea/Bottom/Right/m_imgLine").GetComponent<Image>();
-        m_sliderH = transform.Find("TimelineArea/Bottom/Right/m_sliderH").GetComponent<Slider>();
-        m_sliderV = transform.Find("TimelineArea/Bottom/Right/m_sliderV").GetComponent<Slider>();
+        m_goLeft = transform.Find("TimelineArea/Bottom/m_goLeft").gameObject;
+        m_tfTrackHeaderRoot = transform.Find("TimelineArea/Bottom/m_goLeft/m_tfTrackHeaderRoot").GetComponent<Transform>();
+        m_itemTrackHeader = transform.Find("TimelineArea/Bottom/m_goLeft/m_tfTrackHeaderRoot/m_itemTrackHeader").GetComponent<Transform>();
+        m_goRight = transform.Find("TimelineArea/Bottom/m_goRight").gameObject;
+        m_tfTrackRoot = transform.Find("TimelineArea/Bottom/m_goRight/m_tfTrackRoot").GetComponent<Transform>();
+        m_itemTrack = transform.Find("TimelineArea/Bottom/m_goRight/m_tfTrackRoot/m_itemTrack").GetComponent<Transform>();
+        m_touchTrackArea = transform.Find("TimelineArea/Bottom/m_goRight/m_touchTrackArea").GetComponent<TouchArea>();
+        m_imgRect = transform.Find("TimelineArea/Bottom/m_goRight/m_touchTrackArea/m_imgRect").GetComponent<Image>();
+        m_imgLine = transform.Find("TimelineArea/Bottom/m_goRight/m_imgLine").GetComponent<Image>();
+        m_sliderH = transform.Find("TimelineArea/Bottom/m_goRight/m_sliderH").GetComponent<Slider>();
+        m_sliderV = transform.Find("TimelineArea/Bottom/m_goRight/m_sliderV").GetComponent<Slider>();
 
         m_btnMotion.onClick.AddListener(OnButtonMotionClick);
         m_btnApply.onClick.AddListener(OnButtonApplyClick);
@@ -118,7 +122,6 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_sliderV.onValueChanged.AddListener(OnSliderVChange);
     }
     #endregion
-
 
     #region auto generated events
     private void OnButtonMotionClick()
@@ -494,16 +497,34 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             RefreshAll();
         }
 
-        if (Input.GetKey(KeyCode.LeftControl))
+        var wheel = Input.GetAxis("Mouse ScrollWheel");
+        if (wheel != 0)
         {
-            var wheel = Input.GetAxis("Mouse ScrollWheel");
-            if (wheel != 0)
+            if (Input.GetKey(KeyCode.LeftControl))
             {
-                dot_space += wheel * 10;
-                dot_space = Mathf.Clamp(dot_space, 4, 32);
-                m_lastFrameDisplayCount = MAX_FRAME_DISPLAY_COUNT;
-                m_lastTrackDisplayCount = MAX_TRACK_DISPLAY_COUNT;
-                RefreshAll();
+                if (wheel != 0)
+                {
+                    dot_space += wheel * 10;
+                    dot_space = Mathf.Clamp(dot_space, 4, 32);
+                    m_lastFrameDisplayCount = MAX_FRAME_DISPLAY_COUNT;
+                    m_lastTrackDisplayCount = MAX_TRACK_DISPLAY_COUNT;
+                    RefreshAll();
+                }
+            }
+            else
+            {
+                //如果鼠标位置在m_goLeft上
+                if (RectTransformUtility.RectangleContainsScreenPoint(m_goLeft.GetComponent<RectTransform>(), Input.mousePosition))
+                {
+                    m_sliderV.value -= wheel * 10;
+                }
+                else if (RectTransformUtility.RectangleContainsScreenPoint(m_goRight.GetComponent<RectTransform>(), Input.mousePosition))
+                {
+                    int sign = wheel >= 0 ? 1 : -1;
+                    float moveValue = Mathf.Abs(wheel) * MAX_FRAME_DISPLAY_COUNT;
+                    int value = Mathf.Max(1, (int)moveValue);
+                    m_sliderH.value += value * sign;
+                }
             }
         }
     }
