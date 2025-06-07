@@ -165,6 +165,13 @@ public class Live2dMotionData
                 }
             }
         }
+
+        var frameCount = info.frameCount;
+        if (frames.Count > frameCount)
+        {
+            frames.RemoveRange(frameCount, frames.Count - frameCount);
+        }
+
         info.keyFrames[trackName] = frames;
     }
 
