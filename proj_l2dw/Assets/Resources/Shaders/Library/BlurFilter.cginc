@@ -19,7 +19,7 @@ fixed4 ApplyBlurFilter(float2 rawUv)
 
     float weightSum = 0.0;
                 
-    const int kernelSize = 5; // 可以改大或用参数控制
+    const int kernelSize = 3; // 可以改大或用参数控制
     float sigma = 4; // 控制模糊强度
     float2 blurUv = float2(_Blur * _BlurSampleScaleX, _Blur * _BlurSampleScaleY);
     
