@@ -222,9 +222,11 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     }
     private const string OPERATION_LINEAR_UNBAKE = "线性反烘焙";
     private const string OPERATION_DELETE_SELECTED_DOT = "删除框选点";
-    private const string OPERATION_CLONE_SELECTED_DOT = "复制框选点到当前帧";
+    private const string OPERATION_CLONE_SELECTED_DOT = "复制框选点到当前帧（不建议使用）";
     private const string OPERATION_CACHE_CUR_FRAME = "缓存当前帧";
     private const string OPERATION_RESTORE_CUR_FRAME = "缓存帧覆盖到当前帧";
+    private const string OPERATION_CACHE_SELECTED_DOTS = "缓存框选点（可跨动画工程）";
+    private const string OPERATION_RESTORE_SELECTED_DOTS = "缓存框选点覆盖到当前帧";
     private List<string> m_listOperation = new List<string>()
     {
         OPERATION_LINEAR_UNBAKE,
@@ -232,6 +234,8 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         OPERATION_CLONE_SELECTED_DOT,
         // OPERATION_CACHE_CUR_FRAME,
         // OPERATION_RESTORE_CUR_FRAME,
+        OPERATION_CACHE_SELECTED_DOTS,
+        OPERATION_RESTORE_SELECTED_DOTS,
     };
     private void OnButtonOperationClick()
     {
@@ -261,6 +265,12 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
                     break;
                 case OPERATION_RESTORE_CUR_FRAME:
                     DoRestoreCurFrame();
+                    break;
+                case OPERATION_CACHE_SELECTED_DOTS:
+                    DoCacheSelectedDots();
+                    break;
+                case OPERATION_RESTORE_SELECTED_DOTS:
+                    DoRestoreSelectedDots();
                     break;
             }
         };
@@ -443,7 +453,10 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             return;
         }
 
-        s_selectedDotIndexes.Clear();
+        if (!Input.GetKey(KeyCode.LeftControl))
+        {
+            s_selectedDotIndexes.Clear();
+        }
 
         HashSet<int> TryGetSet(string key)
         {
@@ -537,7 +550,13 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private bool motionDataDirty = false;
     private void SelectMotionData(Live2dMotionData motionData)
     {
+        if (m_motionData != null)
+        {
+            m_motionData.m_state_curFrameIndex = curFrameIndex;
+        }
+
         m_motionData = motionData;
+        curFrameIndex = motionData.m_state_curFrameIndex;
         m_lblMotion.text = $"> {motionData.motionDataName}";
         motionDataDirty = true;
     }
@@ -729,7 +748,6 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             }
         }
     }
-
     private void DoRestoreCurFrame()
     {
         var curTarget = GetValidTarget();
@@ -846,6 +864,61 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_motionData.BakeAllFrames();
         RefreshAll();
     }
+
+    public class CacheSelectedDotsEntry
+    {
+        public string trackName;
+        public int frameIndex;
+        public float value;
+    }
+    public List<CacheSelectedDotsEntry> m_cacheSelectedDotsEntries = new List<CacheSelectedDotsEntry>();
+    private void DoCacheSelectedDots()
+    {
+        m_cacheSelectedDotsEntries.Clear();
+        foreach (var entry in s_selectedDotIndexes)
+        {
+            var track = m_motionData.TryGetTrack(entry.Key, false);
+            if (track == null)
+                continue;
+
+            foreach (var frameIndex in entry.Value)
+            {
+                m_cacheSelectedDotsEntries.Add(new CacheSelectedDotsEntry()
+                {
+                    trackName = track.name,
+                    frameIndex = frameIndex,
+                    value = track.keyFrames[frameIndex],
+                });
+            }
+        }
+
+        int minFrameIndex = int.MaxValue;
+        foreach (var entry in m_cacheSelectedDotsEntries)
+        {
+            minFrameIndex = Mathf.Min(minFrameIndex, entry.frameIndex);
+        }
+
+        foreach (var entry in m_cacheSelectedDotsEntries)
+        {
+            entry.frameIndex -= minFrameIndex;
+        }
+    }
+
+    private void DoRestoreSelectedDots()
+    {
+        foreach (var entry in m_cacheSelectedDotsEntries)
+        {
+            var track = m_motionData.TryGetTrack(entry.trackName, false);
+            if (track == null)
+                continue;
+
+            track.keyFrames[curFrameIndex + entry.frameIndex] = entry.value;
+        }
+
+        m_motionData.BakeAllFrames();
+        RefreshAll();
+    }
+
     #endregion
 
     public void PlaySample()

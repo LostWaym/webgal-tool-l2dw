@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class Live2dMotionData
 {
+    public int m_state_curFrameIndex = 0;
+
     public class Track
     {
         public string name;
