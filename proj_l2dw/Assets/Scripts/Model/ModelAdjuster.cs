@@ -293,6 +293,7 @@ public class ModelAdjuster : ModelAdjusterBase
             -500.0f,
             500.0f
         );
+        UpdateAllFilter();
     }
 
     public override void Adjust()
@@ -333,6 +334,7 @@ public class ModelAdjuster : ModelAdjusterBase
     {
         rootScale = scale;
         pivot.localScale = new Vector3(reverseXScale ? -rootScale : rootScale, rootScale, 1);
+        UpdateBlurFilter();
     }
 
     public override void SetReverseXScale(bool reverse)
@@ -446,6 +448,50 @@ public class ModelAdjuster : ModelAdjusterBase
         {
             pos.model.isMainRenderLoop = true;
         }
+    }
+
+    public override void OnFilterSetDataChanged(FilterProperty property)
+    {
+        switch (property)
+        {
+            case FilterProperty.Alpha:
+            {
+                UpdateAlphaFilter();
+                break;
+            }
+            case FilterProperty.Blur:
+            {
+                UpdateBlurFilter();
+                break;
+            }
+        }
+    }
+
+    private void UpdateAlphaFilter()
+    {
+        var mat = MainModel.meshRenderer.material;
+        mat.SetFloat("_Alpha", filterSetData.Alpha);
+    }
+    
+    private void UpdateBlurFilter()
+    {
+        var mat = MainModel.meshRenderer.material;
+        var modelAspect = MainModel.Live2DModel.getCanvasWidth() / MainModel.Live2DModel.getCanvasHeight();
+        var stageAspect = (float)Constants.WebGalWidth / (float)Constants.WebGalHeight;
+        var aspectRatio = stageAspect / modelAspect;
+        mat.SetFloat("_BlurSampleScaleX", aspectRatio / (float)Constants.WebGalWidth / rootScale);
+        mat.SetFloat("_BlurSampleScaleY", 1.0f / (float)Constants.WebGalHeight / rootScale);
+        mat.SetFloat("_Blur", filterSetData.Blur);
+        if (filterSetData.Blur > 0)
+            mat.EnableKeyword("_BLUR_FILTER");
+        else
+            mat.DisableKeyword("_BLUR_FILTER");
+    }
+
+    private void UpdateAllFilter()
+    {
+        UpdateAlphaFilter();
+        UpdateBlurFilter();
     }
 
     public void SaveImage()
