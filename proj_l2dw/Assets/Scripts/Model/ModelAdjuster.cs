@@ -479,8 +479,18 @@ public class ModelAdjuster : ModelAdjusterBase
         var modelAspect = MainModel.Live2DModel.getCanvasWidth() / MainModel.Live2DModel.getCanvasHeight();
         var stageAspect = (float)Constants.WebGalWidth / (float)Constants.WebGalHeight;
         var aspectRatio = stageAspect / modelAspect;
-        mat.SetFloat("_BlurSampleScaleX", aspectRatio / (float)Constants.WebGalWidth / rootScale);
-        mat.SetFloat("_BlurSampleScaleY", 1.0f / (float)Constants.WebGalHeight / rootScale);
+        var factor = 1.0f;
+        if (!Global.__PIVOT_2_4)
+            factor = 1.0f / 1.5f;
+        
+        mat.SetFloat(
+            "_BlurSampleScaleX",
+            factor * Mathf.Max(aspectRatio, 1.0f) / (float)Constants.WebGalWidth / rootScale
+        );
+        mat.SetFloat(
+            "_BlurSampleScaleY",
+            factor * Mathf.Min(aspectRatio, 1.0f) / (float)Constants.WebGalHeight / rootScale
+        );
         mat.SetFloat("_Blur", filterSetData.Blur);
         if (filterSetData.Blur > 0)
             mat.EnableKeyword("_BLUR_FILTER");
