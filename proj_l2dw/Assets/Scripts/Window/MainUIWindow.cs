@@ -756,7 +756,14 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
 
         private bool IsMouseOnUI()
         {
-            return EventSystem.current.IsPointerOverGameObject();
+            var mousePos = Input.mousePosition;
+            var isMouseInsideGameWindow = 
+                mousePos.x >= 0.0f
+                && mousePos.x <= Screen.width
+                && mousePos.y >= 0.0f
+                && mousePos.y <= Screen.height;
+            
+            return !isMouseInsideGameWindow || EventSystem.current.IsPointerOverGameObject();
         }
     }
 
