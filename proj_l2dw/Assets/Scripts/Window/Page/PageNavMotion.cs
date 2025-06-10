@@ -12,7 +12,11 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     public static float dot_padding = 8;
     public static int dot_count = 5;
 
-    #region auto generated members
+     #region auto generated members
+    private Transform m_tfCharaRoot;
+    private RawImage m_rawChara;
+    private TouchArea m_touchChara;
+    private Button m_btnResetCharaArea;
     private Button m_btnDelete;
     private Button m_btnMotion;
     private Text m_lblMotion;
@@ -20,7 +24,6 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private Button m_btnApply;
     private Button m_btnEdit;
     private Button m_btnSave;
-    private RawImage m_rawChara;
     private Button m_btnRecord;
     private Button m_btnOperation;
     private RectTransform m_rectOperationTitleArea;
@@ -57,6 +60,10 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
+        m_tfCharaRoot = transform.Find("CharaArea/m_tfCharaRoot").GetComponent<Transform>();
+        m_rawChara = transform.Find("CharaArea/m_tfCharaRoot/m_rawChara").GetComponent<RawImage>();
+        m_touchChara = transform.Find("CharaArea/m_touchChara").GetComponent<TouchArea>();
+        m_btnResetCharaArea = transform.Find("CharaArea/m_btnResetCharaArea").GetComponent<Button>();
         m_btnDelete = transform.Find("CharaArea/ToolBar/m_btnDelete").GetComponent<Button>();
         m_btnMotion = transform.Find("CharaArea/ToolBar/m_btnMotion").GetComponent<Button>();
         m_lblMotion = transform.Find("CharaArea/ToolBar/m_btnMotion/m_lblMotion").GetComponent<Text>();
@@ -64,7 +71,6 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_btnApply = transform.Find("CharaArea/ToolBar/m_btnApply").GetComponent<Button>();
         m_btnEdit = transform.Find("CharaArea/ToolBar/m_btnEdit").GetComponent<Button>();
         m_btnSave = transform.Find("CharaArea/ToolBar/m_btnSave").GetComponent<Button>();
-        m_rawChara = transform.Find("CharaArea/m_rawChara").GetComponent<RawImage>();
         m_btnRecord = transform.Find("TimelineArea/ToolBar/Left/Top/m_btnRecord").GetComponent<Button>();
         m_btnOperation = transform.Find("TimelineArea/ToolBar/Left/Top/m_btnOperation").GetComponent<Button>();
         m_rectOperationTitleArea = transform.Find("TimelineArea/ToolBar/Left/Top/m_rectOperationTitleArea").GetComponent<RectTransform>();
@@ -97,6 +103,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_sliderH = transform.Find("TimelineArea/Bottom/m_goRight/m_sliderH").GetComponent<Slider>();
         m_sliderV = transform.Find("TimelineArea/Bottom/m_goRight/m_sliderV").GetComponent<Slider>();
 
+        m_btnResetCharaArea.onClick.AddListener(OnButtonResetCharaAreaClick);
         m_btnDelete.onClick.AddListener(OnButtonDeleteClick);
         m_btnMotion.onClick.AddListener(OnButtonMotionClick);
         m_btnApply.onClick.AddListener(OnButtonApplyClick);
@@ -126,7 +133,16 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     }
     #endregion
 
+
+
     #region auto generated events
+
+    private void OnButtonResetCharaAreaClick()
+    {
+        m_tfCharaRoot.localScale = Vector3.one;
+        m_rawChara.rectTransform.localPosition = Vector3.zero;
+    }
+
     private void OnButtonDeleteClick()
     {
         var motionName = m_motionData.motionDataName;
@@ -417,6 +433,24 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_touchTrackArea._OnPointerMove += OnTouchTrackAreaPointerMove;
         m_touchTrackArea._OnPointerUp += OnTouchTrackAreaPointerUp;
         m_touchTrackArea._OnPointerDown += OnTouchTrackAreaPointerDown;
+
+        m_touchChara._OnPointerDown += OnTouchCharaPointerDown;
+        m_touchChara._OnPointerMove += OnTouchCharaPointerMove;
+    }
+
+    private Vector2 m_charaStartPosition;
+    private void OnTouchCharaPointerDown(Vector2 vector)
+    {
+        m_charaStartPosition = vector;
+    }
+
+    private void OnTouchCharaPointerMove(Vector2 vector)
+    {
+        var delta = vector - m_charaStartPosition;
+        m_charaStartPosition = vector;
+        var pos = m_rawChara.rectTransform.position;
+        pos += new Vector3(delta.x, delta.y, 0);
+        m_rawChara.rectTransform.position = pos;
     }
 
     private Vector2 m_selectStartPosition;
@@ -626,17 +660,25 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             }
             else
             {
-                //如果鼠标位置在m_goLeft上
-                if (RectTransformUtility.RectangleContainsScreenPoint(m_goLeft.GetComponent<RectTransform>(), Input.mousePosition))
+                var mousePos = Input.mousePosition;
+                // 如果鼠标位置在m_goLeft上
+                if (RectTransformUtility.RectangleContainsScreenPoint(m_goLeft.GetComponent<RectTransform>(), mousePos))
                 {
                     m_sliderV.value -= wheel * 10;
                 }
-                else if (RectTransformUtility.RectangleContainsScreenPoint(m_goRight.GetComponent<RectTransform>(), Input.mousePosition))
+                // 如果鼠标位置在m_goRight上
+                else if (RectTransformUtility.RectangleContainsScreenPoint(m_goRight.GetComponent<RectTransform>(), mousePos))
                 {
                     int sign = wheel >= 0 ? 1 : -1;
                     float moveValue = Mathf.Abs(wheel) * MAX_FRAME_DISPLAY_COUNT;
                     int value = Mathf.Max(1, (int)moveValue);
                     m_sliderH.value += value * sign;
+                }
+                // 如果鼠标位置在m_tfCharaRoot上
+                else if (RectTransformUtility.RectangleContainsScreenPoint(m_tfCharaRoot.GetComponent<RectTransform>(), mousePos))
+                {
+                    var value = wheel;
+                    m_tfCharaRoot.localScale += new Vector3(value, value, 0);
                 }
             }
         }
