@@ -11,6 +11,7 @@ public class AnimInstructionUI : BaseWindow<AnimInstructionUI>
     private Button m_btnCancel;
     private InputField m_iptFormatText;
     private Button m_btnCall;
+    private Button m_btnLearn;
     #endregion
 
     #region auto generated binders
@@ -19,13 +20,16 @@ public class AnimInstructionUI : BaseWindow<AnimInstructionUI>
         m_btnCancel = transform.Find("bg/GameObject/m_btnCancel").GetComponent<Button>();
         m_iptFormatText = transform.Find("bg/GameObject/立绘指令模板/m_iptFormatText").GetComponent<InputField>();
         m_btnCall = transform.Find("bg/GameObject/m_btnCall").GetComponent<Button>();
+        m_btnLearn = transform.Find("bg/GameObject/m_btnLearn").GetComponent<Button>();
 
         m_btnCancel.onClick.AddListener(OnButtonCancelClick);
         m_iptFormatText.onValueChanged.AddListener(OnInputFieldFormatTextChange);
         m_iptFormatText.onEndEdit.AddListener(OnInputFieldFormatTextEndEdit);
         m_btnCall.onClick.AddListener(OnButtonCallClick);
+        m_btnLearn.onClick.AddListener(OnButtonLearnClick);
     }
     #endregion
+
 
     #region auto generated events
     private void OnButtonCancelClick()
@@ -45,6 +49,11 @@ public class AnimInstructionUI : BaseWindow<AnimInstructionUI>
         Cast();
         m_pageNavMotion.RefreshAll();
         Close();
+    }
+
+    private void OnButtonLearnClick()
+    {
+        Application.OpenURL("https://docs.qq.com/sheet/DWFBuZEVCSEhtU0NB?tab=15es20");
     }
     #endregion
 
