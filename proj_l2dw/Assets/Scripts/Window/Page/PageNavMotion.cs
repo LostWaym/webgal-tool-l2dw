@@ -672,7 +672,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
                     int sign = wheel >= 0 ? 1 : -1;
                     float moveValue = Mathf.Abs(wheel) * MAX_FRAME_DISPLAY_COUNT;
                     int value = Mathf.Max(1, (int)moveValue);
-                    m_sliderH.value += value * sign;
+                    m_sliderH.value -= value * sign;
                 }
                 // 如果鼠标位置在m_tfCharaRoot上
                 else if (RectTransformUtility.RectangleContainsScreenPoint(m_tfCharaRoot.GetComponent<RectTransform>(), mousePos))

@@ -756,7 +756,14 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
 
         private bool IsMouseOnUI()
         {
-            return EventSystem.current.IsPointerOverGameObject();
+            var mousePos = Input.mousePosition;
+            var isMouseInsideGameWindow = 
+                mousePos.x >= 0.0f
+                && mousePos.x <= Screen.width
+                && mousePos.y >= 0.0f
+                && mousePos.y <= Screen.height;
+            
+            return !isMouseInsideGameWindow || EventSystem.current.IsPointerOverGameObject();
         }
     }
 
@@ -1639,7 +1646,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         if (float.TryParse(value, out float alpha))
         {
             model.filterSetData.Alpha = alpha;
-            model.OnFilterSetDataChanged();
+            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Alpha);
         }
         RefreshFilterSet();
     }
@@ -1656,7 +1663,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         if (int.TryParse(value, out int blur))
         {
             model.filterSetData.Blur = blur;
-            model.OnFilterSetDataChanged();
+            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Blur);
         }
         RefreshFilterSet();
     }
@@ -1668,7 +1675,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
             return;
         }
         model.filterSetData.OldFilm = value;
-        model.OnFilterSetDataChanged();
+        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.OldFilm);
         RefreshFilterSet();
     }
     private void OnToggleDotFilmChange(bool value)
@@ -1679,7 +1686,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
             return;
         }
         model.filterSetData.DotFilm = value;
-        model.OnFilterSetDataChanged();
+        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.DotFilm);
         RefreshFilterSet();
     }
     private void OnToggleReflectionFilmChange(bool value)
@@ -1690,7 +1697,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
             return;
         }
         model.filterSetData.ReflectionFilm = value;
-        model.OnFilterSetDataChanged();
+        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.ReflectionFilm);
         RefreshFilterSet();
     }
     private void OnToggleGlitchFilmChange(bool value)
@@ -1701,7 +1708,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
             return;
         }
         model.filterSetData.GlitchFilm = value;
-        model.OnFilterSetDataChanged();
+        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.GlitchFilm);
         RefreshFilterSet();
     }
     private void OnToggleRgbFilmChange(bool value)
@@ -1712,7 +1719,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
             return;
         }
         model.filterSetData.RgbFilm = value;
-        model.OnFilterSetDataChanged();
+        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.RgbFilm);
         RefreshFilterSet();
     }
     private void OnToggleGodrayFilmChange(bool value)
@@ -1723,7 +1730,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
             return;
         }
         model.filterSetData.GodrayFilm = value;
-        model.OnFilterSetDataChanged();
+        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.GodrayFilm);
         RefreshFilterSet();
     }
     #endregion

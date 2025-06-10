@@ -6,6 +6,18 @@ using UnityEngine;
 
 public class ModelAdjusterBase : MonoBehaviour
 {
+    public enum FilterProperty
+    {
+        Alpha,
+        Blur,
+        OldFilm,
+        DotFilm,
+        ReflectionFilm,
+        GlitchFilm,
+        RgbFilm,
+        GodrayFilm,
+    }
+    
     public virtual bool SupportAnimationMode => false;
     public virtual bool SupportExpressionMode => false;
     public virtual bool HasMotions => false;
@@ -221,7 +233,7 @@ public class ModelAdjusterBase : MonoBehaviour
     #region Filter
     public FilterSetData filterSetData = new FilterSetData();
 
-    public virtual void OnFilterSetDataChanged()
+    public virtual void OnFilterSetDataChanged(FilterProperty property)
     {
 
     }
