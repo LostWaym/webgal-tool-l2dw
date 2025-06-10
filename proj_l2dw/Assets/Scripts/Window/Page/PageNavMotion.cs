@@ -12,7 +12,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     public static float dot_padding = 8;
     public static int dot_count = 5;
 
-     #region auto generated members
+    #region auto generated members
     private Transform m_tfCharaRoot;
     private RawImage m_rawChara;
     private TouchArea m_touchChara;
@@ -44,17 +44,18 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private Text m_lblLabelIndex;
     private TouchArea m_touchLabels;
     private InputField m_iptFrameIndex;
-    private GameObject m_goLeft;
-    private Transform m_tfTrackHeaderRoot;
-    private Transform m_itemTrackHeader;
     private GameObject m_goRight;
     private Transform m_tfTrackRoot;
     private Transform m_itemTrack;
+    private UILineRenderer m_lineFrame;
     private TouchArea m_touchTrackArea;
     private Image m_imgRect;
     private Image m_imgLine;
     private Slider m_sliderH;
     private Slider m_sliderV;
+    private GameObject m_goLeft;
+    private Transform m_tfTrackHeaderRoot;
+    private Transform m_itemTrackHeader;
     #endregion
 
     #region auto generated binders
@@ -91,17 +92,18 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_lblLabelIndex = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_rectLabels/m_lblLabelIndex").GetComponent<Text>();
         m_touchLabels = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_touchLabels").GetComponent<TouchArea>();
         m_iptFrameIndex = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_iptFrameIndex").GetComponent<InputField>();
-        m_goLeft = transform.Find("TimelineArea/Bottom/m_goLeft").gameObject;
-        m_tfTrackHeaderRoot = transform.Find("TimelineArea/Bottom/m_goLeft/m_tfTrackHeaderRoot").GetComponent<Transform>();
-        m_itemTrackHeader = transform.Find("TimelineArea/Bottom/m_goLeft/m_tfTrackHeaderRoot/m_itemTrackHeader").GetComponent<Transform>();
         m_goRight = transform.Find("TimelineArea/Bottom/m_goRight").gameObject;
         m_tfTrackRoot = transform.Find("TimelineArea/Bottom/m_goRight/m_tfTrackRoot").GetComponent<Transform>();
         m_itemTrack = transform.Find("TimelineArea/Bottom/m_goRight/m_tfTrackRoot/m_itemTrack").GetComponent<Transform>();
+        m_lineFrame = transform.Find("TimelineArea/Bottom/m_goRight/m_lineFrame").GetComponent<UILineRenderer>();
         m_touchTrackArea = transform.Find("TimelineArea/Bottom/m_goRight/m_touchTrackArea").GetComponent<TouchArea>();
         m_imgRect = transform.Find("TimelineArea/Bottom/m_goRight/m_touchTrackArea/m_imgRect").GetComponent<Image>();
         m_imgLine = transform.Find("TimelineArea/Bottom/m_goRight/m_imgLine").GetComponent<Image>();
         m_sliderH = transform.Find("TimelineArea/Bottom/m_goRight/m_sliderH").GetComponent<Slider>();
         m_sliderV = transform.Find("TimelineArea/Bottom/m_goRight/m_sliderV").GetComponent<Slider>();
+        m_goLeft = transform.Find("TimelineArea/Bottom/m_goLeft").gameObject;
+        m_tfTrackHeaderRoot = transform.Find("TimelineArea/Bottom/m_goLeft/m_tfTrackHeaderRoot").GetComponent<Transform>();
+        m_itemTrackHeader = transform.Find("TimelineArea/Bottom/m_goLeft/m_tfTrackHeaderRoot/m_itemTrackHeader").GetComponent<Transform>();
 
         m_btnResetCharaArea.onClick.AddListener(OnButtonResetCharaAreaClick);
         m_btnDelete.onClick.AddListener(OnButtonDeleteClick);
@@ -132,8 +134,6 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_sliderV.onValueChanged.AddListener(OnSliderVChange);
     }
     #endregion
-
-
 
     #region auto generated events
 
@@ -243,6 +243,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private const string OPERATION_RESTORE_CUR_FRAME = "缓存帧覆盖到当前帧";
     private const string OPERATION_CACHE_SELECTED_DOTS = "缓存框选点（可跨动画工程）";
     private const string OPERATION_RESTORE_SELECTED_DOTS = "缓存框选点覆盖到当前帧";
+    private const string OPERATION_CAST_ANIM_INSTRUCTION = "使用魔法口令";
     private List<string> m_listOperation = new List<string>()
     {
         OPERATION_LINEAR_UNBAKE,
@@ -252,6 +253,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         // OPERATION_RESTORE_CUR_FRAME,
         OPERATION_CACHE_SELECTED_DOTS,
         OPERATION_RESTORE_SELECTED_DOTS,
+        OPERATION_CAST_ANIM_INSTRUCTION,
     };
     private void OnButtonOperationClick()
     {
@@ -288,8 +290,15 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
                 case OPERATION_RESTORE_SELECTED_DOTS:
                     DoRestoreSelectedDots();
                     break;
+                case OPERATION_CAST_ANIM_INSTRUCTION:
+                    DoCastAnimInstruction();
+                    break;
             }
         };
+    }
+    private void DoCastAnimInstruction()
+    {
+        AnimInstructionUI.Instance.SetPageNavMotion(this);
     }
     private void OnToggleFilterChange(bool value)
     {
@@ -401,6 +410,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private List<Live2DParamInfo> paramKeys = new List<Live2DParamInfo>();
 
     private Live2dMotionData m_motionData;
+    public Live2dMotionData MotionData => m_motionData;
     private List<Live2dMotionData> m_listMotionData;
 
     public int MAX_TRACK_DISPLAY_COUNT
@@ -1264,6 +1274,11 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             m_listMotionTrack[i].SetData(m_motionData.TryGetTrack(filteredParamKeys[trackIndex + i].name), frameIndex);
         }
         RefreshTrackLabels();
+    }
+
+    public void RefreshCurveLine()
+    {
+
     }
 
     private void OnMotionTrackItemCreate(MotionTrackWidget widget)

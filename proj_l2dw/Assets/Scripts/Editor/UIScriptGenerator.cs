@@ -28,6 +28,7 @@ public static class UIScriptGenerator
         { "m_touch", typeof(TouchArea).Name },
         { "m_keystyle", typeof(MonoKeyUIStyle).Name },
         { "m_raw", typeof(RawImage).Name },
+        { "m_line", typeof(UILineRenderer).Name },
     };
 
     private static Dictionary<string, string> reserverPrefixToComponentType = new Dictionary<string, string>();
