@@ -140,7 +140,7 @@ public class SettingPageGeneralWidget : UIItemWidget<SettingPageGeneralWidget>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_iptField = transform.Find("Value/m_iptField").GetComponent<InputField>();
+        m_iptField = transform.Find("Value/InputField/m_iptField").GetComponent<InputField>();
 
         m_iptField.onValueChanged.AddListener(OnInputFieldFieldChange);
     }
@@ -181,11 +181,11 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_itemModelPath = transform.Find("Viewport/Content/m_itemModelPath").GetComponent<Transform>();
-        m_itemBGPath = transform.Find("Viewport/Content/m_itemBGPath").GetComponent<Transform>();
-        m_itemBGChangeTemplate = transform.Find("Viewport/Content/m_itemBGChangeTemplate").GetComponent<Transform>();
-        m_itemBGTransformTemplate = transform.Find("Viewport/Content/m_itemBGTransformTemplate").GetComponent<Transform>();
-        m_toggleCloseGreenLine = transform.Find("Viewport/Content/m_toggleCloseGreenLine").GetComponent<Toggle>();
+        m_itemModelPath = transform.Find("ScrollRect/Viewport/Content/m_itemModelPath").GetComponent<Transform>();
+        m_itemBGPath = transform.Find("ScrollRect/Viewport/Content/m_itemBGPath").GetComponent<Transform>();
+        m_itemBGChangeTemplate = transform.Find("ScrollRect/Viewport/Content/m_itemBGChangeTemplate").GetComponent<Transform>();
+        m_itemBGTransformTemplate = transform.Find("ScrollRect/Viewport/Content/m_itemBGTransformTemplate").GetComponent<Transform>();
+        m_toggleCloseGreenLine = transform.Find("ScrollRect/Viewport/Content/m_toggleCloseGreenLine").GetComponent<Toggle>();
 
         m_toggleCloseGreenLine.onValueChanged.AddListener(OnToggleCloseGreenLineChange);
     }
@@ -285,9 +285,9 @@ public class SettingPageExperiment : SettingPageBase<SettingPageExperiment>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_toggleBlink = transform.Find("Viewport/Content/m_toggleBlink").GetComponent<Toggle>();
-        m_toggleWebgalExpSupport = transform.Find("Viewport/Content/m_toggleWebgalExpSupport").GetComponent<Toggle>();
-        m_toggle_2_4Support = transform.Find("Viewport/Content/m_toggle_2_4Support").GetComponent<Toggle>();
+        m_toggleBlink = transform.Find("ScrollRect/Viewport/Content/m_toggleBlink").GetComponent<Toggle>();
+        m_toggleWebgalExpSupport = transform.Find("ScrollRect/Viewport/Content/m_toggleWebgalExpSupport").GetComponent<Toggle>();
+        m_toggle_2_4Support = transform.Find("ScrollRect/Viewport/Content/m_toggle_2_4Support").GetComponent<Toggle>();
 
         m_toggleBlink.onValueChanged.AddListener(OnToggleBlinkChange);
         m_toggleWebgalExpSupport.onValueChanged.AddListener(OnToggleWebgalExpSupportChange);
@@ -343,7 +343,7 @@ public class SettingPageNavigationWidget : UIItemWidget<SettingPageNavigationWid
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_iptField = transform.Find("Value/m_iptField").GetComponent<InputField>();
+        m_iptField = transform.Find("Value/InputField/m_iptField").GetComponent<InputField>();
 
         m_iptField.onValueChanged.AddListener(OnInputFieldFieldChange);
         m_iptField.onEndEdit.AddListener(OnInputFieldEndEdit);
@@ -386,8 +386,8 @@ public class SettingPageNavigation : SettingPageBase<SettingPageNavigation>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_itemCameraZoomFactor = transform.Find("ScrollView/Viewport/Content/m_itemCameraZoomFactor").GetComponent<Transform>();
-        m_itemCameraZoomBoostFactor = transform.Find("ScrollView/Viewport/Content/m_itemCameraZoomBoostFactor").GetComponent<Transform>();
+        m_itemCameraZoomFactor = transform.Find("ScrollRect/Viewport/Content/m_itemCameraZoomFactor").GetComponent<Transform>();
+        m_itemCameraZoomBoostFactor = transform.Find("ScrollRect/Viewport/Content/m_itemCameraZoomBoostFactor").GetComponent<Transform>();
     }
     #endregion
     
