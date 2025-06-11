@@ -395,11 +395,13 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private void OnSliderHChange(float value)
     {
         RefreshMotionTrack();
+        RefreshCurveLine();
     }
     private void OnSliderVChange(float value)
     {
         RefreshMotionTrackHeader();
         RefreshMotionTrack();
+        RefreshCurveLine();
     }
 
     #endregion
@@ -1062,6 +1064,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
 
         RefreshMotionTrackHeader();
         RefreshMotionTrack();
+        RefreshCurveLine();
         RefreshSlider();
         SampleFrame();
         RefreshTrackLabels();
@@ -1278,7 +1281,43 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
 
     public void RefreshCurveLine()
     {
+        if (filteredParamKeys.Count == 0)
+        {
+            m_lineFrame.ClearPoints();
+            return;
+        }
 
+        var points = new List<Vector2>();
+        var paramInfo = filteredParamKeys[0];
+        var trackName = paramInfo.name;
+        var track = m_motionData.TryGetTrack(trackName, false);
+        m_motionData.info.keyFrames.TryGetValue(trackName, out var bakedPos);
+        var startIndex = (int)m_sliderH.value;
+        var endIndex = startIndex + PageNavMotion.dot_count - 1;
+        Vector2 half = m_lineFrame.rectTransform.rect.size / 2;
+        float min = paramInfo.min;
+        float max = paramInfo.max;
+        float remap_min = -half.y;
+        float remap_max = half.y;
+        if (track != null && bakedPos != null)
+        {
+            for (int i = startIndex; i <= endIndex; i++)
+            {
+                if (i < bakedPos.Count && i >= 0)
+                {
+                    var value = bakedPos[i];
+                    int dot_index = i;
+                    if (m_pageNavMotionLabel.GetLabelPosition(dot_index, out var dot_pos))
+                    {
+                        var localX = m_lineFrame.rectTransform.InverseTransformPoint(dot_pos).x;
+                        var remappedValue = L2DWUtils.Remap(value, min, max, remap_min, remap_max);
+                        points.Add(new Vector2(localX, remappedValue));
+                    }
+                }
+            }
+        }
+
+        m_lineFrame.SetPoints(points);
     }
 
     private void OnMotionTrackItemCreate(MotionTrackWidget widget)
