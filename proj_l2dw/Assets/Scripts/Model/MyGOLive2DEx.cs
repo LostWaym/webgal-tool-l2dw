@@ -71,8 +71,6 @@ public class MyGOLive2DEx : MonoBehaviour
             1.0f,
             live2DModel.getCanvasHeight() * 0.2f
         );
-        
-        Debug.Log($"width: {live2DModel.getCanvasWidth()}, height:{live2DModel.getCanvasHeight()}");
     }
 
     public void ReloadTextures()

@@ -81,7 +81,7 @@ public class BaseWindow<T> : BaseWindow where T : BaseWindow<T>
                 ListItem item = new ListItem();
                 item.Create(gameObject);
                 list.Add(item);
-                gameObject.transform.parent = root;
+                gameObject.transform.SetParent(root);
                 gameObject.SetActive(true);
                 onItemCreate?.Invoke(item);
             }

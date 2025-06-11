@@ -20,15 +20,15 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_iptName = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/角色名/m_iptName").GetComponent<InputField>();
-        m_iptModelFilePath = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/主模型路径/Value/m_iptModelFilePath").GetComponent<InputField>();
-        m_iptFormatText = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/立绘指令模板/m_iptFormatText").GetComponent<InputField>();
-        m_iptTransformFormatText = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/变换指令模板/m_iptTransformFormatText").GetComponent<InputField>();
-        m_tfSubModelRoot = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/子立绘路径/m_tfSubModelRoot").GetComponent<Transform>();
-        m_itemSubModel = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/子立绘路径/m_tfSubModelRoot/m_itemSubModel").GetComponent<Transform>();
-        m_btnAddSubModelPath = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/子立绘路径/GameObject/m_btnAddSubModelPath").GetComponent<Button>();
-        m_btnSave = transform.Find("bg/GameObject/Bottom/m_btnSave").GetComponent<Button>();
-        m_btnCancel = transform.Find("bg/GameObject/Top/m_btnCancel").GetComponent<Button>();
+        m_iptName = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/角色名/Value/InputField/m_iptName").GetComponent<InputField>();
+        m_iptModelFilePath = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/主模型路径/Value/InputField/m_iptModelFilePath").GetComponent<InputField>();
+        m_iptFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/立绘指令模板/Value/InputField/m_iptFormatText").GetComponent<InputField>();
+        m_iptTransformFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/变换指令模板/Value/InputField/m_iptTransformFormatText").GetComponent<InputField>();
+        m_tfSubModelRoot = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/子立绘路径/m_tfSubModelRoot").GetComponent<Transform>();
+        m_itemSubModel = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/子立绘路径/m_tfSubModelRoot/m_itemSubModel").GetComponent<Transform>();
+        m_btnAddSubModelPath = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/子立绘路径/GameObject/m_btnAddSubModelPath").GetComponent<Button>();
+        m_btnSave = transform.Find("Background/Popup/Window/Bottom/m_btnSave").GetComponent<Button>();
+        m_btnCancel = transform.Find("Background/Popup/Window/Top/m_btnCancel").GetComponent<Button>();
 
         m_iptName.onValueChanged.AddListener(OnInputFieldNameChange);
         m_iptName.onEndEdit.AddListener(OnInputFieldNameEndEdit);
@@ -245,9 +245,9 @@ public class ProfileSettingSubModelWidget : UIItemWidget<ProfileSettingSubModelW
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_iptModelFilePaths = transform.Find("m_iptModelFilePaths").GetComponent<InputField>();
-        m_iptX = transform.Find("m_iptX").GetComponent<InputField>();
-        m_iptY = transform.Find("m_iptY").GetComponent<InputField>();
+        m_iptModelFilePaths = transform.Find("InputField/m_iptModelFilePaths").GetComponent<InputField>();
+        m_iptX = transform.Find("OffsetX/m_iptX").GetComponent<InputField>();
+        m_iptY = transform.Find("OffsetY/m_iptY").GetComponent<InputField>();
         m_btnDelete = transform.Find("m_btnDelete").GetComponent<Button>();
         m_btnUp = transform.Find("m_btnUp").GetComponent<Button>();
         m_btnDown = transform.Find("m_btnDown").GetComponent<Button>();
@@ -277,6 +277,9 @@ public class ProfileSettingSubModelWidget : UIItemWidget<ProfileSettingSubModelW
     }
     private void OnInputFieldXChange(string value)
     {
+    }
+    private void OnInputFieldXEndEdit(string value)
+    {
         if (float.TryParse(value, out var result))
         {
             _OnXChange?.Invoke(this, result);
@@ -284,10 +287,10 @@ public class ProfileSettingSubModelWidget : UIItemWidget<ProfileSettingSubModelW
         }
         m_iptX.SetTextWithoutNotify(info.offsetX.ToString());
     }
-    private void OnInputFieldXEndEdit(string value)
+    private void OnInputFieldYChange(string value)
     {
     }
-    private void OnInputFieldYChange(string value)
+    private void OnInputFieldYEndEdit(string value)
     {
         if (float.TryParse(value, out var result))
         {
@@ -295,9 +298,6 @@ public class ProfileSettingSubModelWidget : UIItemWidget<ProfileSettingSubModelW
             return;
         }
         m_iptY.SetTextWithoutNotify(info.offsetY.ToString());
-    }
-    private void OnInputFieldYEndEdit(string value)
-    {
     }
 
     private void OnButtonDeleteClick()
