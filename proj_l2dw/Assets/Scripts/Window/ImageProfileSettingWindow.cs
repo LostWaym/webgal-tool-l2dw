@@ -20,12 +20,12 @@ public class ImageProfileSettingWindow : BaseWindow<ImageProfileSettingWindow>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_iptName = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/角色名/m_iptName").GetComponent<InputField>();
-        m_iptModelFilePath = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/主模型路径/m_iptModelFilePath").GetComponent<InputField>();
-        m_iptFormatText = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/立绘指令模板/m_iptFormatText").GetComponent<InputField>();
-        m_iptTransformFormatText = transform.Find("bg/GameObject/Scroll View/Viewport/Content/view/变换指令模板/m_iptTransformFormatText").GetComponent<InputField>();
-        m_btnSave = transform.Find("bg/GameObject/m_btnSave").GetComponent<Button>();
-        m_btnCancel = transform.Find("bg/GameObject/m_btnCancel").GetComponent<Button>();
+        m_iptName = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/角色名/Value/InputField/m_iptName").GetComponent<InputField>();
+        m_iptModelFilePath = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/主模型路径/Value/InputField/m_iptModelFilePath").GetComponent<InputField>();
+        m_iptFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/立绘指令模板/Value/InputField/m_iptFormatText").GetComponent<InputField>();
+        m_iptTransformFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/变换指令模板/Value/InputField/m_iptTransformFormatText").GetComponent<InputField>();
+        m_btnSave = transform.Find("Background/Popup/Window/Bottom/m_btnSave").GetComponent<Button>();
+        m_btnCancel = transform.Find("Background/Popup/Window/Top/m_btnCancel").GetComponent<Button>();
 
         m_iptName.onValueChanged.AddListener(OnInputFieldNameChange);
         m_iptName.onEndEdit.AddListener(OnInputFieldNameEndEdit);
