@@ -12,6 +12,9 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     public static float dot_padding = 8;
     public static int dot_count = 5;
 
+    public bool ShowTrackDots => m_toggleDotSheetMode.isOn;
+    public bool ShowCurveLine => m_toggleCurveMode.isOn;
+
     #region auto generated members
     private Transform m_tfCharaRoot;
     private RawImage m_rawChara;
@@ -48,6 +51,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private Transform m_tfTrackRoot;
     private Transform m_itemTrack;
     private UILineRenderer m_lineFrame;
+    private GameObject m_goLineDot;
     private TouchArea m_touchTrackArea;
     private Image m_imgRect;
     private Image m_imgLine;
@@ -96,6 +100,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_tfTrackRoot = transform.Find("TimelineArea/Bottom/m_goRight/m_tfTrackRoot").GetComponent<Transform>();
         m_itemTrack = transform.Find("TimelineArea/Bottom/m_goRight/m_tfTrackRoot/m_itemTrack").GetComponent<Transform>();
         m_lineFrame = transform.Find("TimelineArea/Bottom/m_goRight/m_lineFrame").GetComponent<UILineRenderer>();
+        m_goLineDot = transform.Find("TimelineArea/Bottom/m_goRight/m_lineFrame/m_goLineDot").gameObject;
         m_touchTrackArea = transform.Find("TimelineArea/Bottom/m_goRight/m_touchTrackArea").GetComponent<TouchArea>();
         m_imgRect = transform.Find("TimelineArea/Bottom/m_goRight/m_touchTrackArea/m_imgRect").GetComponent<Image>();
         m_imgLine = transform.Find("TimelineArea/Bottom/m_goRight/m_imgLine").GetComponent<Image>();
@@ -319,11 +324,13 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     }
     private void OnToggleDotSheetModeChange(bool value)
     {
-        Debug.Log($"OnToggleDotSheetModeChange:{value}");
+        RefreshMotionTrack();
+        RefreshCurveLine();
     }
     private void OnToggleCurveModeChange(bool value)
     {
-        Debug.Log($"OnToggleCurveModeChange:{value}");
+        RefreshMotionTrack();
+        RefreshCurveLine();
     }
     private void OnButtonNavHomeClick()
     {
@@ -394,12 +401,14 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
 
     private void OnSliderHChange(float value)
     {
+        RefreshTrackLabels();
         RefreshMotionTrack();
         RefreshCurveLine();
     }
     private void OnSliderVChange(float value)
     {
         RefreshMotionTrackHeader();
+        RefreshTrackLabels();
         RefreshMotionTrack();
         RefreshCurveLine();
     }
@@ -1268,6 +1277,13 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     }
     public void RefreshMotionTrack()
     {
+        if (!ShowTrackDots)
+        {
+            m_tfTrackRoot.gameObject.SetActive(false);
+            return;
+        }
+        m_tfTrackRoot.gameObject.SetActive(true);
+
         var trackIndex = (int)m_sliderV.value;
         var frameIndex = (int)m_sliderH.value;
         var trackCount = TrackItemCount;
@@ -1279,14 +1295,19 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         RefreshTrackLabels();
     }
 
+    private List<MotionTrackDotWidget> m_curveLineDots = new List<MotionTrackDotWidget>();
+    private List<int> m_curveLineDotIndexes = new List<int>();
     public void RefreshCurveLine()
     {
-        if (filteredParamKeys.Count == 0)
+        if (filteredParamKeys.Count == 0 || !ShowCurveLine)
         {
             m_lineFrame.ClearPoints();
             return;
         }
 
+        Dictionary<int, float> dotY = new Dictionary<int, float>();
+
+        //曲线部分
         var points = new List<Vector2>();
         var paramInfo = filteredParamKeys[0];
         var trackName = paramInfo.name;
@@ -1312,12 +1333,40 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
                         var localX = m_lineFrame.rectTransform.InverseTransformPoint(dot_pos).x;
                         var remappedValue = L2DWUtils.Remap(value, min, max, remap_min, remap_max);
                         points.Add(new Vector2(localX, remappedValue));
+                        dotY[dot_index] = remappedValue;
                     }
                 }
             }
         }
 
         m_lineFrame.SetPoints(points);
+
+        //点部分
+        m_curveLineDotIndexes.Clear();
+        for (int i = 0; i < PageNavMotion.dot_count; i++)
+        {
+            int frame = startIndex + i;
+            bool hasKeyFrame = track != null && track.HasKeyFrame(frame);
+            if (hasKeyFrame)
+            {
+                m_curveLineDotIndexes.Add(frame);
+            }
+        }
+        
+        int shownDotCount = m_curveLineDotIndexes.Count;
+        SetListItem(m_curveLineDots, m_goLineDot, m_lineFrame.rectTransform, shownDotCount, null);
+        for (int i = 0; i < shownDotCount; i++)
+        {
+            var dot = m_curveLineDots[i];
+            var relativeIndex = m_curveLineDotIndexes[i] - startIndex;
+            var pos = dot.rectTransform.anchoredPosition;
+            pos.x = relativeIndex * PageNavMotion.dot_space + PageNavMotion.dot_padding;
+            pos.y = dotY[m_curveLineDotIndexes[i]];
+            dot.rectTransform.anchoredPosition = pos;
+            var key = track.name;
+            var isSelected = PageNavMotion.IsDotSelected(key, m_curveLineDotIndexes[i]);
+            dot.SetData(m_curveLineDotIndexes[i], isSelected);
+        }
     }
 
     private void OnMotionTrackItemCreate(MotionTrackWidget widget)
