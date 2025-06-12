@@ -14,9 +14,9 @@ public class MessageTipWindow : BaseWindow<MessageTipWindow>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_lblTitle = transform.Find("bg/Panel/Top/m_lblTitle").GetComponent<Text>();
-        m_lblContent = transform.Find("bg/Panel/m_lblContent").GetComponent<Text>();
-        m_btnClose = transform.Find("bg/Panel/Top/m_btnClose").GetComponent<Button>();
+        m_lblTitle = transform.Find("Background/Popup/Window/Top/m_lblTitle").GetComponent<Text>();
+        m_lblContent = transform.Find("Background/Popup/Window/Content/m_lblContent").GetComponent<Text>();
+        m_btnClose = transform.Find("Background/Popup/Window/Top/m_btnClose").GetComponent<Button>();
 
         m_btnClose.onClick.AddListener(OnButtonCloseClick);
     }

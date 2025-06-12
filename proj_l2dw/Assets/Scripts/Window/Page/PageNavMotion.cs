@@ -153,7 +153,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private void OnButtonDeleteClick()
     {
         var motionName = m_motionData.motionDataName;
-        ConfirmUI.Instance.SetData($"确定要删除{motionName}吗？", "删除后将无法恢复", () =>
+        ConfirmUI.Instance.SetData($"删除动画", $"确定要删除 {motionName} 吗？\n删除后将无法恢复", () =>
         {
             m_listMotionData.Remove(m_motionData);
             if (m_listMotionData.Count > 0)

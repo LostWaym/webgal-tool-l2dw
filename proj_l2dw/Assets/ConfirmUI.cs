@@ -17,11 +17,11 @@ public class ConfirmUI : BaseWindow<ConfirmUI>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_lblTitle = transform.Find("bg/Panel/Top/m_lblTitle").GetComponent<Text>();
-        m_lblContent = transform.Find("bg/Panel/Content/m_lblContent").GetComponent<Text>();
-        m_btnClose = transform.Find("bg/Panel/Top/m_btnClose").GetComponent<Button>();
-        m_btnSubmit = transform.Find("bg/Panel/GameObject/m_btnSubmit").GetComponent<Button>();
-        m_btnCancel = transform.Find("bg/Panel/GameObject/m_btnCancel").GetComponent<Button>();
+        m_lblTitle = transform.Find("Background/Popup/Window/Top/m_lblTitle").GetComponent<Text>();
+        m_lblContent = transform.Find("Background/Popup/Window/Content/m_lblContent").GetComponent<Text>();
+        m_btnClose = transform.Find("Background/Popup/Window/Top/m_btnClose").GetComponent<Button>();
+        m_btnSubmit = transform.Find("Background/Popup/Window/Bottom/m_btnSubmit").GetComponent<Button>();
+        m_btnCancel = transform.Find("Background/Popup/Window/Bottom/m_btnCancel").GetComponent<Button>();
 
         m_btnClose.onClick.AddListener(OnButtonCloseClick);
         m_btnSubmit.onClick.AddListener(OnButtonSubmitClick);
