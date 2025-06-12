@@ -1302,8 +1302,10 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         if (filteredParamKeys.Count == 0 || !ShowCurveLine)
         {
             m_lineFrame.ClearPoints();
+            m_lineFrame.gameObject.SetActive(false);
             return;
         }
+        m_lineFrame.gameObject.SetActive(true);
 
         Dictionary<int, float> dotY = new Dictionary<int, float>();
 
