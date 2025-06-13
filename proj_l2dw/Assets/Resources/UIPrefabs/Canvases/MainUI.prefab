@@ -8692,7 +8692,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
+  m_VertexColorAlwaysGammaSpace: 1
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -35775,6 +35775,7 @@ GameObject:
   - component: {fileID: 6594865913933367182}
   - component: {fileID: 4674770116758136269}
   - component: {fileID: 4707750187883617929}
+  - component: {fileID: 6525644547995591118}
   m_Layer: 0
   m_Name: m_goLineDot
   m_TagString: Untagged
@@ -35839,6 +35840,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6525644547995591118
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8860517746423549560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16f46c0354caeea429e792eefe93ef49, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8869929097021239854
 GameObject:
   m_ObjectHideFlags: 0

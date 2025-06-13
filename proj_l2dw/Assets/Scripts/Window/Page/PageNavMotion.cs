@@ -1286,9 +1286,11 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         if (!ShowTrackDots)
         {
             m_tfTrackRoot.gameObject.SetActive(false);
+            m_touchTrackArea.gameObject.SetActive(false);
             return;
         }
         m_tfTrackRoot.gameObject.SetActive(true);
+        m_touchTrackArea.gameObject.SetActive(true);
 
         var trackIndex = (int)m_sliderV.value;
         var frameIndex = (int)m_sliderH.value;
@@ -1301,7 +1303,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         RefreshTrackLabels();
     }
 
-    private List<MotionTrackDotWidget> m_curveLineDots = new List<MotionTrackDotWidget>();
+    private List<MotionTrackCurveLineDotWidget> m_curveLineDots = new List<MotionTrackCurveLineDotWidget>();
     private List<int> m_curveLineDotIndexes = new List<int>();
     public void RefreshCurveLine()
     {
@@ -1362,7 +1364,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         }
         
         int shownDotCount = m_curveLineDotIndexes.Count;
-        SetListItem(m_curveLineDots, m_goLineDot, m_lineFrame.rectTransform, shownDotCount, null);
+        SetListItem(m_curveLineDots, m_goLineDot, m_lineFrame.rectTransform, shownDotCount, OnCurveLineItemCreate);
         for (int i = 0; i < shownDotCount; i++)
         {
             var dot = m_curveLineDots[i];
@@ -1371,16 +1373,110 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             pos.x = relativeIndex * PageNavMotion.dot_space + PageNavMotion.dot_padding;
             pos.y = dotY[m_curveLineDotIndexes[i]];
             dot.rectTransform.anchoredPosition = pos;
-            var key = track.name;
-            var isSelected = PageNavMotion.IsDotSelected(key, m_curveLineDotIndexes[i]);
-            dot.SetData(m_curveLineDotIndexes[i], isSelected);
+            // var key = track.name;
+            // var isSelected = PageNavMotion.IsDotSelected(key, m_curveLineDotIndexes[i]);
+            dot.SetData(m_curveLineDotIndexes[i], paramInfo);
         }
+    }
+
+    private void OnCurveLineItemCreate(MotionTrackCurveLineDotWidget widget)
+    {
+        widget._OnDrag += OnCurveLineItemDrag;
+    }
+
+    private void OnCurveLineItemDrag(MotionTrackCurveLineDotWidget widget, Vector2 position)
+    {
+        Vector2 half = m_lineFrame.rectTransform.rect.size / 2;
+        float min = widget.paramInfo.min;
+        float max = widget.paramInfo.max;
+        float remap_min = -half.y;
+        float remap_max = half.y;
+
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(m_lineFrame.rectTransform, position, null, out var localPosition);
+        var localY = localPosition.y;
+        var remappedValue = L2DWUtils.Remap(localY, remap_min, remap_max, min, max);
+
+        var curFrameIndex = widget.frameIndex;
+        var minFrameIndex = 0;
+        var maxFrameIndex = int.MaxValue;
+        var track = m_motionData.TryGetTrack(widget.paramInfo.name, true);
+        var lst = track.keyFrames.Keys.ToList();
+        lst.Sort();
+        var ind = lst.BinarySearch(curFrameIndex);
+        if (ind >= 0)
+        {
+            if (ind > 0)
+            {
+                minFrameIndex = lst[ind - 1] + 1;
+            }
+            if (ind < lst.Count - 1)
+            {
+                maxFrameIndex = lst[ind + 1] - 1;
+            }
+        }
+
+        var frameIndex = m_pageNavMotionLabel.GetRelativeLabelByPosition(position);
+        // Debug.Log(frameIndex);
+        frameIndex = Mathf.Clamp(frameIndex, minFrameIndex, maxFrameIndex);
+
+        if (frameIndex != curFrameIndex)
+        {
+            track.keyFrames.Remove(curFrameIndex);
+        }
+        SetTrackValue(widget.paramInfo.name, frameIndex, remappedValue);
+
+        // Debug.Log($"OnCurveLineItemDrag: {widget.frameIndex} {widget.paramInfo.name} {remappedValue} oldIndex: {curFrameIndex} newIndex: {frameIndex}");
     }
 
     private void OnMotionTrackItemCreate(MotionTrackWidget widget)
     {
     }
 
+}
+
+public class MotionTrackCurveLineDotWidget : UIItemWidget<MotionTrackCurveLineDotWidget>
+{
+    private DragHandleCom dragHandle;
+    public RectTransform rectTransform;
+
+    public Action<MotionTrackCurveLineDotWidget, Vector2> _OnDrag;
+    public Action<MotionTrackCurveLineDotWidget, Vector2> _OnPointerDown;
+    public Action<MotionTrackCurveLineDotWidget, Vector2> _OnPointerUp;
+
+    public int frameIndex;
+    public Live2DParamInfo paramInfo;
+
+    protected override void OnInit()
+    {
+        base.OnInit();
+        dragHandle = gameObject.GetComponent<DragHandleCom>();
+        rectTransform = transform as RectTransform;
+
+        dragHandle._OnDrag += OnCurveLineItemDrag;
+        dragHandle._OnPointerDown += OnCurveLineItemPointerDown;
+        dragHandle._OnPointerUp += OnCurveLineItemPointerUp;
+    }
+
+    public void SetData(int frameIndex, Live2DParamInfo paramInfo)
+    {
+        this.frameIndex = frameIndex;
+        this.paramInfo = paramInfo;
+    }
+
+    private void OnCurveLineItemDrag(DragHandleCom handle, Vector2 position)
+    {
+        _OnDrag?.Invoke(this, position);
+    }
+
+    private void OnCurveLineItemPointerDown(DragHandleCom handle, Vector2 position)
+    {
+        _OnPointerDown?.Invoke(this, position);
+    }
+
+    private void OnCurveLineItemPointerUp(DragHandleCom handle, Vector2 position)
+    {
+        _OnPointerUp?.Invoke(this, position);
+    }
 }
 
 public class MotionTrackHeaderWidget : UIItemWidget<MotionTrackHeaderWidget>
