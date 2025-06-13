@@ -57,7 +57,7 @@ public class ModelAdjuster : ModelAdjusterBase
     private Transform pivot;
     [SerializeField]
     private WebGalModelPos webgalPosPrefab;
-    private MyGOLive2DEx MainModel => webgalPoses[0].model;
+    public MyGOLive2DEx MainModel => webgalPoses.Count > 0 ? webgalPoses[0].model : null;
     private List<WebGalModelPos> webgalPoses = new List<WebGalModelPos>();
     
     private RenderTexture rt;
@@ -252,9 +252,13 @@ public class ModelAdjuster : ModelAdjusterBase
                 return null;
             }
 
+            var config = Live2dLoadUtils.LoadConfig(modelFilePath);
+            if (config == null)
+            {
+                return null;
+            }
             var pos = Instantiate(webgalPosPrefab);
             var model = pos.model;
-            var config = Live2dLoadUtils.LoadConfig(modelFilePath);
             model.LoadConfig(config);
             model.transform.localScale = Vector3.one;
             model.transform.localPosition = Vector3.zero;
@@ -266,10 +270,15 @@ public class ModelAdjuster : ModelAdjusterBase
             return pos;
         }
 
-        webgalPoses.Add(CreateWebGalModelPos(meta.GetValidModelFilePath(0)));
-        for (int i = 0; i < meta.modelFilePaths.Count; i++)
+        var mainModel = CreateWebGalModelPos(meta.GetValidModelFilePath(0));
+        if (mainModel == null)
         {
-            webgalPoses.Add(CreateWebGalModelPos(meta.GetValidModelFilePath(i + 1)));
+            return;
+        }
+        webgalPoses.Add(mainModel);
+        for (int i = 1; i < meta.modelFilePaths.Count; i++)
+        {
+            webgalPoses.Add(CreateWebGalModelPos(meta.GetValidModelFilePath(i)));
         }
 
         webgalPoses.RemoveAll(pos => pos == null);
@@ -420,6 +429,10 @@ public class ModelAdjuster : ModelAdjusterBase
         if (camera == null)
         {
             Debug.LogError("Camera.main is null");
+            return;
+        }
+        if (MainModel == null)
+        {
             return;
         }
         foreach (var pos in webgalPoses)

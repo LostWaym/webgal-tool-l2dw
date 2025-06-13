@@ -697,11 +697,17 @@ public class MainControl : MonoBehaviour
                 continue;
 
             var meta = MyGOLive2DExMeta.Load(path);
-            ModelAdjusterBase target = CreateModelAdjuster();
+            var target = CreateModelAdjuster();
             target.meta = meta;
+            target.CreateModel();
+            if (target.MainModel == null)
+            {
+                ShowErrorDebugText($"无法加载主模型，不加载了: {path}");
+                DeleteModel(target);
+                continue;
+            }
             success = true;
             validPath = path;
-            target.CreateModel();
             target.Adjust();
             if (meta.hasTransform)
             {
@@ -733,10 +739,19 @@ public class MainControl : MonoBehaviour
             meta.formatText = $"changeFigure:{meta.modelFilePath} -id={meta.name} %me%;";
         }
         meta.transformFormatText = $"setTransform:%me% -target={meta.name} -duration=750;";
+        
         target.CreateModel();
+        if (target.MainModel == null)
+        {
+            ShowErrorDebugText($"无法加载主模型，不加载了: {path}");
+            DeleteModel(target);
+            return;
+        }
         target.Adjust();
         SetCharacter(target);
         TryPlayDefaultMotion(target);
+
+
 
         Resources.UnloadUnusedAssets();
 
@@ -831,7 +846,7 @@ public class MainControl : MonoBehaviour
         LoadConfModel(paths);
     }
 
-    private ModelAdjusterBase CreateModelAdjuster()
+    private ModelAdjuster CreateModelAdjuster()
     {
         var newtarget = Instantiate(prefab);
         newtarget.gameObject.SetActive(true);

@@ -22,6 +22,12 @@ public static class Live2dLoadUtils
         mygo.ClearEmptyExpressions();
         var config = new MygoConfig();
         config.Load(mygo);
+
+        if (config.model == null)
+        {
+            Debug.LogError("配置有误，无法找到模型，不加载了: " + path);
+            return null;
+        }
         
         return config;
     }

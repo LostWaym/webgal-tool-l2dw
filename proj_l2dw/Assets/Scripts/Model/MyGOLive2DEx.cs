@@ -319,6 +319,14 @@ public class EmotionEditor
         paramApplyDict[name] = value;
     }
 
+    public void SetDefaultParam(string name)
+    {
+        if (list.paramDefDict.TryGetValue(name, out var value))
+        {
+            paramApplyDict[name] = value;
+        }
+    }
+
     public void AddControl(string name)
     {
         paramSet.Add(name);
@@ -327,7 +335,7 @@ public class EmotionEditor
     public void RemoveControl(string name)
     {
         paramSet.Remove(name);
-        SetParam(name, list.paramDefDict[name]);
+        SetDefaultParam(name);
     }
 
     public void CopyFromExp(MygoExp exp)
@@ -351,7 +359,10 @@ public class EmotionEditor
             }
             else
             {
-                model.setParamFloat(item.Key, list.paramDefDict[item.Key]);
+                if (list.paramDefDict.TryGetValue(item.Key, out var value))
+                {
+                    model.setParamFloat(item.Key, value);
+                }
             }
         }
     }

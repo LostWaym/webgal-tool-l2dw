@@ -19,35 +19,38 @@ public class MygoJson
     public Dictionary<string, List<MygoJsonFileItem>> motions;
     public List<MygoJsonExpItem> expressions;
 
+
+
+    //已经在别处做了容错，这里不再移除
     public void ClearEmptyMotions()
     {
-        var basePath = Path.GetDirectoryName(filename);
-        List<string> removeKeys = new List<string>();
-        foreach (var item in motions)
-        {
-            if (File.Exists(Path.Combine(basePath, item.Value[0].file)) || File.Exists(Path.Combine(basePath, item.Value[0].file + ".bytes")))
-                continue;
+        // var basePath = Path.GetDirectoryName(filename);
+        // List<string> removeKeys = new List<string>();
+        // foreach (var item in motions)
+        // {
+        //     if (File.Exists(Path.Combine(basePath, item.Value[0].file)) || File.Exists(Path.Combine(basePath, item.Value[0].file + ".bytes")))
+        //         continue;
 
-            removeKeys.Add(item.Key);
-        }
+        //     removeKeys.Add(item.Key);
+        // }
 
-        foreach (var key in removeKeys)
-        {
-            motions.Remove(key);
-        }
+        // foreach (var key in removeKeys)
+        // {
+        //     motions.Remove(key);
+        // }
     }
 
     public void ClearEmptyExpressions()
     {
-        var basePath = Path.GetDirectoryName(filename);
-        for (int i = expressions.Count - 1; i >= 0; i--)
-        {
-            MygoJsonExpItem item = expressions[i];
-            if (File.Exists(Path.Combine(basePath, item.file)) || File.Exists(Path.Combine(basePath, item.file + ".bytes")))
-                continue;
+        // var basePath = Path.GetDirectoryName(filename);
+        // for (int i = expressions.Count - 1; i >= 0; i--)
+        // {
+        //     MygoJsonExpItem item = expressions[i];
+        //     if (File.Exists(Path.Combine(basePath, item.file)) || File.Exists(Path.Combine(basePath, item.file + ".bytes")))
+        //         continue;
 
-            expressions.RemoveAt(i);
-        }
+        //     expressions.RemoveAt(i);
+        // }
     }
 }
 
@@ -78,16 +81,26 @@ public class MygoConfig
     {
         this.json = json;
         string basePath = Path.GetDirectoryName(json.filename);
-        model = ReadBytes(Path.Combine(basePath, json.model));
+        if (!TryReadBytes(Path.Combine(basePath, json.model), out model))
+        {
+            Debug.LogError("无法加载这个地址的模型，路径可能不存在: " + Path.Combine(basePath, json.model));
+        }
         if (!string.IsNullOrEmpty(json.physics))
         {
-            physics = ReadBytes(Path.Combine(basePath, json.physics));
+            if (!TryReadBytes(Path.Combine(basePath, json.physics), out physics))
+            {
+                Debug.LogError("无法加载这个地址的物理文件，路径可能不存在: " + Path.Combine(basePath, json.physics));
+            }
         }
         textures = new List<Texture2D>();
         for (int i = 0; i < json.textures.Count; i++)
         {
             var path = json.textures[i];
-            byte[] bytes = ReadBytes(Path.Combine(basePath, path));
+            if (!TryReadBytes(Path.Combine(basePath, path), out byte[] bytes))
+            {
+                Debug.LogError("无法加载这个地址的贴图，路径可能不存在: " + Path.Combine(basePath, path));
+                continue;
+            }
             Texture2D tex2d = new Texture2D(1, 1, TextureFormat.ARGB32, false);
             tex2d.LoadImage(bytes);
             textures.Add(tex2d);
@@ -95,13 +108,23 @@ public class MygoConfig
         motions = new Dictionary<string, byte[]>();
         foreach (var item in json.motions)
         {
-            motions.Add(item.Key, ReadBytes(Path.Combine(basePath, item.Value[0].file)));
+            if (!TryReadBytes(Path.Combine(basePath, item.Value[0].file), out byte[] bytes))
+            {
+                Debug.LogError("无法加载这个地址的动画，路径可能不存在: " + Path.Combine(basePath, item.Value[0].file));
+                continue;
+            }
+            motions[item.Key] = bytes;
         }
         expressions = new Dictionary<string, MygoExpJson>();
         foreach (var item in json.expressions)
         {
-            var expJson = JsonConvert.DeserializeObject<MygoExpJson>(ReadAllText(Path.Combine(basePath, item.file)));
-            expressions.Add(item.name, expJson);
+            if (!TryReadAllText(Path.Combine(basePath, item.file), out string text))
+            {
+                Debug.LogError("无法加载这个地址的表情，路径可能不存在: " + Path.Combine(basePath, item.file));
+                continue;
+            }
+            var expJson = JsonConvert.DeserializeObject<MygoExpJson>(text);
+            expressions[item.name] = expJson;
         }
     }
 
@@ -112,7 +135,11 @@ public class MygoConfig
         {
             var texture = textures[i];
             var path = json.textures[i];
-            byte[] bytes = ReadBytes(Path.Combine(basePath, path));
+            if (!TryReadBytes(Path.Combine(basePath, path), out byte[] bytes))
+            {
+                Debug.LogError("无法加载这个地址的贴图，路径可能不存在: " + Path.Combine(basePath, path));
+                continue;
+            }
             texture.LoadImage(bytes);
         }
     }
@@ -125,12 +152,44 @@ public class MygoConfig
         return File.ReadAllBytes(path + ".bytes");
     }
 
+    public bool TryReadBytes(string path, out byte[] bytes)
+    {
+        if (File.Exists(path))
+        {
+            bytes = File.ReadAllBytes(path);
+            return true;
+        }
+        if (File.Exists(path + ".bytes"))
+        {
+            bytes = File.ReadAllBytes(path + ".bytes");
+            return true;
+        }
+        bytes = null;
+        return false;
+    }
+
     public string ReadAllText(string path)
     {
         if (File.Exists(path))
             return File.ReadAllText(path);
 
         return File.ReadAllText(path + ".bytes");
+    }
+
+    public bool TryReadAllText(string path, out string text)
+    {
+        if (File.Exists(path))
+        {
+            text = File.ReadAllText(path);
+            return true;
+        }
+        if (File.Exists(path + ".bytes"))
+        {
+            text = File.ReadAllText(path + ".bytes");
+            return true;
+        }
+        text = null;
+        return false;
     }
 }
 
@@ -220,6 +279,7 @@ public class MygoExpJson
     static MygoExpJson()
     {
         settings.NullValueHandling = NullValueHandling.Ignore;
+        settings.MissingMemberHandling = MissingMemberHandling.Ignore;
     }
 
     public string PrintJson()
