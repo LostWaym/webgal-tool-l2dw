@@ -172,6 +172,18 @@ public class ModelAdjuster : ModelAdjusterBase
         }
     }
 
+    public override void SampleDefaultParam(string paramName)
+    {
+        foreach (var pos in webgalPoses)
+        {
+            var list = pos.model.emotionEditor.list;
+            if (list.paramDefDict.TryGetValue(paramName, out var value))
+            {
+                pos.model.Live2DModel.setParamFloat(paramName, value);
+            }
+        }
+    }
+
     public override void SetDisplayMode(ModelDisplayMode mode, bool force = false)
     {
         if (MainModel.displayMode == mode && !force)

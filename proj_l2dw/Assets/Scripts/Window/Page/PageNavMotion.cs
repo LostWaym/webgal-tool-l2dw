@@ -325,11 +325,13 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private void OnToggleDotSheetModeChange(bool value)
     {
         RefreshMotionTrack();
+        RefreshTrackLabels();
         RefreshCurveLine();
     }
     private void OnToggleCurveModeChange(bool value)
     {
         RefreshMotionTrack();
+        RefreshTrackLabels();
         RefreshCurveLine();
     }
     private void OnButtonNavHomeClick()
@@ -1053,6 +1055,10 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             {
                 curTarget.Sample(paramName, value);
             }
+            else
+            {
+                curTarget.SampleDefaultParam(paramName);
+            }
         }
     }
 
@@ -1073,10 +1079,10 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
 
         RefreshMotionTrackHeader();
         RefreshMotionTrack();
+        RefreshTrackLabels();
         RefreshCurveLine();
         RefreshSlider();
         SampleFrame();
-        RefreshTrackLabels();
         m_iptDuration.SetTextWithoutNotify(m_motionData.info.frameCount.ToString());
         m_iptFrame.SetTextWithoutNotify(m_motionData.info.fps.ToString());
         m_iptFrameIndex.SetTextWithoutNotify((curFrameIndex + 1).ToString());

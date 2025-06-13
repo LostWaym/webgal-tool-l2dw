@@ -140,6 +140,11 @@ public class ModelAdjusterBase : MonoBehaviour
 
     }
 
+    public virtual void SampleDefaultParam(string paramName)
+    {
+        
+    }
+
     public virtual void SetDisplayMode(ModelDisplayMode mode, bool force = false)
     {
 
