@@ -83,13 +83,13 @@ public class MygoConfig
         string basePath = Path.GetDirectoryName(json.filename);
         if (!TryReadBytes(Path.Combine(basePath, json.model), out model))
         {
-            Debug.LogError("无法加载这个地址的模型，路径可能不存在: " + Path.Combine(basePath, json.model));
+            Debug.LogError("模型文件不存在: " + Path.Combine(basePath, json.model));
         }
         if (!string.IsNullOrEmpty(json.physics))
         {
             if (!TryReadBytes(Path.Combine(basePath, json.physics), out physics))
             {
-                Debug.LogError("无法加载这个地址的物理文件，路径可能不存在: " + Path.Combine(basePath, json.physics));
+                Debug.LogError("物理文件不存在: " + Path.Combine(basePath, json.physics));
             }
         }
         textures = new List<Texture2D>();
@@ -98,7 +98,7 @@ public class MygoConfig
             var path = json.textures[i];
             if (!TryReadBytes(Path.Combine(basePath, path), out byte[] bytes))
             {
-                Debug.LogError("无法加载这个地址的贴图，路径可能不存在: " + Path.Combine(basePath, path));
+                Debug.LogError("贴图文件不存在: " + Path.Combine(basePath, path));
                 continue;
             }
             Texture2D tex2d = new Texture2D(1, 1, TextureFormat.ARGB32, false);
@@ -110,7 +110,7 @@ public class MygoConfig
         {
             if (!TryReadBytes(Path.Combine(basePath, item.Value[0].file), out byte[] bytes))
             {
-                Debug.LogError("无法加载这个地址的动画，路径可能不存在: " + Path.Combine(basePath, item.Value[0].file));
+                Debug.LogError("动画文件不存在: " + Path.Combine(basePath, item.Value[0].file));
                 continue;
             }
             motions[item.Key] = bytes;
@@ -120,7 +120,7 @@ public class MygoConfig
         {
             if (!TryReadAllText(Path.Combine(basePath, item.file), out string text))
             {
-                Debug.LogError("无法加载这个地址的表情，路径可能不存在: " + Path.Combine(basePath, item.file));
+                Debug.LogError("表情文件不存在: " + Path.Combine(basePath, item.file));
                 continue;
             }
             var expJson = JsonConvert.DeserializeObject<MygoExpJson>(text);
@@ -137,7 +137,7 @@ public class MygoConfig
             var path = json.textures[i];
             if (!TryReadBytes(Path.Combine(basePath, path), out byte[] bytes))
             {
-                Debug.LogError("无法加载这个地址的贴图，路径可能不存在: " + Path.Combine(basePath, path));
+                Debug.LogError("贴图文件不存在: " + Path.Combine(basePath, path));
                 continue;
             }
             texture.LoadImage(bytes);

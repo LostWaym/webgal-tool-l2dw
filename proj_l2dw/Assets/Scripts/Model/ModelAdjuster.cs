@@ -288,9 +288,9 @@ public class ModelAdjuster : ModelAdjusterBase
             return;
         }
         webgalPoses.Add(mainModel);
-        for (int i = 1; i < meta.modelFilePaths.Count; i++)
+        for (int i = 0; i < meta.modelFilePaths.Count; i++)
         {
-            webgalPoses.Add(CreateWebGalModelPos(meta.GetValidModelFilePath(i)));
+            webgalPoses.Add(CreateWebGalModelPos(meta.GetValidModelFilePath(i + 1)));
         }
 
         webgalPoses.RemoveAll(pos => pos == null);
