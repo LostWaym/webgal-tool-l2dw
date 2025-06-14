@@ -488,8 +488,10 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_imgRect.gameObject.SetActive(true);
         var pos1 = m_selectStartPosition;
         var pos2 = vector;
-        var width = Mathf.Abs(pos1.x - pos2.x);
-        var height = Mathf.Abs(pos1.y - pos2.y);
+        // 在canvas scaler下，需要将pos1和pos2转换为local space才能计算出正常的宽高
+        var localDelta = m_imgRect.rectTransform.InverseTransformPoint(pos2) - m_imgRect.rectTransform.InverseTransformPoint(pos1);
+        var width = Mathf.Abs(localDelta.x);
+        var height = Mathf.Abs(localDelta.y);
         m_imgRect.rectTransform.sizeDelta = new Vector2(width, height);
         m_imgRect.rectTransform.position = Vector2.Lerp(pos1, pos2, 0.5f);
     }
@@ -528,7 +530,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         }
 
         var selectedRect = m_imgRect.rectTransform;
-        var selectedArea = new Rect((Vector2)selectedRect.position - selectedRect.rect.size / 2, selectedRect.rect.size);
+        var localSelectedArea = new Rect(Vector2.zero - selectedRect.rect.size / 2, selectedRect.rect.size);
         for (int i = 0; i < TrackItemCount; i++)
         {
             MotionTrackWidget track = m_listMotionTrack[i];
@@ -536,8 +538,8 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             {
                 var dot = track.m_dots[j];
                 var dotWorldPos = dot.rectTransform.position;
-                var dotScreenPos = RectTransformUtility.WorldToScreenPoint(null, dotWorldPos);
-                if (selectedArea.Contains(dotScreenPos))
+                var dotLocalPos = selectedRect.InverseTransformPoint(dotWorldPos);
+                if (localSelectedArea.Contains(dotLocalPos))
                 {
                     var frameIndex = dot.frameIndex;
                     var set = TryGetSet(track.track.name);
@@ -1717,9 +1719,9 @@ public class PageNavMotionLabelBarWidget : UIItemWidget<PageNavMotionLabelBarWid
         }
 
         int relativeFrameIndex = frameIndex - startIndex;
-        var pos = m_labelWidgets[0].rectTransform.position;
-        pos.x += relativeFrameIndex * PageNavMotion.dot_space;
-        position = pos;
+        var pos = m_labelWidgets[0].rectTransform.anchoredPosition;
+        pos.x += relativeFrameIndex * PageNavMotion.dot_space - m_labelWidgets[0].rectTransform.rect.width / 2;
+        position = m_labelWidgets[0].transform.TransformPoint(pos);
         return true;
     }
 
@@ -1727,10 +1729,11 @@ public class PageNavMotionLabelBarWidget : UIItemWidget<PageNavMotionLabelBarWid
     {
         float minDistance = float.MaxValue;
         int minIndex = 0;
-        var startPosX = m_labelWidgets[0].rectTransform.position.x;
+        var localPos = m_labelWidgets[0].transform.InverseTransformPoint(position);
+        var startPosX = 0;//m_labelWidgets[0].rectTransform.anchoredPosition.x;
         for (int i = 0; i < dotCount; i++)
         {
-            var dist = Mathf.Abs(position.x - (startPosX + i * PageNavMotion.dot_space));
+            var dist = Mathf.Abs(localPos.x - (startPosX + i * PageNavMotion.dot_space));
             if (dist < minDistance)
             {
                 minDistance = dist;
