@@ -168,4 +168,60 @@ public static class L2DWUtils
     {
         return (value - from1) / (to1 - from1) * (to2 - from2) + from2;
     }
+
+    public static Vector2 Bezier4(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, float t)
+    {
+        var p01 = Vector2.Lerp(p0, p1, t);
+        var p12 = Vector2.Lerp(p1, p2, t);
+        var p23 = Vector2.Lerp(p2, p3, t);
+        var p012 = Vector2.Lerp(p01, p12, t);
+        var p123 = Vector2.Lerp(p12, p23, t);
+        return Vector2.Lerp(p012, p123, t);
+        // float t2 = t * t;
+        // float t3 = t2 * t;
+        // float oneMinusT = 1 - t;
+        // float oneMinusT2 = oneMinusT * oneMinusT;
+        // float oneMinusT3 = oneMinusT2 * oneMinusT;
+        // return new Vector2(
+        //     oneMinusT3 * p0.x + 3 * oneMinusT2 * t * p1.x + 3 * oneMinusT * t2 * p2.x + t3 * p3.x,
+        //     oneMinusT3 * p0.y + 3 * oneMinusT2 * t * p1.y + 3 * oneMinusT * t2 * p2.y + t3 * p3.y
+        // );
+    }
+
+    public static float GetBezierYValueAtX(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, float x)
+    {
+        // 初始参数:
+        // - t的初始值为0.5,步长为0.25
+        // - 最大迭代次数为10次
+        // - 精度为0.001,即x值的误差小于0.001时认为找到了对应点
+        // 每次迭代步长会减半,所以最终精度约为:
+        // 0.25 * (0.5^9) ≈ 0.00049,即小数点后3-4位
+        float t = 0.5f;
+        float step = 0.25f;
+        int maxIterations = 10;
+        int iteration = 0;
+
+        while (iteration < maxIterations)
+        {
+            var p = Bezier4(p0, p1, p2, p3, t);
+            if (Mathf.Abs(p.x - x) < 0.001f)
+            {
+                return p.y;
+            }
+
+            if (p.x > x)
+            {
+                t -= step;
+            }
+            else
+            {
+                t += step;
+            }
+            step *= 0.5f;
+            iteration++;
+        }
+
+        // 达到最大迭代次数后返回最后一次计算的y值
+        return Bezier4(p0, p1, p2, p3, t).y;
+    }
 }

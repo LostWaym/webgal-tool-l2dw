@@ -100,14 +100,14 @@ public class AnimInstructionUI : BaseWindow<AnimInstructionUI>
         
         for (int i = 0; i < values.Length; i++)
         {
-            track.keyFrames[startFrameIndex + i] = values[i];
+            track.SetKeyFrameValue(startFrameIndex + i, values[i]);
         }
 
         if(!track.HasKeyFrame(0))
         {
             var target = MainControl.Instance.curTarget;
             var defValue = target.GetEmotionEditorList().paramDefDict.TryGetValue(paramName, out var paramDef) ? paramDef : values[0];
-            track.keyFrames[0] = defValue;
+            track.SetKeyFrameValue(0, defValue);
         }
 
         m_pageNavMotion.MotionData.BakeFrames(paramName);

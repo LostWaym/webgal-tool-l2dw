@@ -12,12 +12,79 @@ public class Live2dMotionData
     public class Track
     {
         public string name;
-        public Dictionary<int, float> keyFrames = new Dictionary<int, float>();
+        public Dictionary<int, TrackKeyFrameData> keyFrames = new Dictionary<int, TrackKeyFrameData>();
         public bool HasKeyFrame(int frame)
         {
             return keyFrames.ContainsKey(frame);
         }
+
+        public TrackKeyFrameData GetKeyFrame(int frame)
+        {
+            return keyFrames.TryGetValue(frame, out var data) ? data : null;
+        }
+
+        public void SetNormalKeyFrame(int frame, float value)
+        {
+            keyFrames[frame] = new TrackKeyFrameData()
+            {
+                frame = frame,
+                value = value,
+            };
+        }
+
+        public void SetBezierKeyFrame(int frame, float value, Vector2 controlPoint1, Vector2 controlPoint2)
+        {
+            keyFrames[frame] = new TrackKeyFrameData()
+            {
+                frame = frame,
+                value = value,
+                controlPoint1 = controlPoint1,
+                controlPoint2 = controlPoint2,
+            };
+        }
+
+        public void SetKeyFrameValue(int frame, float value)
+        {
+            if (keyFrames.TryGetValue(frame, out var data))
+            {
+                data.value = value;
+            }
+            else
+            {
+                SetNormalKeyFrame(frame, value);
+            }
+        }
+
+        public void SetKeyFrameData(int frame, TrackKeyFrameData data, bool doClone = false)
+        {
+            if (doClone)
+            {
+                var data2 = data.Clone();
+                data2.frame = frame;
+                keyFrames[frame] = data2;
+            }
+            else
+            {
+                data.frame = frame;
+                keyFrames[frame] = data;
+            }
+        }
     }
+
+    public class TrackKeyFrameData
+    {
+        public int frame;
+        public float value;
+        public Vector2 controlPoint1 = Vector2.zero;
+        public Vector2 controlPoint2 = Vector2.one;
+
+        public TrackKeyFrameData Clone()
+        {
+            var obj = MemberwiseClone() as TrackKeyFrameData;
+            return obj;
+        }
+    }
+
     public string motionDataName = "未命名";
     public Live2dMotionInfo info;
     public Dictionary<string, Track> tracks = new Dictionary<string, Track>();
@@ -47,8 +114,12 @@ public class Live2dMotionData
             var track = TryGetTrack(trackName, true);
             for (int i = 0; i < param.Value.Count; i++)
             {
-                float frame = param.Value[i];
-                track.keyFrames[i] = frame;
+                float value = param.Value[i];
+                track.keyFrames[i] = new TrackKeyFrameData()
+                {
+                    frame = i,
+                    value = value,
+                };
             }
         }
     }
@@ -81,7 +152,11 @@ public class Live2dMotionData
             // 记录第一帧
             if (frames.Count > 0)
             {
-                track.keyFrames[0] = frames[0];
+                track.keyFrames[0] = new TrackKeyFrameData()
+                {
+                    frame = 0,
+                    value = frames[0],
+                };
             }
             
             int trend = 2; // 初始趋势设为增加
@@ -111,7 +186,11 @@ public class Live2dMotionData
                 if (curTrend != trend)
                 {
                     // 趋势改变,记录关键帧
-                    track.keyFrames[i-1] = frames[i-1];
+                    track.keyFrames[i-1] = new TrackKeyFrameData()
+                    {
+                        frame = i-1,
+                        value = frames[i-1],
+                    };
                     trend = curTrend; // 更新趋势
                 }
                 
@@ -133,7 +212,11 @@ public class Live2dMotionData
             // 记录最后一帧
             if (frames.Count > 0)
             {
-                track.keyFrames[frames.Count - 1] = frames[frames.Count - 1];
+                track.keyFrames[frames.Count - 1] = new TrackKeyFrameData()
+                {
+                    frame = frames.Count - 1,
+                    value = frames[frames.Count - 1],
+                };
             }
         }
 
@@ -149,20 +232,29 @@ public class Live2dMotionData
 
         for (int i = 0; i < keyFrames.Count; i++)
         {
-            frames.Add(keyFrames[i].Value);
+            frames.Add(keyFrames[i].Value.value);
 
             // 如果不是最后一个关键帧，添加线性过渡帧
             if (i < keyFrames.Count - 1)
             {
-                int currentFrame = keyFrames[i].Key;
-                int nextFrame = keyFrames[i + 1].Key;
-                float currentValue = keyFrames[i].Value;
-                float nextValue = keyFrames[i + 1].Value;
+                var data = keyFrames[i].Value;
+                var nextData = keyFrames[i + 1].Value;
 
+                int currentFrame = data.frame;
+                int nextFrame = nextData.frame;
+                float currentValue = data.value;
+                float nextValue = nextData.value;
+
+                bool isBezier = data.controlPoint1 != Vector2.zero || data.controlPoint2 != Vector2.one;
                 // 在两个关键帧之间添加线性过渡
                 for (int frame = currentFrame + 1; frame < nextFrame; frame++)
                 {
                     float t = (float)(frame - currentFrame) / (nextFrame - currentFrame);
+                    if (isBezier)
+                    {
+                        float t2 = L2DWUtils.GetBezierYValueAtX(Vector2.zero, data.controlPoint1, data.controlPoint2, Vector2.one, t);
+                        t = t2;
+                    }
                     float interpolatedValue = Mathf.Lerp(currentValue, nextValue, t);
                     frames.Add(interpolatedValue);
                 }
@@ -201,7 +293,17 @@ public class Live2dMotionData
             {
                 var keyFrameObject = new JSONObject(JSONObject.Type.OBJECT);
                 keyFrameObject.AddField("frame", keyFrame.Key);
-                keyFrameObject.AddField("value", keyFrame.Value);
+                keyFrameObject.AddField("value", keyFrame.Value.value);
+                if (keyFrame.Value.controlPoint1 != Vector2.zero)
+                {
+                    keyFrameObject.AddField("controlPoint1_x", keyFrame.Value.controlPoint1.x);
+                    keyFrameObject.AddField("controlPoint1_y", keyFrame.Value.controlPoint1.y);
+                }
+                if (keyFrame.Value.controlPoint2 != Vector2.one)
+                {
+                    keyFrameObject.AddField("controlPoint2_x", keyFrame.Value.controlPoint2.x);
+                    keyFrameObject.AddField("controlPoint2_y", keyFrame.Value.controlPoint2.y);
+                }
                 trackArray.Add(keyFrameObject);
             }
             trackObject.AddField("keyFrames", trackArray);
@@ -231,9 +333,18 @@ public class Live2dMotionData
             var track = TryGetTrack(trackName, true);
             foreach (var keyFrame in trackArray)
             {
+                var data = new TrackKeyFrameData();
                 var frame = (int)keyFrame.GetField("frame").f;
                 var value = keyFrame.GetField("value").f;
-                track.keyFrames[frame] = value;
+                var controlPoint1_x = keyFrame.GetField("controlPoint1_x")?.f ?? 0;
+                var controlPoint1_y = keyFrame.GetField("controlPoint1_y")?.f ?? 0;
+                var controlPoint2_x = keyFrame.GetField("controlPoint2_x")?.f ?? 1;
+                var controlPoint2_y = keyFrame.GetField("controlPoint2_y")?.f ?? 1;
+                data.controlPoint1 = new Vector2(controlPoint1_x, controlPoint1_y);
+                data.controlPoint2 = new Vector2(controlPoint2_x, controlPoint2_y);
+                data.value = value;
+                data.frame = frame;
+                track.keyFrames[frame] = data;
             }
         }
 
