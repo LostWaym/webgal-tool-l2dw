@@ -169,25 +169,29 @@ public class SettingPageGeneralWidget : UIItemWidget<SettingPageGeneralWidget>
 
 public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
 {
-
     #region auto generated members
+    private Transform m_itemScrollRect_Legacy;
     private Transform m_itemModelPath;
     private Transform m_itemBGPath;
     private Transform m_itemBGChangeTemplate;
     private Transform m_itemBGTransformTemplate;
     private Toggle m_toggleCloseGreenLine;
+    private Toggle m_toggleDisableJsonModelProfileInit;
     #endregion
 
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
+        m_itemScrollRect_Legacy = transform.Find("m_itemScrollRect_Legacy").GetComponent<Transform>();
         m_itemModelPath = transform.Find("ScrollRect/Viewport/Content/m_itemModelPath").GetComponent<Transform>();
         m_itemBGPath = transform.Find("ScrollRect/Viewport/Content/m_itemBGPath").GetComponent<Transform>();
         m_itemBGChangeTemplate = transform.Find("ScrollRect/Viewport/Content/m_itemBGChangeTemplate").GetComponent<Transform>();
         m_itemBGTransformTemplate = transform.Find("ScrollRect/Viewport/Content/m_itemBGTransformTemplate").GetComponent<Transform>();
         m_toggleCloseGreenLine = transform.Find("ScrollRect/Viewport/Content/m_toggleCloseGreenLine").GetComponent<Toggle>();
+        m_toggleDisableJsonModelProfileInit = transform.Find("ScrollRect/Viewport/Content/m_toggleDisableJsonModelProfileInit").GetComponent<Toggle>();
 
         m_toggleCloseGreenLine.onValueChanged.AddListener(OnToggleCloseGreenLineChange);
+        m_toggleDisableJsonModelProfileInit.onValueChanged.AddListener(OnToggleDisableJsonModelProfileInitChange);
     }
     #endregion
 
@@ -195,6 +199,11 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
     private void OnToggleCloseGreenLineChange(bool value)
     {
         MainControl.Instance.SetCloseGreenLine(value);
+    }
+
+    private void OnToggleDisableJsonModelProfileInitChange(bool value)
+    {
+        Global.DisableJsonModelProfileInit = value;
     }
     #endregion
 
@@ -250,8 +259,9 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
             m_itemBGChangeTemplateWidget.SetValue(Global.BGChangeTemplate);
             m_itemBGTransformTemplateWidget.SetValue(Global.BGTransformTemplate);
         }
-        
+
         m_toggleCloseGreenLine.SetIsOnWithoutNotify(MainControl.CloseGreenLine);
+        m_toggleDisableJsonModelProfileInit.SetIsOnWithoutNotify(Global.DisableJsonModelProfileInit);
     }
 }
 

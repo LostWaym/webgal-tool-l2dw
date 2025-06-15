@@ -755,8 +755,11 @@ public class MainControl : MonoBehaviour
 
         Resources.UnloadUnusedAssets();
 
-        settingWindow.gameObject.SetActive(true);
-        settingWindow.Load(curMeta);
+        if (!Global.DisableJsonModelProfileInit)
+        {
+            settingWindow.gameObject.SetActive(true);
+            settingWindow.Load(curMeta);
+        }
     }
 
     private void LoadImgModel(string path)

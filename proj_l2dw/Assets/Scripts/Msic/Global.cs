@@ -24,6 +24,7 @@ public static class Global
     }
 
     public static bool __PIVOT_2_4 = false;
+    public static bool DisableJsonModelProfileInit = false;
 
     public static bool IsLoaded = false;
     
@@ -41,6 +42,7 @@ public static class Global
         PlayerPrefs.SetInt("Global.InstNextMode", (int)InstNextMode);
         PlayerPrefs.SetFloat("Global.CameraZoomFactor", CameraZoomFactor);
         PlayerPrefs.SetFloat("Global.CameraZoomBoostFactor", CameraZoomBoostFactor);
+        PlayerPrefs.SetInt("Global.DisableJsonModelProfileInit", DisableJsonModelProfileInit ? 1 : 0);
     }
 
     public static void Load()
@@ -54,7 +56,8 @@ public static class Global
         InstNextMode = (InstDealOperation)PlayerPrefs.GetInt("Global.InstNextMode", 0);
         CameraZoomFactor = PlayerPrefs.GetFloat("Global.CameraZoomFactor", 1.1f);
         CameraZoomBoostFactor = PlayerPrefs.GetFloat("Global.CameraZoomBoostFactor", 1.5f);
-
+        DisableJsonModelProfileInit = PlayerPrefs.GetInt("Global.DisableJsonModelProfileInit", 0) == 1;
+        
         if (string.IsNullOrEmpty(BGChangeTemplate))
         {
             BGChangeTemplate = "changeBg:%me%;";
