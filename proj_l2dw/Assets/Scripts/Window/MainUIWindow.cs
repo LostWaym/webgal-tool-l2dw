@@ -24,10 +24,10 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_togglePreview = transform.Find("GameObject/toggles/m_togglePreview").GetComponent<Toggle>();
-        m_toggleMotion = transform.Find("GameObject/toggles/m_toggleMotion").GetComponent<Toggle>();
-        m_toggleInstructions = transform.Find("GameObject/toggles/m_toggleInstructions").GetComponent<Toggle>();
-        m_btnSetting = transform.Find("GameObject/m_btnSetting").GetComponent<Button>();
+        m_togglePreview = transform.Find("Tabs/toggles/m_togglePreview").GetComponent<Toggle>();
+        m_toggleMotion = transform.Find("Tabs/toggles/m_toggleMotion").GetComponent<Toggle>();
+        m_toggleInstructions = transform.Find("Tabs/toggles/m_toggleInstructions").GetComponent<Toggle>();
+        m_btnSetting = transform.Find("Tabs/m_btnSetting").GetComponent<Button>();
         m_itemPageNavPreview = transform.Find("pages/m_itemPageNavPreview").GetComponent<Transform>();
         m_itemPageNavMotion = transform.Find("pages/m_itemPageNavMotion").GetComponent<Transform>();
         m_itemPageNavInstructions = transform.Find("pages/m_itemPageNavInstructions").GetComponent<Transform>();
@@ -951,74 +951,48 @@ public class LabelInputFieldWidget : UIItemWidget<LabelInputFieldWidget>
 
     #region auto-generated code
     private Text m_lblTitle;
-    private InputField m_iptValue;
+    private InputField m_iptField;
     private Text m_lblPrefix;
-    private Toggle m_toggleLock;
-    private InputField m_iptValue2;
-    private Text m_lblPrefix2;
-    private Toggle m_toggleLock2;
+    private Toggle m_toggle;
 
     protected override void CodeGenBindMembers()
     {
-        m_lblTitle = transform.Find("m_lblTitle").GetComponent<Text>();
-        m_iptValue = transform.Find("Value/m_iptValue").GetComponent<InputField>();
-        m_lblPrefix = transform.Find("Value/m_iptValue/m_lblPrefix").GetComponent<Text>();
-        m_toggleLock = transform.Find("Value/m_iptValue/m_toggleLock").GetComponent<Toggle>();
-        m_iptValue2 = transform.Find("Value/m_iptValue2").GetComponent<InputField>();
-        m_lblPrefix2 = transform.Find("Value/m_iptValue2/m_lblPrefix2").GetComponent<Text>();
-        m_toggleLock2 = transform.Find("Value/m_iptValue2/m_toggleLock2").GetComponent<Toggle>();
+        m_lblTitle = transform.Find("Label/m_lblTitle").GetComponent<Text>();
+        m_iptField = transform.Find("Value/InputField/m_iptField").GetComponent<InputField>();
+        m_lblPrefix = transform.Find("Value/InputField/m_lblPrefix").GetComponent<Text>();
+        m_toggle = transform.Find("Value/InputField/m_toggle").GetComponent<Toggle>();
     }
     #endregion
 
     #region auto-generated code event
     #endregion
 
-    public string Data => m_iptValue.text;
-    public string Data2 => m_iptValue2.text;
+    public string Data => m_iptField.text;
 
     private Action<string> m_onSubmit;
-    private Action<string> m_onSubmit2;
 
     private Action<Toggle, bool> _onToggleChange;
-    private Action<Toggle, bool> _onToggleChange2;
-
+    
     protected override void OnInit()
     {
         base.OnInit();
-        m_iptValue.onEndEdit.AddListener(OnEndEdit);
-        m_iptValue2.onEndEdit.AddListener(OnEndEdit2);
-        m_toggleLock.onValueChanged.AddListener(OnToggleChange);
-        m_toggleLock2.onValueChanged.AddListener(OnToggleChange2);
+        m_iptField.onEndEdit.AddListener(OnEndEdit);
+        m_toggle.onValueChanged.AddListener(OnToggleChange);
     }
 
     private void OnToggleChange(bool arg0)
     {
-        _onToggleChange?.Invoke(m_toggleLock, arg0);
-    }
-
-    private void OnToggleChange2(bool arg0)
-    {
-        _onToggleChange2?.Invoke(m_toggleLock2, arg0);
+        _onToggleChange?.Invoke(m_toggle, arg0);
     }
 
     private void OnEndEdit(string value)
     {
         m_onSubmit?.Invoke(value);
     }
-
-    private void OnEndEdit2(string value)
-    {
-        m_onSubmit2?.Invoke(value);
-    }
-
+    
     public void SetData(string value)
     {
-        m_iptValue.SetTextWithoutNotify(value);
-    }
-
-    public void SetData2(string value)
-    {
-        m_iptValue2.SetTextWithoutNotify(value);
+        m_iptField.SetTextWithoutNotify(value);
     }
 
     public void SetDataSubmit(Action<string> onSubmit)
@@ -1026,42 +1000,20 @@ public class LabelInputFieldWidget : UIItemWidget<LabelInputFieldWidget>
         m_onSubmit = onSubmit;
     }
 
-    public void SetDataSubmit2(Action<string> onSubmit)
-    {
-        m_onSubmit2 = onSubmit;
-    }
-
-    public void SetLockChange(Action<Toggle, bool> onToggleChange)
+    public void SetToggleChange(Action<Toggle, bool> onToggleChange)
     {
         _onToggleChange = onToggleChange;
     }
 
-    public void SetLockChange2(Action<Toggle, bool> onToggleChange2)
-    {
-        _onToggleChange2 = onToggleChange2;
-    }
-
-    public void SetLockValue(bool value, bool notify = true)
+    public void SetToggleValue(bool value, bool notify = true)
     {
         if (notify)
         {
-            m_toggleLock.isOn = value;
+            m_toggle.isOn = value;
         }
         else
         {
-            m_toggleLock.SetIsOnWithoutNotify(value);
-        }
-    }
-
-    public void SetLockValue2(bool value, bool notify = true)
-    {
-        if (notify)
-        {
-            m_toggleLock2.isOn = value;
-        }
-        else
-        {
-            m_toggleLock2.SetIsOnWithoutNotify(value);
+            m_toggle.SetIsOnWithoutNotify(value);
         }
     }
 }
@@ -1082,7 +1034,8 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
     private Button m_btnZSortHelp;
     private Button m_btnDown;
     private Button m_btnBottom;
-    private Transform m_itemPos;
+    private Transform m_itemPosX;
+    private Transform m_itemPosY;
     private Transform m_itemScale;
     private Transform m_itemRotation;
     private Button m_btnReloadModel;
@@ -1093,25 +1046,26 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_btnLoadConf = transform.Find("GameObject/m_btnLoadConf").GetComponent<Button>();
-        m_btnLoadJson = transform.Find("GameObject/m_btnLoadJson").GetComponent<Button>();
-        m_btnLoadImg = transform.Find("GameObject/m_btnLoadImg").GetComponent<Button>();
+        m_btnLoadConf = transform.Find("Top/m_btnLoadConf").GetComponent<Button>();
+        m_btnLoadJson = transform.Find("Top/m_btnLoadJson").GetComponent<Button>();
+        m_btnLoadImg = transform.Find("Top/m_btnLoadImg").GetComponent<Button>();
         m_scrollChara = transform.Find("m_scrollChara").GetComponent<ScrollRect>();
         m_tfCharaItems = transform.Find("m_scrollChara/Viewport/m_tfCharaItems").GetComponent<Transform>();
         m_itemChara = transform.Find("m_scrollChara/Viewport/m_tfCharaItems/m_itemChara").GetComponent<Transform>();
-        m_btnMoreProp = transform.Find("GameObject (1)/m_btnMoreProp").GetComponent<Button>();
-        m_btnSaveProfile = transform.Find("GameObject (1)/m_btnSaveProfile").GetComponent<Button>();
-        m_btnTop = transform.Find("zsetgroup/m_btnTop").GetComponent<Button>();
-        m_btnUp = transform.Find("zsetgroup/m_btnUp").GetComponent<Button>();
-        m_btnZSortHelp = transform.Find("zsetgroup/m_btnZSortHelp").GetComponent<Button>();
-        m_btnDown = transform.Find("zsetgroup/m_btnDown").GetComponent<Button>();
-        m_btnBottom = transform.Find("zsetgroup/m_btnBottom").GetComponent<Button>();
-        m_itemPos = transform.Find("m_itemPos").GetComponent<Transform>();
-        m_itemScale = transform.Find("m_itemScale").GetComponent<Transform>();
-        m_itemRotation = transform.Find("m_itemRotation").GetComponent<Transform>();
-        m_btnReloadModel = transform.Find("GameObject/m_btnReloadModel").GetComponent<Button>();
-        m_btnReloadTexture = transform.Find("GameObject/m_btnReloadTexture").GetComponent<Button>();
-        m_btnOpenModelPath = transform.Find("GameObject/m_btnOpenModelPath").GetComponent<Button>();
+        m_btnMoreProp = transform.Find("Properties/Title/m_btnMoreProp").GetComponent<Button>();
+        m_btnSaveProfile = transform.Find("Properties/Title/m_btnSaveProfile").GetComponent<Button>();
+        m_btnTop = transform.Find("Properties/Container/zsetgroup/m_btnTop").GetComponent<Button>();
+        m_btnUp = transform.Find("Properties/Container/zsetgroup/m_btnUp").GetComponent<Button>();
+        m_btnZSortHelp = transform.Find("Properties/Container/zsetgroup/m_btnZSortHelp").GetComponent<Button>();
+        m_btnDown = transform.Find("Properties/Container/zsetgroup/m_btnDown").GetComponent<Button>();
+        m_btnBottom = transform.Find("Properties/Container/zsetgroup/m_btnBottom").GetComponent<Button>();
+        m_itemPosX = transform.Find("Properties/Container/m_itemPosX").GetComponent<Transform>();
+        m_itemPosY = transform.Find("Properties/Container/m_itemPosY").GetComponent<Transform>();
+        m_itemScale = transform.Find("Properties/Container/m_itemScale").GetComponent<Transform>();
+        m_itemRotation = transform.Find("Properties/Container/m_itemRotation").GetComponent<Transform>();
+        m_btnReloadModel = transform.Find("Properties/Container/GameObject/m_btnReloadModel").GetComponent<Button>();
+        m_btnReloadTexture = transform.Find("Properties/Container/GameObject/m_btnReloadTexture").GetComponent<Button>();
+        m_btnOpenModelPath = transform.Find("Properties/Container/GameObject/m_btnOpenModelPath").GetComponent<Button>();
 
         m_btnLoadConf.onClick.AddListener(OnButtonLoadConfClick);
         m_btnLoadJson.onClick.AddListener(OnButtonLoadJsonClick);
@@ -1204,7 +1158,8 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
     }
     #endregion
 
-    private LabelInputFieldWidget m_liptPos;
+    private LabelInputFieldWidget m_liptPosX;
+    private LabelInputFieldWidget m_liptPosY;
     private LabelInputFieldWidget m_liptScale;
     private LabelInputFieldWidget m_liptRotation;
     private List<CharaItemWidget> m_listChara = new List<CharaItemWidget>();
@@ -1213,16 +1168,17 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
     protected override void OnInit()
     {
         base.OnInit();
-        m_liptPos = LabelInputFieldWidget.CreateWidget(m_itemPos.gameObject);
+        m_liptPosX = LabelInputFieldWidget.CreateWidget(m_itemPosX.gameObject);
+        m_liptPosY = LabelInputFieldWidget.CreateWidget(m_itemPosY.gameObject);
         m_liptScale = LabelInputFieldWidget.CreateWidget(m_itemScale.gameObject);
         m_liptRotation = LabelInputFieldWidget.CreateWidget(m_itemRotation.gameObject);
 
-        m_liptPos.SetDataSubmit(OnXPosSubmit);
-        m_liptPos.SetDataSubmit2(OnYPosSubmit);
-        m_liptPos.SetLockChange(OnLockChange);
-        m_liptPos.SetLockChange2(OnLockChange2);
+        m_liptPosX.SetDataSubmit(OnXPosSubmit);
+        m_liptPosX.SetToggleChange(OnLockXChange);
+        m_liptPosY.SetDataSubmit(OnYPosSubmit);
+        m_liptPosY.SetToggleChange(OnLockYChange);
         m_liptScale.SetDataSubmit(OnScaleSubmit);
-        m_liptScale.SetLockChange(OnFlipChange);
+        m_liptScale.SetToggleChange(OnFlipChange);
         m_liptRotation.SetDataSubmit(OnRotationSubmit);
     }
 
@@ -1299,12 +1255,12 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         m_pageCharaFunctions = pageCharaFunctions;
     }
 
-    private void OnLockChange(Toggle toggle, bool value)
+    private void OnLockXChange(Toggle toggle, bool value)
     {
         MainControl.Instance.LockX = value;
     }
 
-    private void OnLockChange2(Toggle toggle, bool value)
+    private void OnLockYChange(Toggle toggle, bool value)
     {
         MainControl.Instance.LockY = value;
     }
@@ -1321,12 +1277,12 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
 
     private void OnLockXChanged()
     {
-        m_liptPos.SetLockValue(MainControl.Instance.LockX);
+        m_liptPosX.SetToggleValue(MainControl.Instance.LockX);
     }
 
     private void OnLockYChanged()
     {
-        m_liptPos.SetLockValue2(MainControl.Instance.LockY);
+        m_liptPosY.SetToggleValue(MainControl.Instance.LockY);
     }
 
     private void OnModelDeleted()
@@ -1499,8 +1455,8 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
 
     public void RefreshCharaTransform()
     {
-        m_liptPos.SetLockValue(MainControl.Instance.LockX);
-        m_liptPos.SetLockValue2(MainControl.Instance.LockY);
+        m_liptPosX.SetToggleValue(MainControl.Instance.LockX);
+        m_liptPosY.SetToggleValue(MainControl.Instance.LockY);
         
         var model = MainControl.Instance.curTarget;
         if (model == null)
@@ -1508,11 +1464,11 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
             return;
         }
 
-        m_liptPos.SetData(model.RootPosition.x.ToString("F3"));
-        m_liptPos.SetData2(model.RootPosition.y.ToString("F3"));
+        m_liptPosX.SetData(model.RootPosition.x.ToString("F3"));
+        m_liptPosY.SetData(model.RootPosition.y.ToString("F3"));
 
         m_liptScale.SetData(model.RootScaleValue.ToString("F3"));
-        m_liptScale.SetLockValue(model.ReverseXScale);
+        m_liptScale.SetToggleValue(model.ReverseXScale);
 
         m_liptRotation.SetData(model.RootRotation.ToString("F3"));
     }
@@ -2343,7 +2299,8 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
     private Transform m_tfGroupItems;
     private Transform m_itemGroup;
     private InputField m_iptGroupName;
-    private Transform m_itemPos;
+    private Transform m_itemPosX;
+    private Transform m_itemPosY;
     private Button m_btnSetPivotCenter;
     #endregion
 
@@ -2354,9 +2311,10 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
         m_scrollGroup = transform.Find("m_scrollGroup").GetComponent<ScrollRect>();
         m_tfGroupItems = transform.Find("m_scrollGroup/Viewport/m_tfGroupItems").GetComponent<Transform>();
         m_itemGroup = transform.Find("m_scrollGroup/Viewport/m_tfGroupItems/m_itemGroup").GetComponent<Transform>();
-        m_iptGroupName = transform.Find("GroupName/Value/m_iptGroupName").GetComponent<InputField>();
-        m_itemPos = transform.Find("m_itemPos").GetComponent<Transform>();
-        m_btnSetPivotCenter = transform.Find("m_btnSetPivotCenter").GetComponent<Button>();
+        m_iptGroupName = transform.Find("Properties/Container/GroupName/Value/InputField/m_iptGroupName").GetComponent<InputField>();
+        m_itemPosX = transform.Find("Properties/Container/m_itemPosX").GetComponent<Transform>();
+        m_itemPosY = transform.Find("Properties/Container/m_itemPosY").GetComponent<Transform>();
+        m_btnSetPivotCenter = transform.Find("Properties/Container/m_btnSetPivotCenter").GetComponent<Button>();
 
         m_btnAddGroup.onClick.AddListener(OnButtonAddGroupClick);
         m_iptGroupName.onValueChanged.AddListener(OnInputFieldGroupNameChange);
@@ -2421,17 +2379,19 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
 
     private PageGroupFunctions m_pageGroupFunctions;
     private Transform m_tfCursor;
-    private LabelInputFieldWidget m_liptPos;
+    private LabelInputFieldWidget m_liptPosX;
+    private LabelInputFieldWidget m_liptPosY;
 
     protected override void OnInit()
     {
         base.OnInit();
-        m_liptPos = LabelInputFieldWidget.CreateWidget(m_itemPos.gameObject);
+        m_liptPosX = LabelInputFieldWidget.CreateWidget(m_itemPosX.gameObject);
+        m_liptPosY = LabelInputFieldWidget.CreateWidget(m_itemPosY.gameObject);
         
-        m_liptPos.SetDataSubmit(OnGroupPosXSubmit);
-        m_liptPos.SetDataSubmit2(OnGroupPosYSubmit);
-        m_liptPos.SetLockChange(OnLockXChange);
-        m_liptPos.SetLockChange2(OnLockYChange);
+        m_liptPosX.SetDataSubmit(OnGroupPosXSubmit);
+        m_liptPosY.SetDataSubmit(OnGroupPosYSubmit);
+        m_liptPosX.SetToggleChange(OnLockXChange);
+        m_liptPosY.SetToggleChange(OnLockYChange);
     }
 
     public void Inject(PageGroupFunctions pageGroupFunctions, Transform tfCursor)
@@ -2494,11 +2454,11 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
         }
 
         var localPos = group.LocalPosition;
-        m_liptPos.SetData(localPos.x.ToString());
-        m_liptPos.SetData2(localPos.y.ToString());
+        m_liptPosX.SetData(localPos.x.ToString());
+        m_liptPosY.SetData(localPos.y.ToString());
 
-        m_liptPos.SetLockValue(MainControl.Instance.LockX);
-        m_liptPos.SetLockValue2(MainControl.Instance.LockY);
+        m_liptPosX.SetToggleValue(MainControl.Instance.LockX);
+        m_liptPosY.SetToggleValue(MainControl.Instance.LockY);
     }
 
     private void OnGroupPosXSubmit(string x)
@@ -2811,7 +2771,8 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
 {
     #region auto generated members
     private Button m_btnChange;
-    private Transform m_itemPos;
+    private Transform m_itemPosX;
+    private Transform m_itemPosY;
     private Transform m_itemScale;
     private Transform m_itemRotation;
     #endregion
@@ -2820,9 +2781,10 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
     protected override void CodeGenBindMembers()
     {
         m_btnChange = transform.Find("m_btnChange").GetComponent<Button>();
-        m_itemPos = transform.Find("m_itemPos").GetComponent<Transform>();
-        m_itemScale = transform.Find("m_itemScale").GetComponent<Transform>();
-        m_itemRotation = transform.Find("m_itemRotation").GetComponent<Transform>();
+        m_itemPosX = transform.Find("Properties/Container/m_itemPosX").GetComponent<Transform>();
+        m_itemPosY = transform.Find("Properties/Container/m_itemPosY").GetComponent<Transform>();
+        m_itemScale = transform.Find("Properties/Container/m_itemScale").GetComponent<Transform>();
+        m_itemRotation = transform.Find("Properties/Container/m_itemRotation").GetComponent<Transform>();
 
         m_btnChange.onClick.AddListener(OnButtonChangeClick);
     }
@@ -2851,23 +2813,25 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
         m_pageBackgroundFunctions = pageBackgroundFunctions;
     }
 
-    private LabelInputFieldWidget m_liptPos;
+    private LabelInputFieldWidget m_liptPosX;
+    private LabelInputFieldWidget m_liptPosY;
     private LabelInputFieldWidget m_liptScale;
     private LabelInputFieldWidget m_liptRotation;
     protected override void OnInit()
     {
         base.OnInit();
-        m_liptPos = LabelInputFieldWidget.CreateWidget(m_itemPos.gameObject);
+        m_liptPosX = LabelInputFieldWidget.CreateWidget(m_itemPosX.gameObject);
+        m_liptPosY = LabelInputFieldWidget.CreateWidget(m_itemPosY.gameObject);
         m_liptScale = LabelInputFieldWidget.CreateWidget(m_itemScale.gameObject);
         m_liptRotation = LabelInputFieldWidget.CreateWidget(m_itemRotation.gameObject);
 
-        m_liptPos.SetDataSubmit(OnPosXSubmit);
-        m_liptPos.SetDataSubmit2(OnPosYSubmit);
+        m_liptPosX.SetDataSubmit(OnPosXSubmit);
+        m_liptPosY.SetDataSubmit(OnPosYSubmit);
         m_liptScale.SetDataSubmit(OnScaleSubmit);
         m_liptRotation.SetDataSubmit(OnRotationSubmit);
 
-        m_liptPos.SetLockChange(OnUILockXChange);
-        m_liptPos.SetLockChange2(OnUILockYChange);
+        m_liptPosX.SetToggleChange(OnUILockXChange);
+        m_liptPosY.SetToggleChange(OnUILockYChange);
     }
 
     public override void OnPageShown()
@@ -2894,23 +2858,23 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
     public void RefreshAll()
     {
         var bgContainer = MainControl.Instance.bgContainer;
-        m_liptPos.SetData(bgContainer.rootPosition.x.ToString());
-        m_liptPos.SetData2(bgContainer.rootPosition.y.ToString());
+        m_liptPosX.SetData(bgContainer.rootPosition.x.ToString());
+        m_liptPosY.SetData(bgContainer.rootPosition.y.ToString());
         m_liptScale.SetData(bgContainer.rootScale.ToString());
         m_liptRotation.SetData(bgContainer.rootRotation.ToString());
 
-        m_liptPos.SetLockValue(MainControl.Instance.LockX);
-        m_liptPos.SetLockValue2(MainControl.Instance.LockY);
+        m_liptPosX.SetToggleValue(MainControl.Instance.LockX);
+        m_liptPosY.SetToggleValue(MainControl.Instance.LockY);
     }
 
     private void OnLockXChange()
     {
-        m_liptPos.SetLockValue(MainControl.Instance.LockX);
+        m_liptPosX.SetToggleValue(MainControl.Instance.LockX);
     }
 
     private void OnLockYChange()
     {
-        m_liptPos.SetLockValue2(MainControl.Instance.LockY);
+        m_liptPosY.SetToggleValue(MainControl.Instance.LockY);
     }
 
     private void OnUILockXChange(Toggle toggle, bool value)
@@ -2943,7 +2907,7 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
         }
         else
         {
-            m_liptPos.SetData(MainControl.Instance.bgContainer.rootPosition.x.ToString());
+            m_liptPosX.SetData(MainControl.Instance.bgContainer.rootPosition.x.ToString());
         }
     }
 
@@ -2955,7 +2919,7 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
         }
         else
         {
-            m_liptPos.SetData2(MainControl.Instance.bgContainer.rootPosition.y.ToString());
+            m_liptPosY.SetData(MainControl.Instance.bgContainer.rootPosition.y.ToString());
         }
     }
     
