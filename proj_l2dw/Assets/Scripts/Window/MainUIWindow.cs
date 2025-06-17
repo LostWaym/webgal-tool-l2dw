@@ -1566,14 +1566,14 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_iptAlpha = transform.Find("Scroll/Viewport/Content/透明度/m_iptAlpha").GetComponent<InputField>();
-        m_iptBlur = transform.Find("Scroll/Viewport/Content/高斯模糊/m_iptBlur").GetComponent<InputField>();
-        m_toggleOldFilm = transform.Find("Scroll/Viewport/Content/老电影/m_toggleOldFilm").GetComponent<Toggle>();
-        m_toggleDotFilm = transform.Find("Scroll/Viewport/Content/点状电影/m_toggleDotFilm").GetComponent<Toggle>();
-        m_toggleReflectionFilm = transform.Find("Scroll/Viewport/Content/反射电影/m_toggleReflectionFilm").GetComponent<Toggle>();
-        m_toggleGlitchFilm = transform.Find("Scroll/Viewport/Content/故障电影/m_toggleGlitchFilm").GetComponent<Toggle>();
-        m_toggleRgbFilm = transform.Find("Scroll/Viewport/Content/RGB电影/m_toggleRgbFilm").GetComponent<Toggle>();
-        m_toggleGodrayFilm = transform.Find("Scroll/Viewport/Content/光辉电影/m_toggleGodrayFilm").GetComponent<Toggle>();
+        m_iptAlpha = transform.Find("Parameters/Container/Scroll/Viewport/Content/透明度/Value/InputField/m_iptAlpha").GetComponent<InputField>();
+        m_iptBlur = transform.Find("Parameters/Container/Scroll/Viewport/Content/高斯模糊/Value/InputField/m_iptBlur").GetComponent<InputField>();
+        m_toggleOldFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/m_toggleOldFilm").GetComponent<Toggle>();
+        m_toggleDotFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/m_toggleDotFilm").GetComponent<Toggle>();
+        m_toggleReflectionFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/m_toggleReflectionFilm").GetComponent<Toggle>();
+        m_toggleGlitchFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/m_toggleGlitchFilm").GetComponent<Toggle>();
+        m_toggleRgbFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/m_toggleRgbFilm").GetComponent<Toggle>();
+        m_toggleGodrayFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/m_toggleGodrayFilm").GetComponent<Toggle>();
 
         m_iptAlpha.onValueChanged.AddListener(OnInputFieldAlphaChange);
         m_iptAlpha.onEndEdit.AddListener(OnInputFieldAlphaEndEdit);
@@ -1737,18 +1737,18 @@ public class PageCharacterPreview : UIPageWidget<PageCharacterPreview>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_btnCopyMotionExp = transform.Find("m_btnCopyMotionExp").GetComponent<Button>();
-        m_btnCopyTransform = transform.Find("m_btnCopyTransform").GetComponent<Button>();
-        m_btnCopyAll = transform.Find("m_btnCopyAll").GetComponent<Button>();
-        m_btnCopyAllSpilt = transform.Find("m_btnCopyAllSpilt").GetComponent<Button>();
-        m_iptFilterMotion = transform.Find("GameObject/m_iptFilterMotion").GetComponent<InputField>();
-        m_scrollMotion = transform.Find("m_scrollMotion").GetComponent<ScrollRect>();
-        m_tfMotionItems = transform.Find("m_scrollMotion/Viewport/m_tfMotionItems").GetComponent<Transform>();
-        m_itemMotion = transform.Find("m_scrollMotion/Viewport/m_tfMotionItems/m_itemMotion").GetComponent<Transform>();
-        m_iptFilterExpression = transform.Find("GameObject (1)/m_iptFilterExpression").GetComponent<InputField>();
-        m_scrollExpression = transform.Find("m_scrollExpression").GetComponent<ScrollRect>();
-        m_tfExpressionItems = transform.Find("m_scrollExpression/Viewport/m_tfExpressionItems").GetComponent<Transform>();
-        m_itemExpression = transform.Find("m_scrollExpression/Viewport/m_tfExpressionItems/m_itemExpression").GetComponent<Transform>();
+        m_btnCopyMotionExp = transform.Find("CopyCommand/Container/m_btnCopyMotionExp").GetComponent<Button>();
+        m_btnCopyTransform = transform.Find("CopyCommand/Container/m_btnCopyTransform").GetComponent<Button>();
+        m_btnCopyAll = transform.Find("CopyCommand/Container/m_btnCopyAll").GetComponent<Button>();
+        m_btnCopyAllSpilt = transform.Find("CopyCommand/Container/m_btnCopyAllSpilt").GetComponent<Button>();
+        m_iptFilterMotion = transform.Find("Motion/Title/InputField/m_iptFilterMotion").GetComponent<InputField>();
+        m_scrollMotion = transform.Find("Motion/Container/m_scrollMotion").GetComponent<ScrollRect>();
+        m_tfMotionItems = transform.Find("Motion/Container/m_scrollMotion/Viewport/m_tfMotionItems").GetComponent<Transform>();
+        m_itemMotion = transform.Find("Motion/Container/m_scrollMotion/Viewport/m_tfMotionItems/m_itemMotion").GetComponent<Transform>();
+        m_iptFilterExpression = transform.Find("Expression/Title/InputField/m_iptFilterExpression").GetComponent<InputField>();
+        m_scrollExpression = transform.Find("Expression/Container/m_scrollExpression").GetComponent<ScrollRect>();
+        m_tfExpressionItems = transform.Find("Expression/Container/m_scrollExpression/Viewport/m_tfExpressionItems").GetComponent<Transform>();
+        m_itemExpression = transform.Find("Expression/Container/m_scrollExpression/Viewport/m_tfExpressionItems/m_itemExpression").GetComponent<Transform>();
 
         m_btnCopyMotionExp.onClick.AddListener(OnButtonCopyMotionExpClick);
         m_btnCopyTransform.onClick.AddListener(OnButtonCopyTransformClick);
@@ -1947,14 +1947,14 @@ public class PageExpressionEditor : UIPageWidget<PageExpressionEditor>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_btnCopySelectedExp = transform.Find("m_btnCopySelectedExp").GetComponent<Button>();
-        m_btnCopyExpData = transform.Find("m_btnCopyExpData").GetComponent<Button>();
-        m_toggleShowSelectedOnly = transform.Find("m_toggleShowSelectedOnly").GetComponent<Toggle>();
-        m_toggleLock = transform.Find("m_toggleLock").GetComponent<Toggle>();
-        m_iptFilter = transform.Find("m_iptFilter").GetComponent<InputField>();
-        m_scrollExpression = transform.Find("m_scrollExpression").GetComponent<ScrollRect>();
-        m_tfExpEntries = transform.Find("m_scrollExpression/Viewport/m_tfExpEntries").GetComponent<Transform>();
-        m_itemExpEntry = transform.Find("m_scrollExpression/Viewport/m_tfExpEntries/m_itemExpEntry").GetComponent<Transform>();
+        m_btnCopySelectedExp = transform.Find("QuickCommand/Container/m_btnCopySelectedExp").GetComponent<Button>();
+        m_btnCopyExpData = transform.Find("QuickCommand/Container/m_btnCopyExpData").GetComponent<Button>();
+        m_toggleShowSelectedOnly = transform.Find("QuickCommand/Container/m_toggleShowSelectedOnly").GetComponent<Toggle>();
+        m_toggleLock = transform.Find("QuickCommand/Container/m_toggleLock").GetComponent<Toggle>();
+        m_iptFilter = transform.Find("Parameters/Title/InputField/m_iptFilter").GetComponent<InputField>();
+        m_scrollExpression = transform.Find("Parameters/Container/m_scrollExpression").GetComponent<ScrollRect>();
+        m_tfExpEntries = transform.Find("Parameters/Container/m_scrollExpression/Viewport/m_tfExpEntries").GetComponent<Transform>();
+        m_itemExpEntry = transform.Find("Parameters/Container/m_scrollExpression/Viewport/m_tfExpEntries/m_itemExpEntry").GetComponent<Transform>();
 
         m_btnCopySelectedExp.onClick.AddListener(OnButtonCopySelectedExpClick);
         m_btnCopyExpData.onClick.AddListener(OnButtonCopyExpDataClick);
@@ -2597,15 +2597,15 @@ public class PageGroupFunctions : UIPageWidget<PageGroupFunctions>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_btnCopyMotionExp = transform.Find("m_btnCopyMotionExp").GetComponent<Button>();
-        m_btnCopyTransform = transform.Find("m_btnCopyTransform").GetComponent<Button>();
-        m_btnCopyAll = transform.Find("m_btnCopyAll").GetComponent<Button>();
-        m_btnCopyAllSpilt = transform.Find("m_btnCopyAllSpilt").GetComponent<Button>();
-        m_itemBackgroundTransform = transform.Find("m_itemBackgroundTransform").GetComponent<Transform>();
-        m_itemBackgroundTransformCopy = transform.Find("m_itemBackgroundTransformCopy").GetComponent<Transform>();
-        m_scrollChara = transform.Find("m_scrollChara").GetComponent<ScrollRect>();
-        m_tfCharas = transform.Find("m_scrollChara/Viewport/m_tfCharas").GetComponent<Transform>();
-        m_itemSelectedChara = transform.Find("m_scrollChara/Viewport/m_tfCharas/m_itemSelectedChara").GetComponent<Transform>();
+        m_btnCopyMotionExp = transform.Find("CopyCommand/Container/m_btnCopyMotionExp").GetComponent<Button>();
+        m_btnCopyTransform = transform.Find("CopyCommand/Container/m_btnCopyTransform").GetComponent<Button>();
+        m_btnCopyAll = transform.Find("CopyCommand/Container/m_btnCopyAll").GetComponent<Button>();
+        m_btnCopyAllSpilt = transform.Find("CopyCommand/Container/m_btnCopyAllSpilt").GetComponent<Button>();
+        m_itemBackgroundTransform = transform.Find("Special/Container/m_itemBackgroundTransform").GetComponent<Transform>();
+        m_itemBackgroundTransformCopy = transform.Find("Special/Container/m_itemBackgroundTransformCopy").GetComponent<Transform>();
+        m_scrollChara = transform.Find("CharacterList/Container/m_scrollChara").GetComponent<ScrollRect>();
+        m_tfCharas = transform.Find("CharacterList/Container/m_scrollChara/Viewport/m_tfCharas").GetComponent<Transform>();
+        m_itemSelectedChara = transform.Find("CharacterList/Container/m_scrollChara/Viewport/m_tfCharas/m_itemSelectedChara").GetComponent<Transform>();
 
         m_btnCopyMotionExp.onClick.AddListener(OnButtonCopyMotionExpClick);
         m_btnCopyTransform.onClick.AddListener(OnButtonCopyTransformClick);
@@ -2960,9 +2960,9 @@ public class PageBackgroundFunctions : UIPageWidget<PageBackgroundFunctions>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_btnCopyScene = transform.Find("m_btnCopyScene").GetComponent<Button>();
-        m_btnCopyTransform = transform.Find("m_btnCopyTransform").GetComponent<Button>();
-        m_btnCopyAll = transform.Find("m_btnCopyAll").GetComponent<Button>();
+        m_btnCopyScene = transform.Find("CopyCommand/Container/m_btnCopyScene").GetComponent<Button>();
+        m_btnCopyTransform = transform.Find("CopyCommand/Container/m_btnCopyTransform").GetComponent<Button>();
+        m_btnCopyAll = transform.Find("CopyCommand/Container/m_btnCopyAll").GetComponent<Button>();
 
         m_btnCopyScene.onClick.AddListener(OnButtonCopySceneClick);
         m_btnCopyTransform.onClick.AddListener(OnButtonCopyTransformClick);
