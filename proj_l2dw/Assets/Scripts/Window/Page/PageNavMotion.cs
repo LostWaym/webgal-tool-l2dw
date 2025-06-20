@@ -46,6 +46,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private RectTransform m_rectLabels;
     private Text m_lblLabelIndex;
     private TouchArea m_touchLabels;
+    private RectTransform m_iptFrameIndexContainer;
     private InputField m_iptFrameIndex;
     private GameObject m_goRight;
     private Transform m_tfTrackRoot;
@@ -82,21 +83,22 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_rectOperationTitleArea = transform.Find("TimelineArea/ToolBar/Left/Top/m_rectOperationTitleArea").GetComponent<RectTransform>();
         m_rectOperationContentArea = transform.Find("TimelineArea/ToolBar/Left/Top/m_rectOperationTitleArea/m_rectOperationContentArea").GetComponent<RectTransform>();
         m_toggleFilter = transform.Find("TimelineArea/ToolBar/Left/Bottom/m_toggleFilter").GetComponent<Toggle>();
-        m_iptFilter = transform.Find("TimelineArea/ToolBar/Left/Bottom/m_iptFilter").GetComponent<InputField>();
-        m_btnClearFilter = transform.Find("TimelineArea/ToolBar/Left/Bottom/m_iptFilter/m_btnClearFilter").GetComponent<Button>();
-        m_toggleDotSheetMode = transform.Find("TimelineArea/ToolBar/Right/Top/Container/ToggleGroup/m_toggleDotSheetMode").GetComponent<Toggle>();
-        m_toggleCurveMode = transform.Find("TimelineArea/ToolBar/Right/Top/Container/ToggleGroup/m_toggleCurveMode").GetComponent<Toggle>();
-        m_btnNavHome = transform.Find("TimelineArea/ToolBar/Right/Top/Container/GameObject/m_btnNavHome").GetComponent<Button>();
-        m_btnNavLeft = transform.Find("TimelineArea/ToolBar/Right/Top/Container/GameObject/m_btnNavLeft").GetComponent<Button>();
-        m_btnPlay = transform.Find("TimelineArea/ToolBar/Right/Top/Container/GameObject/m_btnPlay").GetComponent<Button>();
-        m_btnNavRight = transform.Find("TimelineArea/ToolBar/Right/Top/Container/GameObject/m_btnNavRight").GetComponent<Button>();
-        m_btnNavEnd = transform.Find("TimelineArea/ToolBar/Right/Top/Container/GameObject/m_btnNavEnd").GetComponent<Button>();
-        m_iptDuration = transform.Find("TimelineArea/ToolBar/Right/Top/Container/m_iptDuration").GetComponent<InputField>();
-        m_iptFrame = transform.Find("TimelineArea/ToolBar/Right/Top/Container/m_iptFrame").GetComponent<InputField>();
+        m_iptFilter = transform.Find("TimelineArea/ToolBar/Left/Bottom/Search/m_iptFilter").GetComponent<InputField>();
+        m_btnClearFilter = transform.Find("TimelineArea/ToolBar/Left/Bottom/Search/m_btnClearFilter").GetComponent<Button>();
+        m_toggleDotSheetMode = transform.Find("TimelineArea/ToolBar/Right/Top/ScrollRectH/Viewport/Content/ToggleGroup/m_toggleDotSheetMode").GetComponent<Toggle>();
+        m_toggleCurveMode = transform.Find("TimelineArea/ToolBar/Right/Top/ScrollRectH/Viewport/Content/ToggleGroup/m_toggleCurveMode").GetComponent<Toggle>();
+        m_btnNavHome = transform.Find("TimelineArea/ToolBar/Right/Top/ScrollRectH/Viewport/Content/m_btnNavHome").GetComponent<Button>();
+        m_btnNavLeft = transform.Find("TimelineArea/ToolBar/Right/Top/ScrollRectH/Viewport/Content/m_btnNavLeft").GetComponent<Button>();
+        m_btnPlay = transform.Find("TimelineArea/ToolBar/Right/Top/ScrollRectH/Viewport/Content/m_btnPlay").GetComponent<Button>();
+        m_btnNavRight = transform.Find("TimelineArea/ToolBar/Right/Top/ScrollRectH/Viewport/Content/m_btnNavRight").GetComponent<Button>();
+        m_btnNavEnd = transform.Find("TimelineArea/ToolBar/Right/Top/ScrollRectH/Viewport/Content/m_btnNavEnd").GetComponent<Button>();
+        m_iptDuration = transform.Find("TimelineArea/ToolBar/Right/Top/ScrollRectH/Viewport/Content/Duration/m_iptDuration").GetComponent<InputField>();
+        m_iptFrame = transform.Find("TimelineArea/ToolBar/Right/Top/ScrollRectH/Viewport/Content/FPS/m_iptFrame").GetComponent<InputField>();
         m_rectLabels = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_rectLabels").GetComponent<RectTransform>();
         m_lblLabelIndex = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_rectLabels/m_lblLabelIndex").GetComponent<Text>();
         m_touchLabels = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_touchLabels").GetComponent<TouchArea>();
-        m_iptFrameIndex = transform.Find("TimelineArea/ToolBar/Right/Bottom/m_iptFrameIndex").GetComponent<InputField>();
+        m_iptFrameIndexContainer = transform.Find("TimelineArea/ToolBar/Right/Bottom/FrameIndex").GetComponent<RectTransform>();
+        m_iptFrameIndex = transform.Find("TimelineArea/ToolBar/Right/Bottom/FrameIndex/m_iptFrameIndex").GetComponent<InputField>();
         m_goRight = transform.Find("TimelineArea/Bottom/m_goRight").gameObject;
         m_tfTrackRoot = transform.Find("TimelineArea/Bottom/m_goRight/m_tfTrackRoot").GetComponent<Transform>();
         m_itemTrack = transform.Find("TimelineArea/Bottom/m_goRight/m_tfTrackRoot/m_itemTrack").GetComponent<Transform>();
@@ -475,6 +477,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
 
         m_touchChara._OnPointerDown += OnTouchCharaPointerDown;
         m_touchChara._OnPointerMove += OnTouchCharaPointerMove;
+        m_touchChara._OnScroll += OnTouchCharaScroll;
 
         m_curveEditWidget = MotionCurveEditWidget.CreateWidget(m_itemCurveEdit.gameObject);
         m_curveEditWidget._OnDataChanged += OnCurveEditWidgetDataChanged;
@@ -493,6 +496,19 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         var pos = m_rawChara.rectTransform.position;
         pos += new Vector3(delta.x, delta.y, 0);
         m_rawChara.rectTransform.position = pos;
+    }
+
+    private void OnTouchCharaScroll(Vector2 vector)
+    {
+        var ctrlPressed = Input.GetKey(KeyCode.LeftControl);
+        var scaleFactor = ctrlPressed ? Global.CameraZoomBoostFactor : Global.CameraZoomFactor;
+        if (vector.y < 0)
+            scaleFactor = 1.0f / scaleFactor;
+        m_tfCharaRoot.localScale = new Vector3(
+            m_tfCharaRoot.localScale.x * scaleFactor,
+            m_tfCharaRoot.localScale.y * scaleFactor,
+            m_tfCharaRoot.localScale.z
+        );
     }
 
     private Vector2 m_selectStartPosition;
@@ -635,7 +651,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
 
         m_motionData = motionData;
         curFrameIndex = motionData.m_state_curFrameIndex;
-        m_lblMotion.text = $"> {motionData.motionDataName}";
+        m_lblMotion.text = $"{motionData.motionDataName}";
         m_curCurveLineItemTrackName = null;
         m_curCurveLineItemData = null;
         motionDataDirty = true;
@@ -737,12 +753,6 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
                     float moveValue = Mathf.Abs(wheel) * MAX_FRAME_DISPLAY_COUNT;
                     int value = Mathf.Max(1, (int)moveValue);
                     m_sliderH.value -= value * sign;
-                }
-                // 如果鼠标位置在m_tfCharaRoot上
-                else if (RectTransformUtility.RectangleContainsScreenPoint(m_tfCharaRoot.GetComponent<RectTransform>(), mousePos))
-                {
-                    var value = wheel;
-                    m_tfCharaRoot.localScale += new Vector3(value, value, 0);
                 }
             }
         }
@@ -1173,10 +1183,18 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             linePos.x = position.x;
             m_imgLine.rectTransform.position = linePos;
             m_imgLine.gameObject.SetActive(true);
+            
+            m_iptFrameIndexContainer.position = new Vector3(
+                linePos.x,
+                m_iptFrameIndexContainer.position.y,
+                m_iptFrameIndexContainer.position.z
+            );
+            m_iptFrameIndexContainer.gameObject.SetActive(true);
         }
         else
         {
             m_imgLine.gameObject.SetActive(false);
+            m_iptFrameIndexContainer.gameObject.SetActive(false);
         }
     }
 
@@ -1608,10 +1626,10 @@ public class MotionTrackHeaderWidget : UIItemWidget<MotionTrackHeaderWidget>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_lblTitle = transform.Find("m_lblTitle").GetComponent<Text>();
-        m_btnTitle = transform.Find("m_btnTitle").GetComponent<Button>();
-        m_sliderValue = transform.Find("m_sliderValue").GetComponent<Slider>();
-        m_iptValue = transform.Find("m_iptValue").GetComponent<InputField>();
+        m_lblTitle = transform.Find("Left/m_lblTitle").GetComponent<Text>();
+        m_btnTitle = transform.Find("Left/m_btnTitle").GetComponent<Button>();
+        m_sliderValue = transform.Find("Left/m_sliderValue").GetComponent<Slider>();
+        m_iptValue = transform.Find("InputField/m_iptValue").GetComponent<InputField>();
         m_btnStatus = transform.Find("m_btnStatus").GetComponent<Button>();
         m_keystyleButton = transform.Find("m_keystyleButton").GetComponent<MonoKeyUIStyle>();
         m_goMask = transform.Find("m_goMask").gameObject;
@@ -1879,7 +1897,7 @@ public class MotionTrackDotWidget : UIItemWidget<MotionTrackDotWidget>
     public void SetData(int frameIndex, bool isSelected)
     {
         this.frameIndex = frameIndex;
-        imgDot.color = isSelected ? Color.green : Color.white;
+        imgDot.color = isSelected ? Color.cyan : Color.white;
     }
 }
 public class PageNavMotionLabelBarWidget : UIItemWidget<PageNavMotionLabelBarWidget>

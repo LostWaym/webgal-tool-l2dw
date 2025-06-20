@@ -2164,6 +2164,7 @@ public class ExpEntryWidget : UIItemWidget<ExpEntryWidget>
     private Image m_imgBtnPreview;
     private Text m_lblPreview;
     private MonoUIStyle m_styleButton;
+    private RectTransform m_iptField;
     private InputField m_iptValue;
     private Text m_lblMin;
     private Text m_lblMax;
@@ -2183,9 +2184,10 @@ public class ExpEntryWidget : UIItemWidget<ExpEntryWidget>
         m_imgBtnPreview = transform.Find("Value/m_btnPreview/m_imgBtnPreview").GetComponent<Image>();
         m_lblPreview = transform.Find("Value/m_btnPreview/m_lblPreview").GetComponent<Text>();
         m_styleButton = transform.Find("Value/m_btnPreview/m_styleButton").GetComponent<MonoUIStyle>();
-        m_iptValue = transform.Find("m_iptValue").GetComponent<InputField>();
-        m_lblMin = transform.Find("m_iptValue/m_lblMin").GetComponent<Text>();
-        m_lblMax = transform.Find("m_iptValue/m_lblMax").GetComponent<Text>();
+        m_iptField = transform.Find("m_iptField").GetComponent<RectTransform>();
+        m_iptValue = transform.Find("m_iptField/m_iptValue").GetComponent<InputField>();
+        m_lblMin = transform.Find("m_iptField/m_lblMin").GetComponent<Text>();
+        m_lblMax = transform.Find("m_iptField/m_lblMax").GetComponent<Text>();
 
         m_btnTitle.onClick.AddListener(OnButtonTitleClick);
         m_sliderValue.onValueChanged.AddListener(OnSliderValueChange);
@@ -2274,7 +2276,7 @@ public class ExpEntryWidget : UIItemWidget<ExpEntryWidget>
 
     public void ShowEdit(bool show)
     {
-        m_iptValue.gameObject.SetActive(show);
+        m_iptField.gameObject.SetActive(show);
         m_sliderValue.gameObject.SetActive(!show);
         m_btnPreview.gameObject.SetActive(!show);
         m_btnTitle.gameObject.SetActive(!show);

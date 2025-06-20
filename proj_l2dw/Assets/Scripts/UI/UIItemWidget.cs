@@ -70,6 +70,9 @@ public class UIItemWidget
                 list.Add(item);
                 gameObject.transform.SetParent(root);
                 gameObject.SetActive(true);
+                var image = gameObject.GetComponent<Image>();
+                if (image)
+                    image.color = new Color(image.color.r, image.color.g, image.color.b, (float)i % 2f * 0.5f + 0.5f);
                 onItemCreate?.Invoke(item);
             }
         }
