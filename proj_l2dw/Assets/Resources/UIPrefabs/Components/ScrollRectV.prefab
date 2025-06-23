@@ -42,15 +42,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7489658948024495945, guid: 754ac434254a58948b6e0b9fc63cd5a6, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7489658948024495945, guid: 754ac434254a58948b6e0b9fc63cd5a6, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7489658948024495945, guid: 754ac434254a58948b6e0b9fc63cd5a6, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7489658948024495945, guid: 754ac434254a58948b6e0b9fc63cd5a6, type: 3}
       propertyPath: m_AnchorMin.y
@@ -58,7 +58,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7489658948024495945, guid: 754ac434254a58948b6e0b9fc63cd5a6, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 7489658948024495945, guid: 754ac434254a58948b6e0b9fc63cd5a6, type: 3}
       propertyPath: m_SizeDelta.y
@@ -94,7 +94,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7489658948024495945, guid: 754ac434254a58948b6e0b9fc63cd5a6, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: -8
       objectReference: {fileID: 0}
     - target: {fileID: 7489658948024495945, guid: 754ac434254a58948b6e0b9fc63cd5a6, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -233,6 +233,18 @@ PrefabInstance:
       propertyPath: m_VerticalScrollbar
       value: 
       objectReference: {fileID: 4127466188099082054}
+    - target: {fileID: 6875901498423445445, guid: d1484380aa752dc4e8449c560437f5ab, type: 3}
+      propertyPath: m_VerticalScrollbarVisibility
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8986132681163516965, guid: d1484380aa752dc4e8449c560437f5ab, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8986132681163516965, guid: d1484380aa752dc4e8449c560437f5ab, type: 3}
+      propertyPath: m_Pivot.y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8986132681163516965, guid: d1484380aa752dc4e8449c560437f5ab, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -270,7 +282,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 6589252185927312393, guid: d1484380aa752dc4e8449c560437f5ab, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3217827028512927670}
+      addedObject: {fileID: 7979615736117394491}
     - targetCorrespondingSourceObject: {fileID: 8471166417043619176, guid: d1484380aa752dc4e8449c560437f5ab, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4040359887440402560}
@@ -333,7 +345,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6589252185927312393, guid: d1484380aa752dc4e8449c560437f5ab, type: 3}
   m_PrefabInstance: {fileID: 2329030166451958344}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &3217827028512927670
+--- !u!114 &7979615736117394491
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -342,20 +354,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 8873174744889841217}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
-  m_ChildAlignment: 0
-  m_Spacing: 0
-  m_ChildForceExpandWidth: 0
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 1
-  m_ChildControlHeight: 1
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
-  m_ReverseArrangement: 0
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: 1
+  m_FlexibleHeight: 1
+  m_LayoutPriority: 1

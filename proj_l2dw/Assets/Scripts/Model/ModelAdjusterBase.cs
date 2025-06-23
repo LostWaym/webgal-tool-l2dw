@@ -10,6 +10,7 @@ public class ModelAdjusterBase : MonoBehaviour
     {
         Alpha,
         Blur,
+        Adjustment,
         OldFilm,
         DotFilm,
         ReflectionFilm,
@@ -259,11 +260,60 @@ public class FilterSetData
         }
     }
 
-    private int blur;
+    private int blur = 0;
     public int Blur
     {
         get => blur;
         set => blur = value;
+    }
+    
+    private float brightness = 1.0f;
+    public float Brightness
+    {
+        get => brightness;
+        set => brightness = value;
+    }
+    
+    private float contrast = 1.0f;
+    public float Contrast
+    {
+        get => contrast;
+        set => contrast = value;
+    }
+    
+    private float saturation = 1.0f;
+    public float Saturation
+    {
+        get => saturation;
+        set => saturation = value;
+    }
+    
+    private float gamma = 1.0f;
+    public float Gamma
+    {
+        get => gamma;
+        set => gamma = value;
+    }
+    
+    private float colorRed = 255.0f;
+    public float ColorRed
+    {
+        get => colorRed;
+        set => colorRed = value;
+    }
+    
+    private float colorGreen = 255.0f;
+    public float ColorGreen
+    {
+        get => colorGreen;
+        set => colorGreen = value;
+    }
+    
+    private float colorBlue = 255.0f;
+    public float ColorBlue
+    {
+        get => colorBlue;
+        set => colorBlue = value;
     }
 
     private bool oldFilm;
@@ -317,6 +367,13 @@ public class FilterSetData
     {
         ApplyIfNotApproximately(json, "alpha", alpha, 1);
         ApplyIfNot(json, "blur", blur, 0);
+        ApplyIfNotApproximately(json, "brightness", brightness, 1.0f);
+        ApplyIfNotApproximately(json, "contrast", contrast, 1.0f);
+        ApplyIfNotApproximately(json, "saturation", saturation, 1.0f);
+        ApplyIfNotApproximately(json, "gamma", gamma, 1.0f);
+        ApplyIfNotApproximately(json, "colorRed", colorRed, 255.0f);
+        ApplyIfNotApproximately(json, "colorGreen", colorGreen, 255.0f);
+        ApplyIfNotApproximately(json, "colorBlue", colorBlue, 255.0f);
         ApplyIfTrue(json, "oldFilm", oldFilm);
         ApplyIfTrue(json, "dotFilm", dotFilm);
         ApplyIfTrue(json, "reflectionFilm", reflectionFilm);

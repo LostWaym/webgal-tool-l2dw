@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class TouchArea : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IScrollHandler
+public class TouchArea : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IScrollHandler, IDragHandler
 {
     public bool processing = false;
     public Action<Vector2> _OnPointerDown;
     public Action<Vector2> _OnPointerMove;
     public Action<Vector2> _OnPointerUp;
-    public Action<Vector2> _OnScroll;
+    public Action<PointerEventData> _OnScroll;
+    public Action<PointerEventData> _OnDrag;
 
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -34,6 +35,11 @@ public class TouchArea : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, 
 
     public void OnScroll(PointerEventData eventData)
     {
-        _OnScroll?.Invoke(eventData.scrollDelta);
+        _OnScroll?.Invoke(eventData);
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        _OnDrag?.Invoke(eventData);
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class PageNavMotion : UIPageWidget<PageNavMotion>
@@ -498,11 +499,11 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_rawChara.rectTransform.position = pos;
     }
 
-    private void OnTouchCharaScroll(Vector2 vector)
+    private void OnTouchCharaScroll(PointerEventData eventData)
     {
         var ctrlPressed = Input.GetKey(KeyCode.LeftControl);
         var scaleFactor = ctrlPressed ? Global.CameraZoomBoostFactor : Global.CameraZoomFactor;
-        if (vector.y < 0)
+        if (eventData.scrollDelta.y < 0)
             scaleFactor = 1.0f / scaleFactor;
         m_tfCharaRoot.localScale = new Vector3(
             m_tfCharaRoot.localScale.x * scaleFactor,
@@ -514,11 +515,22 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private Vector2 m_selectStartPosition;
     private void OnTouchTrackAreaPointerDown(Vector2 vector)
     {
-        m_imgRect.gameObject.SetActive(true);
         m_selectStartPosition = vector;
+        UpdateSelectionRect(vector);
     }
 
     private void OnTouchTrackAreaPointerMove(Vector2 vector)
+    {
+        UpdateSelectionRect(vector);
+    }
+
+    private void OnTouchTrackAreaPointerUp(Vector2 vector)
+    {
+        m_imgRect.gameObject.SetActive(false);
+        SelectDotArea();
+    }
+
+    private void UpdateSelectionRect(Vector2 vector)
     {
         m_imgRect.gameObject.SetActive(true);
         var pos1 = m_selectStartPosition;
@@ -529,12 +541,6 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         var height = Mathf.Abs(localDelta.y);
         m_imgRect.rectTransform.sizeDelta = new Vector2(width, height);
         m_imgRect.rectTransform.position = Vector2.Lerp(pos1, pos2, 0.5f);
-    }
-
-    private void OnTouchTrackAreaPointerUp(Vector2 vector)
-    {
-        m_imgRect.gameObject.SetActive(false);
-        SelectDotArea();
     }
 
     public static Dictionary<string, HashSet<int>> s_selectedDotIndexes = new Dictionary<string, HashSet<int>>();

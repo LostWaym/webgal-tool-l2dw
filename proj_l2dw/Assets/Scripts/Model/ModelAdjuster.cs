@@ -489,6 +489,11 @@ public class ModelAdjuster : ModelAdjusterBase
                 UpdateBlurFilter();
                 break;
             }
+            case FilterProperty.Adjustment:
+            {
+                UpdateAdjustmentFilter();
+                break;
+            }
         }
     }
 
@@ -523,10 +528,23 @@ public class ModelAdjuster : ModelAdjusterBase
             mat.DisableKeyword("_BLUR_FILTER");
     }
 
+    private void UpdateAdjustmentFilter()
+    {
+        var mat = MainModel.meshRenderer.material;
+        mat.SetFloat("_Brightness", filterSetData.Brightness);
+        mat.SetFloat("_Contrast", filterSetData.Contrast);
+        mat.SetFloat("_Saturation", filterSetData.Saturation);
+        mat.SetFloat("_Gamma", filterSetData.Gamma);
+        mat.SetFloat("_ColorRed", filterSetData.ColorRed);
+        mat.SetFloat("_ColorGreen", filterSetData.ColorGreen);
+        mat.SetFloat("_ColorBlue", filterSetData.ColorBlue);
+    }
+
     private void UpdateAllFilter()
     {
         UpdateAlphaFilter();
         UpdateBlurFilter();
+        UpdateAdjustmentFilter();
     }
 
     public void SaveImage()

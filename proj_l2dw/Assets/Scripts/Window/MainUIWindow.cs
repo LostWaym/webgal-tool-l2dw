@@ -1555,6 +1555,11 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     #region auto generated members
     private InputField m_iptAlpha;
     private InputField m_iptBlur;
+    private InputField m_iptBrightness;
+    private InputField m_iptContrast;
+    private InputField m_iptSaturation;
+    private InputField m_iptGamma;
+    private ColorPicker m_colAdjustment;
     private Toggle m_toggleOldFilm;
     private Toggle m_toggleDotFilm;
     private Toggle m_toggleReflectionFilm;
@@ -1566,19 +1571,33 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_iptAlpha = transform.Find("Parameters/Container/Scroll/Viewport/Content/透明度/Value/InputField/m_iptAlpha").GetComponent<InputField>();
-        m_iptBlur = transform.Find("Parameters/Container/Scroll/Viewport/Content/高斯模糊/Value/InputField/m_iptBlur").GetComponent<InputField>();
-        m_toggleOldFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/m_toggleOldFilm").GetComponent<Toggle>();
-        m_toggleDotFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/m_toggleDotFilm").GetComponent<Toggle>();
-        m_toggleReflectionFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/m_toggleReflectionFilm").GetComponent<Toggle>();
-        m_toggleGlitchFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/m_toggleGlitchFilm").GetComponent<Toggle>();
-        m_toggleRgbFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/m_toggleRgbFilm").GetComponent<Toggle>();
-        m_toggleGodrayFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/m_toggleGodrayFilm").GetComponent<Toggle>();
+        m_iptAlpha = transform.Find("Parameters/Container/Scroll/Viewport/Content/Effect/Container/透明度/Value/InputField/m_iptAlpha").GetComponent<InputField>();
+        m_iptBlur = transform.Find("Parameters/Container/Scroll/Viewport/Content/Effect/Container/高斯模糊/Value/InputField/m_iptBlur").GetComponent<InputField>();
+        m_iptBrightness = transform.Find("Parameters/Container/Scroll/Viewport/Content/Adjustment/Container/亮度/Value/InputField/m_iptBrightness").GetComponent<InputField>();
+        m_iptContrast = transform.Find("Parameters/Container/Scroll/Viewport/Content/Adjustment/Container/对比度/Value/InputField/m_iptContrast").GetComponent<InputField>();
+        m_iptSaturation = transform.Find("Parameters/Container/Scroll/Viewport/Content/Adjustment/Container/饱和度/Value/InputField/m_iptSaturation").GetComponent<InputField>();
+        m_iptGamma = transform.Find("Parameters/Container/Scroll/Viewport/Content/Adjustment/Container/伽马值/Value/InputField/m_iptGamma").GetComponent<InputField>();
+        m_colAdjustment = transform.Find("Parameters/Container/Scroll/Viewport/Content/Adjustment/Container/色调/Value/m_colAdjustment").GetComponent<ColorPicker>();
+        m_toggleOldFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/Filter/Container/m_toggleOldFilm").GetComponent<Toggle>();
+        m_toggleDotFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/Filter/Container/m_toggleDotFilm").GetComponent<Toggle>();
+        m_toggleReflectionFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/Filter/Container/m_toggleReflectionFilm").GetComponent<Toggle>();
+        m_toggleGlitchFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/Filter/Container/m_toggleGlitchFilm").GetComponent<Toggle>();
+        m_toggleRgbFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/Filter/Container/m_toggleRgbFilm").GetComponent<Toggle>();
+        m_toggleGodrayFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/Filter/Container/m_toggleGodrayFilm").GetComponent<Toggle>();
 
         m_iptAlpha.onValueChanged.AddListener(OnInputFieldAlphaChange);
         m_iptAlpha.onEndEdit.AddListener(OnInputFieldAlphaEndEdit);
         m_iptBlur.onValueChanged.AddListener(OnInputFieldBlurChange);
         m_iptBlur.onEndEdit.AddListener(OnInputFieldBlurEndEdit);
+        m_iptBrightness.onValueChanged.AddListener(OnInputFieldBrightnessChange);
+        m_iptBrightness.onEndEdit.AddListener(OnInputFieldBrightnessEndEdit);
+        m_iptContrast.onValueChanged.AddListener(OnInputFieldContrastChange);
+        m_iptContrast.onEndEdit.AddListener(OnInputFieldContrastEndEdit);
+        m_iptSaturation.onValueChanged.AddListener(OnInputFieldSaturationChange);
+        m_iptSaturation.onEndEdit.AddListener(OnInputFieldSaturationEndEdit);
+        m_iptGamma.onValueChanged.AddListener(OnInputFieldGammaChange);
+        m_iptGamma.onEndEdit.AddListener(OnInputFieldGammaEndEdit);
+        m_colAdjustment._OnColorChanged += OnColorPickerAdjustmentChanged;
         m_toggleOldFilm.onValueChanged.AddListener(OnToggleOldFilmChange);
         m_toggleDotFilm.onValueChanged.AddListener(OnToggleDotFilmChange);
         m_toggleReflectionFilm.onValueChanged.AddListener(OnToggleReflectionFilmChange);
@@ -1621,6 +1640,88 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
             model.filterSetData.Blur = blur;
             model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Blur);
         }
+        RefreshFilterSet();
+    }
+    private void OnInputFieldBrightnessChange(string value)
+    {
+    }
+    private void OnInputFieldBrightnessEndEdit(string value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        if (float.TryParse(value, out float brightness))
+        {
+            model.filterSetData.Brightness = brightness;
+            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
+        }
+        RefreshFilterSet();
+    }
+    private void OnInputFieldContrastChange(string value)
+    {
+    }
+    private void OnInputFieldContrastEndEdit(string value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        if (float.TryParse(value, out float contrast))
+        {
+            model.filterSetData.Contrast = contrast;
+            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
+        }
+        RefreshFilterSet();
+    }
+    private void OnInputFieldSaturationChange(string value)
+    {
+    }
+    private void OnInputFieldSaturationEndEdit(string value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        if (float.TryParse(value, out float saturation))
+        {
+            model.filterSetData.Saturation = saturation;
+            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
+        }
+        RefreshFilterSet();
+    }
+    private void OnInputFieldGammaChange(string value)
+    {
+    }
+    private void OnInputFieldGammaEndEdit(string value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        if (float.TryParse(value, out float gamma))
+        {
+            model.filterSetData.Gamma = gamma;
+            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
+        }
+        RefreshFilterSet();
+    }
+
+    private void OnColorPickerAdjustmentChanged(Color color)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        model.filterSetData.ColorRed = color.r * 255.0f;
+        model.filterSetData.ColorGreen = color.g * 255.0f;
+        model.filterSetData.ColorBlue = color.b * 255.0f;
+        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
         RefreshFilterSet();
     }
     private void OnToggleOldFilmChange(bool value)
@@ -1707,6 +1808,15 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
 
         m_iptAlpha.SetTextWithoutNotify(model.filterSetData.Alpha.ToString("F2"));
         m_iptBlur.SetTextWithoutNotify(model.filterSetData.Blur.ToString());
+        m_iptBrightness.SetTextWithoutNotify(model.filterSetData.Brightness.ToString("F2"));
+        m_iptContrast.SetTextWithoutNotify(model.filterSetData.Contrast.ToString("F2"));
+        m_iptSaturation.SetTextWithoutNotify(model.filterSetData.Saturation.ToString("F2"));
+        m_iptGamma.SetTextWithoutNotify(model.filterSetData.Gamma.ToString("F2"));
+        m_colAdjustment.color = new Color(
+            model.filterSetData.ColorRed / 255.0f,
+            model.filterSetData.ColorGreen / 255.0f,
+            model.filterSetData.ColorBlue / 255.0f
+        );
         m_toggleOldFilm.SetIsOnWithoutNotify(model.filterSetData.OldFilm);
         m_toggleDotFilm.SetIsOnWithoutNotify(model.filterSetData.DotFilm);
         m_toggleReflectionFilm.SetIsOnWithoutNotify(model.filterSetData.ReflectionFilm);

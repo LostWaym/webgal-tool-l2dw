@@ -1,21 +1,12 @@
-Shader "Webgal/WebgalContainer"
+Shader "UI/ColorPicker"
 {
     Properties
     {
         [HideInInspector] _MainTex ("Texture", 2D) = "white" {}
-        _Alpha ("Alpha", Range(0, 1)) = 1
-        [Toggle(_BLUR_FILTER)] _BlurFilter ("BlurFilter", Float) = 0
-        _Blur ("Blur", Float) = 0
-        _BlurSampleScaleX ("BlurSampleScaleX", Float) = 1
-        _BlurSampleScaleY ("BlurSampleScaleY", Float) = 1
-        
-        _Brightness ("Brightness", Float) = 1
-        _Contrast ("Contrast", Float) = 1
-        _Saturation ("Saturation", Float) = 1
-        _Gamma ("Gamma", Float) = 1
-        _ColorRed ("ColorRed", Float) = 255
-        _ColorGreen ("ColorGreen", Float) = 255
-        _ColorBlue ("ColorBlue", Float) = 255
+        [KeywordEnum(Sv_Rect, Hue_Bar, Dragger)] _Mode ("Mode", Float) = 0
+        _Hue ("Hue", Range(0, 1)) = 0
+        _Saturation ("Saturation", Range(0, 1)) = 0
+        _Value ("Value", Range(0, 1)) = 1
     }
     SubShader
     {
@@ -37,9 +28,17 @@ Shader "Webgal/WebgalContainer"
             // make fog work
             #pragma multi_compile_fog
 
+            #pragma multi_compile _MODE_SV_RECT _MODE_HUE_BAR _MODE_DRAGGER
+
             #include "UnityCG.cginc"
-            #include "Library/AlphaFilter.cginc"
-            #include "Library/BlurFilter.cginc"
+            #include "Library/ColorUtils.cginc"
+
+            sampler2D _MainTex;
+            float4 _MainTex_ST;
+
+            float _Hue;
+            float _Saturation;
+            float _Value;
 
             struct appdata
             {
@@ -66,15 +65,23 @@ Shader "Webgal/WebgalContainer"
             fixed4 frag (v2f i) : SV_Target
             {
                 fixed4 col = fixed4(0.5, 0.8, 0.6 ,1);
-                // sample the texture
-                // fixed4 col = tex2D(_MainTex, i.uv);
+#if _MODE_SV_RECT
+                // col = fixed4(1.0, 0.0, 0.0, 1.0);
+                col.rgb = HsvToRgb(_Hue, i.uv.x, i.uv.y);
+#elif _MODE_HUE_BAR
+                // col = fixed4(0.0, 1.0, 0.0, 1.0);
+                col.rgb = HsvToRgb(i.uv.x, 1.0, 1.0);
+#elif _MODE_DRAGGER
+                // col = fixed4(0.0, 0.0, 1.0, 1.0);
+                col.rgb = HsvToRgb(_Hue, _Saturation, _Value);
 
-                // 应用滤镜
-                col = ApplyBlurFilter(i.uv);
-                col = ApplyAlphaFilter(col);
+                float normalizedSphere = length(i.uv - float2(0.5, 0.5)) * 2.0;
+                col.rgb = lerp(float3(1.0, 1.0, 1.0), col.rgb, smoothstep(0.80, 0.70, normalizedSphere));
+                col.rgb = lerp(float3(0.0, 0.0, 0.0), col.rgb, smoothstep(0.90, 0.80, normalizedSphere));
+
+                col.a = smoothstep(1.0, 0.90, normalizedSphere);
+#endif
                 
-                // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
             }
             ENDCG

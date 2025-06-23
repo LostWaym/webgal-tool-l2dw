@@ -3,6 +3,7 @@
 
 #include "UnityCG.cginc"
 #include "./WebgalContainerInput.cginc"
+#include "Library/AdjustmentFilter.cginc"
 
 #pragma multi_compile _ _BLUR_FILTER
 
@@ -13,7 +14,8 @@ float _BlurSampleScaleY;
 fixed4 ApplyBlurFilter(float2 rawUv)
 {
 #ifndef _BLUR_FILTER
-    return tex2D(_MainTex, rawUv);
+    // return tex2D(_MainTex, rawUv);
+    return ApplyAdjustmentFilter(rawUv);
 #else
     fixed4 col = fixed4(0, 0, 0, 0);
 
@@ -31,7 +33,7 @@ fixed4 ApplyBlurFilter(float2 rawUv)
         {
             float2 offset = float2(x, y) * blurUv / kernelSize;
             float weight = exp(-(x*x + y*y) / (2 * sigma * sigma));
-            col += tex2D(_MainTex, rawUv + offset) * weight;
+            col += ApplyAdjustmentFilter(rawUv + offset) * weight;
             weightSum += weight;
         }
     }
