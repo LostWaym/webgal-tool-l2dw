@@ -3,11 +3,13 @@ Shader "Webgal/WebgalContainer"
     Properties
     {
         [HideInInspector] _MainTex ("Texture", 2D) = "white" {}
+        
+        _SampleScaleX ("SampleScaleX", Float) = 1
+        _SampleScaleY ("SampleScaleY", Float) = 1
+        
         _Alpha ("Alpha", Range(0, 1)) = 1
         [Toggle(_BLUR_FILTER)] _BlurFilter ("BlurFilter", Float) = 0
         _Blur ("Blur", Float) = 0
-        _BlurSampleScaleX ("BlurSampleScaleX", Float) = 1
-        _BlurSampleScaleY ("BlurSampleScaleY", Float) = 1
         
         _Brightness ("Brightness", Float) = 1
         _Contrast ("Contrast", Float) = 1
@@ -16,6 +18,15 @@ Shader "Webgal/WebgalContainer"
         _ColorRed ("ColorRed", Float) = 255
         _ColorGreen ("ColorGreen", Float) = 255
         _ColorBlue ("ColorBlue", Float) = 255
+        
+        _Bevel ("Bevel", Range(0, 1)) = 0
+        _BevelThickness ("BevelThickness", Float) = 0
+        _BevelRotation ("BevelRotation", Float) = 0
+        [Toggle(_BEVEL_FILTER_SOFTNESS)] _BevelFilterSoftness ("BevelFilterSoftness", Float) = 0
+        _BevelSoftness ("BevelSoftness", Range(0, 1)) = 0
+        _BevelRed ("BevelRed", Float) = 255
+        _BevelGreen ("BevelGreen", Float) = 255
+        _BevelBlue ("BevelBlue", Float) = 255
     }
     SubShader
     {

@@ -11,6 +11,7 @@ public class ModelAdjusterBase : MonoBehaviour
         Alpha,
         Blur,
         Adjustment,
+        Bevel,
         OldFilm,
         DotFilm,
         ReflectionFilm,
@@ -316,6 +317,55 @@ public class FilterSetData
         set => colorBlue = value;
     }
 
+    private float bevel = 0.0f;
+    public float Bevel
+    {
+        get => bevel;
+        set => bevel = value;
+    }
+    
+    private float bevelThickness = 0.0f;
+    public float BevelThickness
+    {
+        get => bevelThickness;
+        set => bevelThickness = value;
+    }
+    
+    private float bevelRotation = 0.0f;
+    public float BevelRotation
+    {
+        get => bevelRotation;
+        set => bevelRotation = value;
+    }
+    
+    private float bevelSoftness = 0.0f;
+    public float BevelSoftness
+    {
+        get => bevelSoftness;
+        set => bevelSoftness = value;
+    }
+    
+    private float bevelRed = 255.0f;
+    public float BevelRed
+    {
+        get => bevelRed;
+        set => bevelRed = value;
+    }
+    
+    private float bevelGreen = 255.0f;
+    public float BevelGreen
+    {
+        get => bevelGreen;
+        set => bevelGreen = value;
+    }
+    
+    private float bevelBlue = 255.0f;
+    public float BevelBlue
+    {
+        get => bevelBlue;
+        set => bevelBlue = value;
+    }
+
     private bool oldFilm;
     public bool OldFilm
     {
@@ -367,6 +417,7 @@ public class FilterSetData
     {
         ApplyIfNotApproximately(json, "alpha", alpha, 1);
         ApplyIfNot(json, "blur", blur, 0);
+        
         ApplyIfNotApproximately(json, "brightness", brightness, 1.0f);
         ApplyIfNotApproximately(json, "contrast", contrast, 1.0f);
         ApplyIfNotApproximately(json, "saturation", saturation, 1.0f);
@@ -374,6 +425,15 @@ public class FilterSetData
         ApplyIfNotApproximately(json, "colorRed", colorRed, 255.0f);
         ApplyIfNotApproximately(json, "colorGreen", colorGreen, 255.0f);
         ApplyIfNotApproximately(json, "colorBlue", colorBlue, 255.0f);
+        
+        ApplyIfNotApproximately(json, "bevel", bevel, 0.0f);
+        ApplyIfNotApproximately(json, "bevelThickness", bevelThickness, 0.0f);
+        ApplyIfNotApproximately(json, "bevelRotation", bevelRotation, 0.0f);
+        ApplyIfNotApproximately(json, "bevelSoftness", bevelSoftness, 0.0f);
+        ApplyIfNotApproximately(json, "bevelRed", bevelRed, 255.0f);
+        ApplyIfNotApproximately(json, "bevelGreen", bevelGreen, 255.0f);
+        ApplyIfNotApproximately(json, "bevelBlue", bevelBlue, 255.0f);
+        
         ApplyIfTrue(json, "oldFilm", oldFilm);
         ApplyIfTrue(json, "dotFilm", dotFilm);
         ApplyIfTrue(json, "reflectionFilm", reflectionFilm);

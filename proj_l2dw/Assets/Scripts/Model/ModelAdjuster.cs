@@ -494,7 +494,33 @@ public class ModelAdjuster : ModelAdjusterBase
                 UpdateAdjustmentFilter();
                 break;
             }
+            case FilterProperty.Bevel:
+            {
+                UpdateBevelFilter();
+                break;
+            }
         }
+    }
+    
+    // 更新屏幕尺寸相关参数
+    private void UpdateScreenParams()
+    {
+        var mat = MainModel.meshRenderer.material;
+        var modelAspect = MainModel.Live2DModel.getCanvasWidth() / MainModel.Live2DModel.getCanvasHeight();
+        var stageAspect = (float)Constants.WebGalWidth / (float)Constants.WebGalHeight;
+        var aspectRatio = stageAspect / modelAspect;
+        var factor = 1.0f;
+        if (!Global.__PIVOT_2_4)
+            factor = 1.0f / 1.5f;
+        
+        mat.SetFloat(
+            "_SampleScaleX",
+            factor * Mathf.Max(aspectRatio, 1.0f) / (float)Constants.WebGalWidth / rootScale
+        );
+        mat.SetFloat(
+            "_SampleScaleY",
+            factor * Mathf.Min(aspectRatio, 1.0f) / (float)Constants.WebGalHeight / rootScale
+        );
     }
 
     private void UpdateAlphaFilter()
@@ -506,21 +532,6 @@ public class ModelAdjuster : ModelAdjusterBase
     private void UpdateBlurFilter()
     {
         var mat = MainModel.meshRenderer.material;
-        var modelAspect = MainModel.Live2DModel.getCanvasWidth() / MainModel.Live2DModel.getCanvasHeight();
-        var stageAspect = (float)Constants.WebGalWidth / (float)Constants.WebGalHeight;
-        var aspectRatio = stageAspect / modelAspect;
-        var factor = 1.0f;
-        if (!Global.__PIVOT_2_4)
-            factor = 1.0f / 1.5f;
-        
-        mat.SetFloat(
-            "_BlurSampleScaleX",
-            factor * Mathf.Max(aspectRatio, 1.0f) / (float)Constants.WebGalWidth / rootScale
-        );
-        mat.SetFloat(
-            "_BlurSampleScaleY",
-            factor * Mathf.Min(aspectRatio, 1.0f) / (float)Constants.WebGalHeight / rootScale
-        );
         mat.SetFloat("_Blur", filterSetData.Blur);
         if (filterSetData.Blur > 0)
             mat.EnableKeyword("_BLUR_FILTER");
@@ -539,12 +550,31 @@ public class ModelAdjuster : ModelAdjusterBase
         mat.SetFloat("_ColorGreen", filterSetData.ColorGreen);
         mat.SetFloat("_ColorBlue", filterSetData.ColorBlue);
     }
+    
+    private void UpdateBevelFilter()
+    {
+        var mat = MainModel.meshRenderer.material;
+        mat.SetFloat("_Bevel", filterSetData.Bevel);
+        mat.SetFloat("_BevelThickness", filterSetData.BevelThickness);
+        mat.SetFloat("_BevelRotation", filterSetData.BevelRotation);
+        mat.SetFloat("_BevelSoftness", filterSetData.BevelSoftness);
+        mat.SetFloat("_BevelRed", filterSetData.BevelRed);
+        mat.SetFloat("_BevelGreen", filterSetData.BevelGreen);
+        mat.SetFloat("_BevelBlue", filterSetData.BevelBlue);
+
+        if (filterSetData.BevelSoftness > 0.0f)
+            mat.EnableKeyword("_BEVEL_FILTER_SOFTNESS");
+        else
+            mat.DisableKeyword("_BEVEL_FILTER_SOFTNESS");
+    }
 
     private void UpdateAllFilter()
     {
+        UpdateScreenParams();
         UpdateAlphaFilter();
         UpdateBlurFilter();
         UpdateAdjustmentFilter();
+        UpdateBevelFilter();
     }
 
     public void SaveImage()

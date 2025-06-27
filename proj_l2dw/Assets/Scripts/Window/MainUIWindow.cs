@@ -1560,6 +1560,11 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     private InputField m_iptSaturation;
     private InputField m_iptGamma;
     private ColorPicker m_colAdjustment;
+    private InputField m_iptBevel;
+    private InputField m_iptBevelThickness;
+    private InputField m_iptBevelRotation;
+    private InputField m_iptBevelSoftness;
+    private ColorPicker m_colBevel;
     private Toggle m_toggleOldFilm;
     private Toggle m_toggleDotFilm;
     private Toggle m_toggleReflectionFilm;
@@ -1573,11 +1578,19 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     {
         m_iptAlpha = transform.Find("Parameters/Container/Scroll/Viewport/Content/Effect/Container/透明度/Value/InputField/m_iptAlpha").GetComponent<InputField>();
         m_iptBlur = transform.Find("Parameters/Container/Scroll/Viewport/Content/Effect/Container/高斯模糊/Value/InputField/m_iptBlur").GetComponent<InputField>();
+        
         m_iptBrightness = transform.Find("Parameters/Container/Scroll/Viewport/Content/Adjustment/Container/亮度/Value/InputField/m_iptBrightness").GetComponent<InputField>();
         m_iptContrast = transform.Find("Parameters/Container/Scroll/Viewport/Content/Adjustment/Container/对比度/Value/InputField/m_iptContrast").GetComponent<InputField>();
         m_iptSaturation = transform.Find("Parameters/Container/Scroll/Viewport/Content/Adjustment/Container/饱和度/Value/InputField/m_iptSaturation").GetComponent<InputField>();
         m_iptGamma = transform.Find("Parameters/Container/Scroll/Viewport/Content/Adjustment/Container/伽马值/Value/InputField/m_iptGamma").GetComponent<InputField>();
         m_colAdjustment = transform.Find("Parameters/Container/Scroll/Viewport/Content/Adjustment/Container/色调/Value/m_colAdjustment").GetComponent<ColorPicker>();
+        
+        m_iptBevel = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/透明度/Value/InputField/m_iptBevel").GetComponent<InputField>();
+        m_iptBevelThickness = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/粗细/Value/InputField/m_iptBevelThickness").GetComponent<InputField>();
+        m_iptBevelRotation = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/旋转/Value/InputField/m_iptBevelRotation").GetComponent<InputField>();
+        m_iptBevelSoftness = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/软化/Value/InputField/m_iptBevelSoftness").GetComponent<InputField>();
+        m_colBevel = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/色调/Value/m_colBevel").GetComponent<ColorPicker>();
+        
         m_toggleOldFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/Filter/Container/m_toggleOldFilm").GetComponent<Toggle>();
         m_toggleDotFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/Filter/Container/m_toggleDotFilm").GetComponent<Toggle>();
         m_toggleReflectionFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/Filter/Container/m_toggleReflectionFilm").GetComponent<Toggle>();
@@ -1589,6 +1602,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_iptAlpha.onEndEdit.AddListener(OnInputFieldAlphaEndEdit);
         m_iptBlur.onValueChanged.AddListener(OnInputFieldBlurChange);
         m_iptBlur.onEndEdit.AddListener(OnInputFieldBlurEndEdit);
+        
         m_iptBrightness.onValueChanged.AddListener(OnInputFieldBrightnessChange);
         m_iptBrightness.onEndEdit.AddListener(OnInputFieldBrightnessEndEdit);
         m_iptContrast.onValueChanged.AddListener(OnInputFieldContrastChange);
@@ -1598,6 +1612,17 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_iptGamma.onValueChanged.AddListener(OnInputFieldGammaChange);
         m_iptGamma.onEndEdit.AddListener(OnInputFieldGammaEndEdit);
         m_colAdjustment._OnColorChanged += OnColorPickerAdjustmentChanged;
+        
+        m_iptBevel.onValueChanged.AddListener(OnInputFieldBevelChange);
+        m_iptBevel.onEndEdit.AddListener(OnInputFieldBevelEndEdit);
+        m_iptBevelThickness.onValueChanged.AddListener(OnInputFieldBevelThicknessChange);
+        m_iptBevelThickness.onEndEdit.AddListener(OnInputFieldBevelThicknessEndEdit);
+        m_iptBevelRotation.onValueChanged.AddListener(OnInputFieldBevelRotationChange);
+        m_iptBevelRotation.onEndEdit.AddListener(OnInputFieldBevelRotationEndEdit);
+        m_iptBevelSoftness.onValueChanged.AddListener(OnInputFieldBevelSoftnessChange);
+        m_iptBevelSoftness.onEndEdit.AddListener(OnInputFieldBevelSoftnessEndEdit);
+        m_colBevel._OnColorChanged += OnColorPickerBevelChanged;
+        
         m_toggleOldFilm.onValueChanged.AddListener(OnToggleOldFilmChange);
         m_toggleDotFilm.onValueChanged.AddListener(OnToggleDotFilmChange);
         m_toggleReflectionFilm.onValueChanged.AddListener(OnToggleReflectionFilmChange);
@@ -1724,6 +1749,88 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
         RefreshFilterSet();
     }
+    private void OnInputFieldBevelChange(string value)
+    {
+    }
+    private void OnInputFieldBevelEndEdit(string value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        if (float.TryParse(value, out float bevel))
+        {
+            model.filterSetData.Bevel = bevel;
+            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
+        }
+        RefreshFilterSet();
+    }
+    private void OnInputFieldBevelThicknessChange(string value)
+    {
+    }
+    private void OnInputFieldBevelThicknessEndEdit(string value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        if (float.TryParse(value, out float bevelThickness))
+        {
+            model.filterSetData.BevelThickness = bevelThickness;
+            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
+        }
+        RefreshFilterSet();
+    }
+    private void OnInputFieldBevelRotationChange(string value)
+    {
+    }
+    private void OnInputFieldBevelRotationEndEdit(string value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        if (float.TryParse(value, out float bevelRotation))
+        {
+            model.filterSetData.BevelRotation = bevelRotation;
+            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
+        }
+        RefreshFilterSet();
+    }
+    private void OnInputFieldBevelSoftnessChange(string value)
+    {
+    }
+    private void OnInputFieldBevelSoftnessEndEdit(string value)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        if (float.TryParse(value, out float bevelSoftness))
+        {
+            model.filterSetData.BevelSoftness = bevelSoftness;
+            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
+        }
+        RefreshFilterSet();
+    }
+
+    private void OnColorPickerBevelChanged(Color color)
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null)
+        {
+            return;
+        }
+        model.filterSetData.BevelRed = color.r * 255.0f;
+        model.filterSetData.BevelGreen = color.g * 255.0f;
+        model.filterSetData.BevelBlue = color.b * 255.0f;
+        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
+        RefreshFilterSet();
+    }
     private void OnToggleOldFilmChange(bool value)
     {
         var model = MainControl.Instance.curTarget;
@@ -1808,6 +1915,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
 
         m_iptAlpha.SetTextWithoutNotify(model.filterSetData.Alpha.ToString("F2"));
         m_iptBlur.SetTextWithoutNotify(model.filterSetData.Blur.ToString());
+        
         m_iptBrightness.SetTextWithoutNotify(model.filterSetData.Brightness.ToString("F2"));
         m_iptContrast.SetTextWithoutNotify(model.filterSetData.Contrast.ToString("F2"));
         m_iptSaturation.SetTextWithoutNotify(model.filterSetData.Saturation.ToString("F2"));
@@ -1817,6 +1925,17 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
             model.filterSetData.ColorGreen / 255.0f,
             model.filterSetData.ColorBlue / 255.0f
         );
+        
+        m_iptBevel.SetTextWithoutNotify(model.filterSetData.Bevel.ToString("F2"));
+        m_iptBevelThickness.SetTextWithoutNotify(model.filterSetData.BevelThickness.ToString("F2"));
+        m_iptBevelRotation.SetTextWithoutNotify(model.filterSetData.BevelRotation.ToString("F2"));
+        m_iptBevelSoftness.SetTextWithoutNotify(model.filterSetData.BevelSoftness.ToString("F2"));
+        m_colBevel.color = new Color(
+            model.filterSetData.BevelRed / 255.0f,
+            model.filterSetData.BevelGreen / 255.0f,
+            model.filterSetData.BevelBlue / 255.0f
+        );
+            
         m_toggleOldFilm.SetIsOnWithoutNotify(model.filterSetData.OldFilm);
         m_toggleDotFilm.SetIsOnWithoutNotify(model.filterSetData.DotFilm);
         m_toggleReflectionFilm.SetIsOnWithoutNotify(model.filterSetData.ReflectionFilm);
