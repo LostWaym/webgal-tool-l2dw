@@ -285,11 +285,13 @@ public class SettingPageManual : SettingPageBase<SettingPageManual>
 
 public class SettingPageExperiment : SettingPageBase<SettingPageExperiment>
 {
-
     #region auto generated members
     private Toggle m_toggleBlink;
     private Toggle m_toggleWebgalExpSupport;
     private Toggle m_toggle_2_4Support;
+    private Toggle m_toggleUseCustomResolution;
+    private InputField m_iptValueResolutionWidth;
+    private InputField m_iptValueResolutionHeight;
     #endregion
 
     #region auto generated binders
@@ -298,10 +300,18 @@ public class SettingPageExperiment : SettingPageBase<SettingPageExperiment>
         m_toggleBlink = transform.Find("ScrollRect/Viewport/Content/m_toggleBlink").GetComponent<Toggle>();
         m_toggleWebgalExpSupport = transform.Find("ScrollRect/Viewport/Content/m_toggleWebgalExpSupport").GetComponent<Toggle>();
         m_toggle_2_4Support = transform.Find("ScrollRect/Viewport/Content/m_toggle_2_4Support").GetComponent<Toggle>();
+        m_toggleUseCustomResolution = transform.Find("ScrollRect/Viewport/Content/m_toggleUseCustomResolution").GetComponent<Toggle>();
+        m_iptValueResolutionWidth = transform.Find("ScrollRect/Viewport/Content/LabelInputField/Value/m_iptValueResolutionWidth").GetComponent<InputField>();
+        m_iptValueResolutionHeight = transform.Find("ScrollRect/Viewport/Content/LabelInputField/Value/m_iptValueResolutionHeight").GetComponent<InputField>();
 
         m_toggleBlink.onValueChanged.AddListener(OnToggleBlinkChange);
         m_toggleWebgalExpSupport.onValueChanged.AddListener(OnToggleWebgalExpSupportChange);
         m_toggle_2_4Support.onValueChanged.AddListener(OnToggle_2_4SupportChange);
+        m_toggleUseCustomResolution.onValueChanged.AddListener(OnToggleUseCustomResolutionChange);
+        m_iptValueResolutionWidth.onValueChanged.AddListener(OnInputFieldValueResolutionWidthChange);
+        m_iptValueResolutionWidth.onEndEdit.AddListener(OnInputFieldValueResolutionWidthEndEdit);
+        m_iptValueResolutionHeight.onValueChanged.AddListener(OnInputFieldValueResolutionHeightChange);
+        m_iptValueResolutionHeight.onEndEdit.AddListener(OnInputFieldValueResolutionHeightEndEdit);
     }
     #endregion
 
@@ -327,6 +337,31 @@ public class SettingPageExperiment : SettingPageBase<SettingPageExperiment>
         Global.__PIVOT_2_4 = value;
     }
 
+    private void OnToggleUseCustomResolutionChange(bool value)
+    {
+        Global.IsSetResolution = value;
+    }
+    private void OnInputFieldValueResolutionWidthChange(string value)
+    {
+        if (int.TryParse(value, out var width))
+        {
+            Global.NewResolutionWidth = width;
+        }
+    }
+    private void OnInputFieldValueResolutionWidthEndEdit(string value)
+    {
+    }
+    private void OnInputFieldValueResolutionHeightChange(string value)
+    {
+        if (int.TryParse(value, out var height))
+        {
+            Global.NewResolutionHeight = height;
+        }
+    }
+    private void OnInputFieldValueResolutionHeightEndEdit(string value)
+    {
+    }
+
     #endregion
 
     protected override string Title => "实验性";
@@ -338,9 +373,12 @@ public class SettingPageExperiment : SettingPageBase<SettingPageExperiment>
     public override void OnPageShown()
     {
         base.OnPageShown();
-        m_toggleBlink.isOn = MainControl.AllowBlink;
-        m_toggleWebgalExpSupport.isOn = MainControl.WebGalExpressionSupport;
-        m_toggle_2_4Support.isOn = Global.__PIVOT_2_4;
+        m_toggleBlink.SetIsOnWithoutNotify(MainControl.AllowBlink);
+        m_toggleWebgalExpSupport.SetIsOnWithoutNotify(MainControl.WebGalExpressionSupport);
+        m_toggle_2_4Support.SetIsOnWithoutNotify(Global.__PIVOT_2_4);
+        m_toggleUseCustomResolution.SetIsOnWithoutNotify(Global.IsSetResolution);
+        m_iptValueResolutionWidth.SetTextWithoutNotify(Global.NewResolutionWidth.ToString());
+        m_iptValueResolutionHeight.SetTextWithoutNotify(Global.NewResolutionHeight.ToString());
     }
 }
 

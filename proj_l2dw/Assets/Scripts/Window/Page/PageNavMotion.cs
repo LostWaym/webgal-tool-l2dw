@@ -1054,7 +1054,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
                 continue;
 
             var targetFrameIndex = curFrameIndex + entry.frameIndex;
-            track.SetKeyFrameData(targetFrameIndex, entry.data);
+            track.SetKeyFrameData(targetFrameIndex, entry.data.Clone());
         }
 
         m_motionData.BakeAllFrames();

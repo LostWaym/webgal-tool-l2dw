@@ -27,6 +27,10 @@ public static class Global
     public static bool DisableJsonModelProfileInit = false;
 
     public static bool IsLoaded = false;
+
+    public static bool IsSetResolution = false;
+    public static int NewResolutionWidth = 2560;
+    public static int NewResolutionHeight = 1440;
     
 
     public static void Save()
@@ -43,6 +47,9 @@ public static class Global
         PlayerPrefs.SetFloat("Global.CameraZoomFactor", CameraZoomFactor);
         PlayerPrefs.SetFloat("Global.CameraZoomBoostFactor", CameraZoomBoostFactor);
         PlayerPrefs.SetInt("Global.DisableJsonModelProfileInit", DisableJsonModelProfileInit ? 1 : 0);
+        PlayerPrefs.SetInt("Global.IsSetResolution", IsSetResolution ? 1 : 0);
+        PlayerPrefs.SetInt("Global.NewResolutionWidth", NewResolutionWidth);
+        PlayerPrefs.SetInt("Global.NewResolutionHeight", NewResolutionHeight);
     }
 
     public static void Load()
@@ -57,7 +64,10 @@ public static class Global
         CameraZoomFactor = PlayerPrefs.GetFloat("Global.CameraZoomFactor", 1.1f);
         CameraZoomBoostFactor = PlayerPrefs.GetFloat("Global.CameraZoomBoostFactor", 1.5f);
         DisableJsonModelProfileInit = PlayerPrefs.GetInt("Global.DisableJsonModelProfileInit", 0) == 1;
-        
+        IsSetResolution = PlayerPrefs.GetInt("Global.IsSetResolution", 0) == 1;
+        NewResolutionWidth = PlayerPrefs.GetInt("Global.NewResolutionWidth", 2560);
+        NewResolutionHeight = PlayerPrefs.GetInt("Global.NewResolutionHeight", 1440);
+
         if (string.IsNullOrEmpty(BGChangeTemplate))
         {
             BGChangeTemplate = "changeBg:%me%;";

@@ -120,6 +120,9 @@ public static class UIScriptGenerator
     {
         foreach (Transform child in target)
         {
+            if (child.name.StartsWith("#"))
+                continue;
+
             var type = GetComponentType(child.name);
             var relativePath = GetPathFromRoot(root, child);
             string name = child.name;
@@ -129,7 +132,7 @@ public static class UIScriptGenerator
                 GenerateMemberBinder(type, name, relativePath);
                 GenerateEventBinder(type, name);
             }
-
+            
             if (ignorePrefixes.Any(prefix => child.name.StartsWith(prefix)))
             {
                 continue;

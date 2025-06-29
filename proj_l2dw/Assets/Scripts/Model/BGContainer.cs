@@ -17,9 +17,25 @@ public class BGContainer : MonoBehaviour
     public float width;
     public float height;
 
+    public Transform tfLeft, tfRight, tfTop, tfBottom;
+
+    void Awake()
+    {
+        Adjust();
+    }
+
     public void Adjust()
     {
         transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+        var width = Constants.WebGalWidth;
+        var height = Constants.WebGalHeight;
+        var offset = 2;
+        tfLeft.localPosition = new Vector3(-width / 2 - offset, 0, 0);
+        tfRight.localPosition = new Vector3(width / 2 + offset, 0, 0);
+        tfTop.localPosition = new Vector3(0, height / 2 + offset, 0);
+        tfBottom.localPosition = new Vector3(0, -height / 2 - offset, 0);
+
+        LoadTexture(bg.sprite.texture);
     }
 
     public void LoadTexture(Texture2D texture)
