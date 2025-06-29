@@ -15353,7 +15353,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3845902138487081574, guid: f867c185b95e79a42966ec7affadf587, type: 3}
       propertyPath: m_Text
-      value: "\u81EA\u5B9A\u4E49\u6E38\u620F\u5206\u8FA8\u7387"
+      value: "\u542F\u7528\u81EA\u5B9A\u4E49\u6E38\u620F\u5206\u8FA8\u7387"
       objectReference: {fileID: 0}
     - target: {fileID: 6407413874481761397, guid: f867c185b95e79a42966ec7affadf587, type: 3}
       propertyPath: m_AnchorMax.y
@@ -17769,13 +17769,13 @@ PrefabInstance:
       addedObject: {fileID: 5916567817320958202}
     - targetCorrespondingSourceObject: {fileID: 3947186172999790834, guid: 1eef29915b7cb1145a06364aaea69956, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5834691647894781141}
-    - targetCorrespondingSourceObject: {fileID: 3947186172999790834, guid: 1eef29915b7cb1145a06364aaea69956, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 3652050552114756038}
     - targetCorrespondingSourceObject: {fileID: 3947186172999790834, guid: 1eef29915b7cb1145a06364aaea69956, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8670228277201000104}
+    - targetCorrespondingSourceObject: {fileID: 3947186172999790834, guid: 1eef29915b7cb1145a06364aaea69956, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5834691647894781141}
     - targetCorrespondingSourceObject: {fileID: 3947186172999790834, guid: 1eef29915b7cb1145a06364aaea69956, type: 3}
       insertIndex: -1
       addedObject: {fileID: 380323559611541303}
@@ -19630,7 +19630,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3154913733724790923, guid: f867c185b95e79a42966ec7affadf587, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -128
+      value: -96
       objectReference: {fileID: 0}
     - target: {fileID: 3154913733724790923, guid: f867c185b95e79a42966ec7affadf587, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
