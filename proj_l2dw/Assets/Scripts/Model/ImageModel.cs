@@ -59,6 +59,7 @@ public class ImageModel : ModelAdjusterBase
     public override void CreateModel()
     {
         LoadTexture();
+        UpdateAllFilter();
     }
 
     private void LoadTexture()
@@ -153,6 +154,112 @@ public class ImageModel : ModelAdjusterBase
         CopyScaleFromRoot();
         SetCharacterWorldPosition(oldPos.x, oldPos.y);
     }
+
+    #region 滤镜
+
+    public override void OnFilterSetDataChanged(FilterProperty property)
+    {
+        switch (property)
+        {
+            case FilterProperty.Alpha:
+            {
+                UpdateAlphaFilter();
+                break;
+            }
+            case FilterProperty.Blur:
+            {
+                UpdateBlurFilter();
+                break;
+            }
+            case FilterProperty.Adjustment:
+            {
+                UpdateAdjustmentFilter();
+                break;
+            }
+            case FilterProperty.Bevel:
+            {
+                UpdateBevelFilter();
+                break;
+            }
+        }
+    }
+    
+    // 更新屏幕尺寸相关参数
+    private void UpdateScreenParams()
+    {
+        var mat = spriteRenderer.material;
+        var modelAspect = sprite.bounds.size.x / sprite.bounds.size.y;
+        var stageAspect = (float)Constants.WebGalWidth / (float)Constants.WebGalHeight;
+        var aspectRatio = stageAspect / modelAspect;
+        var factor = 1.0f;
+        if (!Global.__PIVOT_2_4)
+            factor = 1.0f / 1.5f;
+        
+        mat.SetFloat(
+            "_SampleScaleX",
+            factor * Mathf.Max(aspectRatio, 1.0f) / (float)Constants.WebGalWidth / RootScaleValue
+        );
+        mat.SetFloat(
+            "_SampleScaleY",
+            factor * Mathf.Min(aspectRatio, 1.0f) / (float)Constants.WebGalHeight / RootScaleValue
+        );
+    }
+
+    private void UpdateAlphaFilter()
+    {
+        var mat = spriteRenderer.material;
+        mat.SetFloat("_Alpha", filterSetData.Alpha);
+    }
+    
+    private void UpdateBlurFilter()
+    {
+        var mat = spriteRenderer.material;
+        mat.SetFloat("_Blur", filterSetData.Blur);
+        if (filterSetData.Blur > 0)
+            mat.EnableKeyword("_BLUR_FILTER");
+        else
+            mat.DisableKeyword("_BLUR_FILTER");
+    }
+
+    private void UpdateAdjustmentFilter()
+    {
+        var mat = spriteRenderer.material;
+        mat.SetFloat("_Brightness", filterSetData.Brightness);
+        mat.SetFloat("_Contrast", filterSetData.Contrast);
+        mat.SetFloat("_Saturation", filterSetData.Saturation);
+        mat.SetFloat("_Gamma", filterSetData.Gamma);
+        mat.SetFloat("_ColorRed", filterSetData.ColorRed);
+        mat.SetFloat("_ColorGreen", filterSetData.ColorGreen);
+        mat.SetFloat("_ColorBlue", filterSetData.ColorBlue);
+    }
+    
+    private void UpdateBevelFilter()
+    {
+        var mat = spriteRenderer.material;
+        mat.SetFloat("_Bevel", filterSetData.Bevel);
+        mat.SetFloat("_BevelThickness", filterSetData.BevelThickness);
+        mat.SetFloat("_BevelRotation", filterSetData.BevelRotation);
+        mat.SetFloat("_BevelSoftness", filterSetData.BevelSoftness);
+        mat.SetFloat("_BevelRed", filterSetData.BevelRed);
+        mat.SetFloat("_BevelGreen", filterSetData.BevelGreen);
+        mat.SetFloat("_BevelBlue", filterSetData.BevelBlue);
+
+        if (filterSetData.BevelSoftness > 0.0f)
+            mat.EnableKeyword("_BEVEL_FILTER_SOFTNESS");
+        else
+            mat.DisableKeyword("_BEVEL_FILTER_SOFTNESS");
+    }
+
+    private void UpdateAllFilter()
+    {
+        UpdateScreenParams();
+        UpdateAlphaFilter();
+        UpdateBlurFilter();
+        UpdateAdjustmentFilter();
+        UpdateBevelFilter();
+    }
+
+    #endregion
 }
 
 public class ImageModelMeta

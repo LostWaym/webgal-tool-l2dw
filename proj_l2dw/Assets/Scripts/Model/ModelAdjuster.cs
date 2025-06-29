@@ -475,6 +475,8 @@ public class ModelAdjuster : ModelAdjusterBase
         }
     }
 
+    #region 滤镜
+
     public override void OnFilterSetDataChanged(FilterProperty property)
     {
         switch (property)
@@ -576,6 +578,8 @@ public class ModelAdjuster : ModelAdjusterBase
         UpdateAdjustmentFilter();
         UpdateBevelFilter();
     }
+
+    #endregion
 
     public void SaveImage()
     {
