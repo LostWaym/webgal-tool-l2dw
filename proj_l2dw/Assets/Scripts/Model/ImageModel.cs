@@ -81,10 +81,19 @@ public class ImageModel : ModelAdjusterBase
     public override void Adjust()
     {
         var size = sprite.bounds.size;
-        //只支持y长的。
-        var scale = Constants.WebGalHeight / size.y;
+        var scaleX = Constants.WebGalWidth / size.x;
+        var scaleY = Constants.WebGalHeight / size.y;
+        // var webgalAspect = Constants.WebGalWidth / Constants.WebGalHeight;
+        // var aspect = size.x / size.y;
+        var targetScale = Mathf.Min(scaleX, scaleY);
         transform.localScale = Vector3.one * 0.01f;
-        spriteRenderer.transform.localScale = scale * Vector3.one;
+        spriteRenderer.transform.localScale = targetScale * Vector3.one;
+
+        var targetHeight = size.y * targetScale;
+        if (targetHeight < Constants.WebGalHeight)
+        {
+            pivot.transform.localPosition = new Vector3(0, -(Constants.WebGalHeight - targetHeight) / 2, 0);
+        }
     }
 
     public override void SetScale(float scale)

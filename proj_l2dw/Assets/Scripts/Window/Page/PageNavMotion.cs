@@ -762,6 +762,20 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
                 }
             }
         }
+
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+        {
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                DoCacheSelectedDots();
+                MainControl.Instance.ShowDebugText(OPERATION_CACHE_SELECTED_DOTS);
+            }
+            else if (Input.GetKeyDown(KeyCode.V))
+            {
+                DoRestoreSelectedDots();
+                MainControl.Instance.ShowDebugText(OPERATION_RESTORE_SELECTED_DOTS);
+            }
+        }
     }
 
     private void OpenMotionDataSelectDialog()
