@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class BGContainer : MonoBehaviour
 {
+    public FilterSetData filterSetData = new FilterSetData();
     public Transform root;
     public SpriteRenderer bg;
 
@@ -38,6 +39,8 @@ public class BGContainer : MonoBehaviour
         }
         bg.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
         bg.transform.localScale = new Vector3(scale * 100, scale * 100, 1);
+
+        UpdateAllFilter();
     }
 
     public void SetPosition(float x, float y)
@@ -75,4 +78,76 @@ public class BGContainer : MonoBehaviour
     {
         rootScale = root.localScale.x;
     }
+
+    #region 滤镜
+
+    public void OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty property)
+    {
+        switch (property)
+        {
+            case ModelAdjusterBase.FilterProperty.Alpha:
+            {
+                UpdateAlphaFilter();
+                break;
+            }
+            case ModelAdjusterBase.FilterProperty.Blur:
+            {
+                UpdateBlurFilter();
+                break;
+            }
+            case ModelAdjusterBase.FilterProperty.Adjustment:
+            {
+                UpdateAdjustmentFilter();
+                break;
+            }
+            case ModelAdjusterBase.FilterProperty.Bevel:
+            {
+                UpdateBevelFilter();
+                break;
+            }
+        }
+    }
+    
+    // 更新屏幕尺寸相关参数
+    private void UpdateScreenParams()
+    {
+        var mat = bg.material;
+        var modelAspect = bg.sprite.bounds.size.x / bg.sprite.bounds.size.y;
+        FilterUtils.UpdateScreenParams(mat, modelAspect, rootScale, 1f);
+    }
+
+    private void UpdateAlphaFilter()
+    {
+        var mat = bg.material;
+        FilterUtils.UpdateAlphaFilter(mat, filterSetData);
+    }
+    
+    private void UpdateBlurFilter()
+    {
+        var mat = bg.material;
+        FilterUtils.UpdateBlurFilter(mat, filterSetData);
+    }
+
+    private void UpdateAdjustmentFilter()
+    {
+        var mat = bg.material;
+        FilterUtils.UpdateAdjustmentFilter(mat, filterSetData);
+    }
+    
+    private void UpdateBevelFilter()
+    {
+        var mat = bg.material;
+        FilterUtils.UpdateBevelFilter(mat, filterSetData);
+    }
+
+    private void UpdateAllFilter()
+    {
+        UpdateScreenParams();
+        UpdateAlphaFilter();
+        UpdateBlurFilter();
+        UpdateAdjustmentFilter();
+        UpdateBevelFilter();
+    }
+
+    #endregion
 }

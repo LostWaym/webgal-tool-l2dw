@@ -1552,6 +1552,11 @@ public class PageCharaFunctions : UIPageWidget<PageCharaFunctions>
 
 public class PageFilterSet : UIPageWidget<PageFilterSet>
 {
+    private ModelAdjusterBase m_model;
+    private BGContainer m_bgContainer;
+    private FilterSetData m_filterSetData;
+
+
     #region auto generated members
     private InputField m_iptAlpha;
     private InputField m_iptBlur;
@@ -1638,15 +1643,13 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     }
     private void OnInputFieldAlphaEndEdit(string value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
+
         if (float.TryParse(value, out float alpha))
         {
-            model.filterSetData.Alpha = alpha;
-            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Alpha);
+            m_filterSetData.Alpha = alpha;
+            SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Alpha);
         }
         RefreshFilterSet();
     }
@@ -1655,15 +1658,13 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     }
     private void OnInputFieldBlurEndEdit(string value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
+
         if (int.TryParse(value, out int blur))
         {
-            model.filterSetData.Blur = blur;
-            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Blur);
+            m_filterSetData.Blur = blur;
+            SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Blur);
         }
         RefreshFilterSet();
     }
@@ -1672,15 +1673,13 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     }
     private void OnInputFieldBrightnessEndEdit(string value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
+
         if (float.TryParse(value, out float brightness))
         {
-            model.filterSetData.Brightness = brightness;
-            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
+            m_filterSetData.Brightness = brightness;
+            SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
         }
         RefreshFilterSet();
     }
@@ -1689,15 +1688,13 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     }
     private void OnInputFieldContrastEndEdit(string value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
+
         if (float.TryParse(value, out float contrast))
         {
-            model.filterSetData.Contrast = contrast;
-            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
+            m_filterSetData.Contrast = contrast;
+            SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
         }
         RefreshFilterSet();
     }
@@ -1706,15 +1703,13 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     }
     private void OnInputFieldSaturationEndEdit(string value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
+
         if (float.TryParse(value, out float saturation))
         {
-            model.filterSetData.Saturation = saturation;
-            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
+            m_filterSetData.Saturation = saturation;
+            SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
         }
         RefreshFilterSet();
     }
@@ -1723,30 +1718,26 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     }
     private void OnInputFieldGammaEndEdit(string value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
+
         if (float.TryParse(value, out float gamma))
         {
-            model.filterSetData.Gamma = gamma;
-            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
+            m_filterSetData.Gamma = gamma;
+            SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
         }
         RefreshFilterSet();
     }
 
     private void OnColorPickerAdjustmentChanged(Color color)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
-        model.filterSetData.ColorRed = color.r * 255.0f;
-        model.filterSetData.ColorGreen = color.g * 255.0f;
-        model.filterSetData.ColorBlue = color.b * 255.0f;
-        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
+
+        m_filterSetData.ColorRed = color.r * 255.0f;
+        m_filterSetData.ColorGreen = color.g * 255.0f;
+        m_filterSetData.ColorBlue = color.b * 255.0f;
+        SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
         RefreshFilterSet();
     }
     private void OnInputFieldBevelChange(string value)
@@ -1754,15 +1745,13 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     }
     private void OnInputFieldBevelEndEdit(string value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
+
         if (float.TryParse(value, out float bevel))
         {
-            model.filterSetData.Bevel = bevel;
-            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
+            m_filterSetData.Bevel = bevel;
+            SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
         }
         RefreshFilterSet();
     }
@@ -1771,15 +1760,13 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     }
     private void OnInputFieldBevelThicknessEndEdit(string value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
+
         if (float.TryParse(value, out float bevelThickness))
         {
-            model.filterSetData.BevelThickness = bevelThickness;
-            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
+            m_filterSetData.BevelThickness = bevelThickness;
+            SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
         }
         RefreshFilterSet();
     }
@@ -1788,15 +1775,13 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     }
     private void OnInputFieldBevelRotationEndEdit(string value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
+
         if (float.TryParse(value, out float bevelRotation))
         {
-            model.filterSetData.BevelRotation = bevelRotation;
-            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
+            m_filterSetData.BevelRotation = bevelRotation;
+            SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
         }
         RefreshFilterSet();
     }
@@ -1805,96 +1790,80 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     }
     private void OnInputFieldBevelSoftnessEndEdit(string value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
+
         if (float.TryParse(value, out float bevelSoftness))
         {
-            model.filterSetData.BevelSoftness = bevelSoftness;
-            model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
+            m_filterSetData.BevelSoftness = bevelSoftness;
+            SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
         }
         RefreshFilterSet();
     }
 
     private void OnColorPickerBevelChanged(Color color)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
-        model.filterSetData.BevelRed = color.r * 255.0f;
-        model.filterSetData.BevelGreen = color.g * 255.0f;
-        model.filterSetData.BevelBlue = color.b * 255.0f;
-        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
+
+        m_filterSetData.BevelRed = color.r * 255.0f;
+        m_filterSetData.BevelGreen = color.g * 255.0f;
+        m_filterSetData.BevelBlue = color.b * 255.0f;
+        SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
         RefreshFilterSet();
     }
     private void OnToggleOldFilmChange(bool value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
-        model.filterSetData.OldFilm = value;
-        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.OldFilm);
+
+        m_filterSetData.OldFilm = value;
+        SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.OldFilm);
         RefreshFilterSet();
     }
     private void OnToggleDotFilmChange(bool value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
-        model.filterSetData.DotFilm = value;
-        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.DotFilm);
+
+        m_filterSetData.DotFilm = value;
+        SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.DotFilm);
         RefreshFilterSet();
     }
     private void OnToggleReflectionFilmChange(bool value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
-        model.filterSetData.ReflectionFilm = value;
-        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.ReflectionFilm);
+
+        m_filterSetData.ReflectionFilm = value;
+        SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.ReflectionFilm);
         RefreshFilterSet();
     }
     private void OnToggleGlitchFilmChange(bool value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
-        model.filterSetData.GlitchFilm = value;
-        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.GlitchFilm);
+
+        m_filterSetData.GlitchFilm = value;
+        SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.GlitchFilm);
         RefreshFilterSet();
     }
     private void OnToggleRgbFilmChange(bool value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
-        model.filterSetData.RgbFilm = value;
-        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.RgbFilm);
+
+        m_filterSetData.RgbFilm = value;
+        SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.RgbFilm);
         RefreshFilterSet();
     }
     private void OnToggleGodrayFilmChange(bool value)
     {
-        var model = MainControl.Instance.curTarget;
-        if (model == null)
-        {
+        if (m_filterSetData == null)
             return;
-        }
-        model.filterSetData.GodrayFilm = value;
-        model.OnFilterSetDataChanged(ModelAdjusterBase.FilterProperty.GodrayFilm);
+
+        m_filterSetData.GodrayFilm = value;
+        SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.GodrayFilm);
         RefreshFilterSet();
     }
     #endregion
@@ -1902,46 +1871,84 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     public override void OnPageShown()
     {
         base.OnPageShown();
-        RefreshFilterSet();
+        TryInitAsModel();
     }
 
-    public void RefreshFilterSet()
+    private void TryInitAsModel()
     {
         var model = MainControl.Instance.curTarget;
         if (model == null)
         {
             return;
         }
+        m_model = model;
+        m_filterSetData = model.filterSetData;
+        m_bgContainer = null;
+        RefreshFilterSet();
+    }
 
-        m_iptAlpha.SetTextWithoutNotify(model.filterSetData.Alpha.ToString("F2"));
-        m_iptBlur.SetTextWithoutNotify(model.filterSetData.Blur.ToString());
+    public void TryInitAsBG()
+    {
+        var bg = MainControl.Instance.bgContainer;
+        if (bg == null)
+        {
+            return;
+        }
+        m_filterSetData = bg.filterSetData;
+        m_model = null;
+        m_bgContainer = bg;
+        RefreshFilterSet();
+    }
+
+    private void SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty property)
+    {
+        if (m_bgContainer != null)
+        {
+            m_bgContainer.OnFilterSetDataChanged(property);
+        }
+        else if (m_model != null)
+        {
+            m_model.OnFilterSetDataChanged(property);
+        }
+    }
+
+    public void RefreshFilterSet()
+    {
+        var filterSetData = m_filterSetData;
+        if (filterSetData == null)
+        {
+            return;
+        }
+
+        m_iptAlpha.SetTextWithoutNotify(filterSetData.Alpha.ToString("F2"));
+        m_iptBlur.SetTextWithoutNotify(filterSetData.Blur.ToString());
         
-        m_iptBrightness.SetTextWithoutNotify(model.filterSetData.Brightness.ToString("F2"));
-        m_iptContrast.SetTextWithoutNotify(model.filterSetData.Contrast.ToString("F2"));
-        m_iptSaturation.SetTextWithoutNotify(model.filterSetData.Saturation.ToString("F2"));
-        m_iptGamma.SetTextWithoutNotify(model.filterSetData.Gamma.ToString("F2"));
+        m_iptBrightness.SetTextWithoutNotify(filterSetData.Brightness.ToString("F2"));
+        m_iptContrast.SetTextWithoutNotify(filterSetData.Contrast.ToString("F2"));
+        m_iptSaturation.SetTextWithoutNotify(filterSetData.Saturation.ToString("F2"));
+        m_iptGamma.SetTextWithoutNotify(filterSetData.Gamma.ToString("F2"));
         m_colAdjustment.color = new Color(
-            model.filterSetData.ColorRed / 255.0f,
-            model.filterSetData.ColorGreen / 255.0f,
-            model.filterSetData.ColorBlue / 255.0f
+            filterSetData.ColorRed / 255.0f,
+            filterSetData.ColorGreen / 255.0f,
+            filterSetData.ColorBlue / 255.0f
         );
         
-        m_iptBevel.SetTextWithoutNotify(model.filterSetData.Bevel.ToString("F2"));
-        m_iptBevelThickness.SetTextWithoutNotify(model.filterSetData.BevelThickness.ToString("F2"));
-        m_iptBevelRotation.SetTextWithoutNotify(model.filterSetData.BevelRotation.ToString("F2"));
-        m_iptBevelSoftness.SetTextWithoutNotify(model.filterSetData.BevelSoftness.ToString("F2"));
+        m_iptBevel.SetTextWithoutNotify(filterSetData.Bevel.ToString("F2"));
+        m_iptBevelThickness.SetTextWithoutNotify(filterSetData.BevelThickness.ToString("F2"));
+        m_iptBevelRotation.SetTextWithoutNotify(filterSetData.BevelRotation.ToString("F2"));
+        m_iptBevelSoftness.SetTextWithoutNotify(filterSetData.BevelSoftness.ToString("F2"));
         m_colBevel.color = new Color(
-            model.filterSetData.BevelRed / 255.0f,
-            model.filterSetData.BevelGreen / 255.0f,
-            model.filterSetData.BevelBlue / 255.0f
+            filterSetData.BevelRed / 255.0f,
+            filterSetData.BevelGreen / 255.0f,
+            filterSetData.BevelBlue / 255.0f
         );
             
-        m_toggleOldFilm.SetIsOnWithoutNotify(model.filterSetData.OldFilm);
-        m_toggleDotFilm.SetIsOnWithoutNotify(model.filterSetData.DotFilm);
-        m_toggleReflectionFilm.SetIsOnWithoutNotify(model.filterSetData.ReflectionFilm);
-        m_toggleGlitchFilm.SetIsOnWithoutNotify(model.filterSetData.GlitchFilm);
-        m_toggleRgbFilm.SetIsOnWithoutNotify(model.filterSetData.RgbFilm);
-        m_toggleGodrayFilm.SetIsOnWithoutNotify(model.filterSetData.GodrayFilm);
+        m_toggleOldFilm.SetIsOnWithoutNotify(filterSetData.OldFilm);
+        m_toggleDotFilm.SetIsOnWithoutNotify(filterSetData.DotFilm);
+        m_toggleReflectionFilm.SetIsOnWithoutNotify(filterSetData.ReflectionFilm);
+        m_toggleGlitchFilm.SetIsOnWithoutNotify(filterSetData.GlitchFilm);
+        m_toggleRgbFilm.SetIsOnWithoutNotify(filterSetData.RgbFilm);
+        m_toggleGodrayFilm.SetIsOnWithoutNotify(filterSetData.GodrayFilm);
     }
 
 }
@@ -3183,17 +3190,21 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
 public class PageBackgroundFunctions : UIPageWidget<PageBackgroundFunctions>
 {
     #region auto generated members
+    private Transform m_itemCopyCommand_Legacy;
     private Button m_btnCopyScene;
     private Button m_btnCopyTransform;
     private Button m_btnCopyAll;
+    private Transform m_itemPageFilterSet;
     #endregion
 
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
+        m_itemCopyCommand_Legacy = transform.Find("m_itemCopyCommand_Legacy").GetComponent<Transform>();
         m_btnCopyScene = transform.Find("CopyCommand/Container/m_btnCopyScene").GetComponent<Button>();
         m_btnCopyTransform = transform.Find("CopyCommand/Container/m_btnCopyTransform").GetComponent<Button>();
         m_btnCopyAll = transform.Find("CopyCommand/Container/m_btnCopyAll").GetComponent<Button>();
+        m_itemPageFilterSet = transform.Find("m_itemPageFilterSet").GetComponent<Transform>();
 
         m_btnCopyScene.onClick.AddListener(OnButtonCopySceneClick);
         m_btnCopyTransform.onClick.AddListener(OnButtonCopyTransformClick);
@@ -3215,4 +3226,19 @@ public class PageBackgroundFunctions : UIPageWidget<PageBackgroundFunctions>
         MainControl.Instance.CopyBackgroundAll();
     }
     #endregion
+
+    private FilterSetData m_filterSetData;
+    private PageFilterSet m_pageFilterSet;
+    protected override void OnInit()
+    {
+        base.OnInit();
+        m_pageFilterSet = PageFilterSet.CreateWidget(m_itemPageFilterSet.gameObject);
+        m_filterSetData = new FilterSetData();
+    }
+
+    public override void OnPageShown()
+    {
+        base.OnPageShown();
+        m_pageFilterSet.TryInitAsBG();
+    }
 }

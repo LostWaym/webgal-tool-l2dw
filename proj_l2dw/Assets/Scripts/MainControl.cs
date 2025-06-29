@@ -430,7 +430,21 @@ public class MainControl : MonoBehaviour
 
     public string GetTransformTextBG()
     {
-        return $"{{\"position\":{{\"x\":{bgContainer.rootPosition.x:F3},\"y\":{-bgContainer.rootPosition.y:F3} }},\"scale\":{{\"x\":{bgContainer.rootScale:F3},\"y\":{bgContainer.rootScale:F3} }},\"rotation\":{bgContainer.GetWebGalRotation():F3} }}";
+        var jsonObject = new JSONObject();
+        var posObject = new JSONObject();
+        posObject.AddField("x", bgContainer.rootPosition.x);
+        posObject.AddField("y", -bgContainer.rootPosition.y);
+        jsonObject.AddField("position", posObject);
+        var scaleObject = new JSONObject();
+        scaleObject.AddField("x", bgContainer.rootScale);
+        scaleObject.AddField("y", bgContainer.rootScale);
+        jsonObject.AddField("scale", scaleObject);
+        jsonObject.AddField("rotation", bgContainer.GetWebGalRotation());
+        bgContainer.filterSetData.ApplyToJson(jsonObject);
+        return jsonObject.ToString(false);
+
+        // return $"{{\"position\":{{\"x\":{bgContainer.rootPosition.x:F3},\"y\":{-bgContainer.rootPosition.y:F3} }},\"scale\":{{\"x\":{bgContainer.rootScale:F3},\"y\":{bgContainer.rootScale:F3} }},\"rotation\":{bgContainer.GetWebGalRotation():F3} }}";
+
     }
 
     private bool CheckBackGroundValid()
