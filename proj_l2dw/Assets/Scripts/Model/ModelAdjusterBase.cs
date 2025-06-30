@@ -11,6 +11,7 @@ public class ModelAdjusterBase : MonoBehaviour
         Alpha,
         Blur,
         Adjustment,
+        Bloom,
         Bevel,
         OldFilm,
         DotFilm,
@@ -317,6 +318,34 @@ public class FilterSetData
         set => colorBlue = value;
     }
 
+    private float bloom = 0.0f;
+    public float Bloom
+    {
+        get => bloom;
+        set => bloom = value;
+    }
+    
+    private float bloomBrightness = 1.0f;
+    public float BloomBrightness
+    {
+        get => bloomBrightness;
+        set => bloomBrightness = value;
+    }
+    
+    private float bloomBlur = 0.0f;
+    public float BloomBlur
+    {
+        get => bloomBlur;
+        set => bloomBlur = value;
+    }
+    
+    private float bloomThreshold = 0.0f;
+    public float BloomThreshold
+    {
+        get => bloomThreshold;
+        set => bloomThreshold = value;
+    }
+    
     private float bevel = 0.0f;
     public float Bevel
     {
@@ -425,6 +454,11 @@ public class FilterSetData
         ApplyIfNotApproximately(json, "colorRed", colorRed, 255.0f);
         ApplyIfNotApproximately(json, "colorGreen", colorGreen, 255.0f);
         ApplyIfNotApproximately(json, "colorBlue", colorBlue, 255.0f);
+        
+        ApplyIfNotApproximately(json, "bloom", bloom, 0.0f);
+        ApplyIfNotApproximately(json, "bloomBrightness", bloomBrightness, 1.0f);
+        ApplyIfNotApproximately(json, "bloomBlur", bloomBlur, 0.0f);
+        ApplyIfNotApproximately(json, "bloomThreshold", bloomThreshold, 0.0f);
         
         ApplyIfNotApproximately(json, "bevel", bevel, 0.0f);
         ApplyIfNotApproximately(json, "bevelThickness", bevelThickness, 0.0f);

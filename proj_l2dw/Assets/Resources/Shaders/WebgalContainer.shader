@@ -19,6 +19,12 @@ Shader "Webgal/WebgalContainer"
         _ColorGreen ("ColorGreen", Float) = 255
         _ColorBlue ("ColorBlue", Float) = 255
         
+        _Bloom ("Bloom", Float) = 0
+        _BloomBrightness ("BloomBrightness", Float) = 1
+        _BloomBlur ("BloomBlur", Float) = 0
+        [Toggle(_BLOOM_FILTER_BLUR)] _BloomFilterBlur ("BloomFilterBlur", Float) = 0
+        _BloomThreshold ("BloomThreshold", Range(0, 1)) = 0
+        
         _Bevel ("Bevel", Range(0, 1)) = 0
         _BevelThickness ("BevelThickness", Float) = 0
         _BevelRotation ("BevelRotation", Float) = 0
@@ -83,6 +89,8 @@ Shader "Webgal/WebgalContainer"
                 // 应用滤镜
                 col = ApplyBlurFilter(i.uv);
                 col = ApplyAlphaFilter(col);
+
+                col.rgb = pow(col.rgb, 2.0);
                 
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);

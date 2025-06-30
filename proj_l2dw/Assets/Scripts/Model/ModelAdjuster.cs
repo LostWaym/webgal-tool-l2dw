@@ -496,6 +496,11 @@ public class ModelAdjuster : ModelAdjusterBase
                 UpdateAdjustmentFilter();
                 break;
             }
+            case FilterProperty.Bloom:
+            {
+                UpdateBloomFilter();
+                break;
+            }
             case FilterProperty.Bevel:
             {
                 UpdateBevelFilter();
@@ -530,6 +535,12 @@ public class ModelAdjuster : ModelAdjusterBase
         FilterUtils.UpdateAdjustmentFilter(mat, filterSetData);
     }
     
+    private void UpdateBloomFilter()
+    {
+        var mat = MainModel.meshRenderer.material;
+        FilterUtils.UpdateBloomFilter(mat, filterSetData);
+    }
+    
     private void UpdateBevelFilter()
     {
         var mat = MainModel.meshRenderer.material;
@@ -542,6 +553,7 @@ public class ModelAdjuster : ModelAdjusterBase
         UpdateAlphaFilter();
         UpdateBlurFilter();
         UpdateAdjustmentFilter();
+        UpdateBloomFilter();
         UpdateBevelFilter();
     }
 

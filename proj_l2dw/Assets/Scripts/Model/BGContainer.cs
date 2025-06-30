@@ -116,6 +116,11 @@ public class BGContainer : MonoBehaviour
                 UpdateAdjustmentFilter();
                 break;
             }
+            case ModelAdjusterBase.FilterProperty.Bloom:
+            {
+                UpdateBloomFilter();
+                break;
+            }
             case ModelAdjusterBase.FilterProperty.Bevel:
             {
                 UpdateBevelFilter();
@@ -150,6 +155,12 @@ public class BGContainer : MonoBehaviour
         FilterUtils.UpdateAdjustmentFilter(mat, filterSetData);
     }
     
+    private void UpdateBloomFilter()
+    {
+        var mat = bg.material;
+        FilterUtils.UpdateBloomFilter(mat, filterSetData);
+    }
+    
     private void UpdateBevelFilter()
     {
         var mat = bg.material;
@@ -162,6 +173,7 @@ public class BGContainer : MonoBehaviour
         UpdateAlphaFilter();
         UpdateBlurFilter();
         UpdateAdjustmentFilter();
+        UpdateBloomFilter();
         UpdateBevelFilter();
     }
 

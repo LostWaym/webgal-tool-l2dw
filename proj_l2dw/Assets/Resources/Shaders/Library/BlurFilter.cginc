@@ -3,7 +3,7 @@
 
 #include "UnityCG.cginc"
 #include "WebgalContainerInput.cginc"
-#include "BevelFilter.cginc"
+#include "BloomFilter.cginc"
 
 #pragma multi_compile _ _BLUR_FILTER
 
@@ -13,7 +13,7 @@ fixed4 ApplyBlurFilter(float2 rawUv)
 {
 #ifndef _BLUR_FILTER
     // return tex2D(_MainTex, rawUv);
-    return ApplyBevelFilter(rawUv);
+    return ApplyBloomFilter(rawUv);
 #else
     fixed4 col = fixed4(0, 0, 0, 0);
 
@@ -31,15 +31,13 @@ fixed4 ApplyBlurFilter(float2 rawUv)
         {
             float2 offset = float2(x, y) * blurUv / kernelSize;
             float weight = exp(-(x*x + y*y) / (2 * sigma * sigma));
-            fixed4 sampleColor = ApplyBevelFilter(rawUv + offset);
-            sampleColor.rgb = pow(sampleColor.rgb, 1.0 / 2.2);
+            fixed4 sampleColor = ApplyBloomFilter(rawUv + offset);
             col += sampleColor * weight;
             weightSum += weight;
         }
     }
 
     col /= weightSum; // 归一化颜色值
-    col.rgb = pow(col.rgb, 2.2);
     
     return col;
 #endif

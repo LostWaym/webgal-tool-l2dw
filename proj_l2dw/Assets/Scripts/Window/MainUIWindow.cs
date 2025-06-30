@@ -1565,6 +1565,10 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     private InputField m_iptSaturation;
     private InputField m_iptGamma;
     private ColorPicker m_colAdjustment;
+    private InputField m_iptBloom;
+    private InputField m_iptBloomBrightness;
+    private InputField m_iptBloomBlur;
+    private InputField m_iptBloomThreshold;
     private InputField m_iptBevel;
     private InputField m_iptBevelThickness;
     private InputField m_iptBevelRotation;
@@ -1589,6 +1593,11 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_iptSaturation = transform.Find("Parameters/Container/Scroll/Viewport/Content/Adjustment/Container/饱和度/Value/InputField/m_iptSaturation").GetComponent<InputField>();
         m_iptGamma = transform.Find("Parameters/Container/Scroll/Viewport/Content/Adjustment/Container/伽马值/Value/InputField/m_iptGamma").GetComponent<InputField>();
         m_colAdjustment = transform.Find("Parameters/Container/Scroll/Viewport/Content/Adjustment/Container/色调/Value/m_colAdjustment").GetComponent<ColorPicker>();
+        
+        m_iptBloom = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bloom/Container/强度/Value/InputField/m_iptBloom").GetComponent<InputField>();
+        m_iptBloomBrightness = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bloom/Container/亮度/Value/InputField/m_iptBloomBrightness").GetComponent<InputField>();
+        m_iptBloomBlur = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bloom/Container/模糊/Value/InputField/m_iptBloomBlur").GetComponent<InputField>();
+        m_iptBloomThreshold = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bloom/Container/阈值/Value/InputField/m_iptBloomThreshold").GetComponent<InputField>();
         
         m_iptBevel = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/透明度/Value/InputField/m_iptBevel").GetComponent<InputField>();
         m_iptBevelThickness = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/粗细/Value/InputField/m_iptBevelThickness").GetComponent<InputField>();
@@ -1617,6 +1626,15 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_iptGamma.onValueChanged.AddListener(OnInputFieldGammaChange);
         m_iptGamma.onEndEdit.AddListener(OnInputFieldGammaEndEdit);
         m_colAdjustment._OnColorChanged += OnColorPickerAdjustmentChanged;
+        
+        m_iptBloom.onValueChanged.AddListener(OnInputFieldBloomChange);
+        m_iptBloom.onEndEdit.AddListener(OnInputFieldBloomEndEdit);
+        m_iptBloomBrightness.onValueChanged.AddListener(OnInputFieldBloomBrightnessChange);
+        m_iptBloomBrightness.onEndEdit.AddListener(OnInputFieldBloomBrightnessEndEdit);
+        m_iptBloomBlur.onValueChanged.AddListener(OnInputFieldBloomBlurChange);
+        m_iptBloomBlur.onEndEdit.AddListener(OnInputFieldBloomBlurEndEdit);
+        m_iptBloomThreshold.onValueChanged.AddListener(OnInputFieldBloomThresholdChange);
+        m_iptBloomThreshold.onEndEdit.AddListener(OnInputFieldBloomThresholdEndEdit);
         
         m_iptBevel.onValueChanged.AddListener(OnInputFieldBevelChange);
         m_iptBevel.onEndEdit.AddListener(OnInputFieldBevelEndEdit);
@@ -1738,6 +1756,67 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_filterSetData.ColorGreen = color.g * 255.0f;
         m_filterSetData.ColorBlue = color.b * 255.0f;
         SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Adjustment);
+        RefreshFilterSet();
+    }
+
+    private void OnInputFieldBloomChange(string value)
+    {
+    }
+    private void OnInputFieldBloomEndEdit(string value)
+    {
+        if (m_filterSetData == null)
+            return;
+
+        if (float.TryParse(value, out float bloom))
+        {
+            m_filterSetData.Bloom = bloom;
+            SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bloom);
+        }
+        RefreshFilterSet();
+    }
+    private void OnInputFieldBloomBrightnessChange(string value)
+    {
+    }
+    private void OnInputFieldBloomBrightnessEndEdit(string value)
+    {
+        if (m_filterSetData == null)
+            return;
+
+        if (float.TryParse(value, out float bloomBrightness))
+        {
+            m_filterSetData.BloomBrightness = bloomBrightness;
+            SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bloom);
+        }
+        RefreshFilterSet();
+    }
+    private void OnInputFieldBloomBlurChange(string value)
+    {
+    }
+    private void OnInputFieldBloomBlurEndEdit(string value)
+    {
+        if (m_filterSetData == null)
+            return;
+
+        if (float.TryParse(value, out float bloomBlur))
+        {
+            m_filterSetData.BloomBlur = bloomBlur;
+            SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bloom);
+        }
+        RefreshFilterSet();
+    }
+    private void OnInputFieldBloomThresholdChange(string value)
+    {
+    }
+    private void OnInputFieldBloomThresholdEndEdit(string value)
+    {
+        if (m_filterSetData == null)
+            return;
+
+        if (float.TryParse(value, out float bloomThreshold))
+        {
+            m_filterSetData.BloomThreshold = bloomThreshold;
+            SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bloom);
+        }
         RefreshFilterSet();
     }
     private void OnInputFieldBevelChange(string value)
@@ -1932,6 +2011,11 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
             filterSetData.ColorGreen / 255.0f,
             filterSetData.ColorBlue / 255.0f
         );
+        
+        m_iptBloom.SetTextWithoutNotify(filterSetData.Bloom.ToString("F2"));
+        m_iptBloomBrightness.SetTextWithoutNotify(filterSetData.BloomBrightness.ToString("F2"));
+        m_iptBloomBlur.SetTextWithoutNotify(filterSetData.BloomBlur.ToString("F2"));
+        m_iptBloomThreshold.SetTextWithoutNotify(filterSetData.BloomThreshold.ToString("F2"));
         
         m_iptBevel.SetTextWithoutNotify(filterSetData.Bevel.ToString("F2"));
         m_iptBevelThickness.SetTextWithoutNotify(filterSetData.BevelThickness.ToString("F2"));

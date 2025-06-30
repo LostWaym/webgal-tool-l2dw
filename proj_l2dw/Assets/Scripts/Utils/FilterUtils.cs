@@ -50,6 +50,19 @@ public static class FilterUtils
         mat.SetFloat("_ColorBlue", filterSetData.ColorBlue);
     }
     
+    public static void UpdateBloomFilter(Material mat, FilterSetData filterSetData)
+    {
+        mat.SetFloat("_Bloom", filterSetData.Bloom);
+        mat.SetFloat("_BloomBrightness", filterSetData.BloomBrightness);
+        mat.SetFloat("_BloomBlur", filterSetData.BloomBlur);
+        mat.SetFloat("_BloomThreshold", filterSetData.BloomThreshold);
+
+        if (filterSetData.BloomBlur > 0.0f)
+            mat.EnableKeyword("_BLOOM_FILTER_BLUR");
+        else
+            mat.DisableKeyword("_BLOOM_FILTER_BLUR");
+    }
+    
     public static void UpdateBevelFilter(Material mat, FilterSetData filterSetData)
     {
         mat.SetFloat("_Bevel", filterSetData.Bevel);

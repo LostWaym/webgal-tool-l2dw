@@ -17,7 +17,6 @@ float _BevelBlue;
 fixed4 ApplyBevelFilter(float2 rawUv)
 {
     fixed3 bevelColor = fixed3(_BevelRed, _BevelGreen, _BevelBlue) / 255.0;
-    // bevelColor = pow(bevelColor, 2.2);
     float bevelRadians = radians(_BevelRotation * -1.0);
     float2 sampleVector = float2(cos(bevelRadians), sin(bevelRadians));
     sampleVector *= -1.0;
@@ -25,7 +24,6 @@ fixed4 ApplyBevelFilter(float2 rawUv)
     sampleVector *= float2(_SampleScaleX, _SampleScaleY);
 
     fixed4 color = ApplyAdjustmentFilter(rawUv);
-    color.rgb = pow(color.rgb, 1.0 / 2.2);
 
 #if _BEVEL_FILTER_SOFTNESS
     const int kernelSize = 7;
@@ -48,7 +46,6 @@ fixed4 ApplyBevelFilter(float2 rawUv)
     bevelAlpha /= weightSum;
 #else
     fixed4 tex = tex2D(_MainTex, rawUv + sampleVector);
-    // float bevelAlpha = lerp(1.0, tex.a, clamp(_Bevel, 0.0, 1.0));
     float bevelAlpha = clamp((color.a - tex.a) * clamp(_Bevel, 0.0, 1.0), 0.0, 1.0);
 #endif
     
@@ -58,7 +55,6 @@ fixed4 ApplyBevelFilter(float2 rawUv)
         bevelAlpha
     );
     color.rgb = clamp(color.rgb, 0.0, 1.0);
-    color.rgb = pow(color.rgb, 2.2);
     
     return color;
 }
