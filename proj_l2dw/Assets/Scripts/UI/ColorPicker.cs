@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -69,12 +70,21 @@ public class ColorPicker : MonoBehaviour
         }
     }
     
+    [Header("Touch")]
     [SerializeField] private TouchArea svRectTouch;
     [SerializeField] private Image svRectImage;
     [SerializeField] private Image svRectDragger;
     [SerializeField] private TouchArea hueBarTouch;
     [SerializeField] private Image hueBarImage;
     [SerializeField] private Image hueBarDragger;
+    
+    [Header("Input")]
+    [SerializeField] private InputField inputFieldRed;
+    [SerializeField] private InputField inputFieldGreen;
+    [SerializeField] private InputField inputFieldBlue;
+    [SerializeField] private InputField inputFieldHue;
+    [SerializeField] private InputField inputFieldSaturation;
+    [SerializeField] private InputField inputFieldValue;
 
     private Material svRectImageMaterial;
     private Material svRectDraggerMaterial;
@@ -110,6 +120,12 @@ public class ColorPicker : MonoBehaviour
         hueBarTouch._OnPointerMove += OnHueBarTouchMove;
         hueBarTouch._OnScroll += OnHueBarTouchScroll;
         hueBarTouch._OnDrag += OnHueBarTouchDrag;
+        inputFieldRed.onEndEdit.AddListener(OnInputFieldRedEndEdit);
+        inputFieldGreen.onEndEdit.AddListener(OnInputFieldGreenEndEdit);
+        inputFieldBlue.onEndEdit.AddListener(OnInputFieldBlueEndEdit);
+        inputFieldHue.onEndEdit.AddListener(OnInputFieldHueEndEdit);
+        inputFieldSaturation.onEndEdit.AddListener(OnInputFieldSaturationEndEdit);
+        inputFieldValue.onEndEdit.AddListener(OnInputFieldValueEndEdit);
 
         UpdateSvRectDragger();
         UpdateSvRectImage();
@@ -193,33 +209,42 @@ public class ColorPicker : MonoBehaviour
             this.saturation = saturation;
             this.value = value;
         }
-        else
-        {
-            hsvToColor = false;
-        }
+        
+        inputFieldRed.text = (color.r * 255.0f).ToString();
+        inputFieldGreen.text = (color.g * 255.0f).ToString();
+        inputFieldBlue.text = (color.b * 255.0f).ToString();
     }
 
     private void OnHueChanged(float hue)
     {
         hsvToColor = true;
         color = Color.HSVToRGB(this.hue, this.saturation, this.value);
+        hsvToColor = false;
         UpdateSvRectImage();
         UpdateSvRectDragger();
         UpdateHueBarDragger();
+        
+        inputFieldHue.SetTextWithoutNotify((hue * 360.0f).ToString());
     }
 
     private void OnSaturationChanged(float saturation)
     {
         hsvToColor = true;
         color = Color.HSVToRGB(this.hue, this.saturation, this.value);
+        hsvToColor = false;
         UpdateSvRectDragger();
+        
+        inputFieldSaturation.SetTextWithoutNotify((saturation * 100.0f).ToString());
     }
 
     private void OnValueChanged(float value)
     {
         hsvToColor = true;
         color = Color.HSVToRGB(this.hue, this.saturation, this.value);
+        hsvToColor = false;
         UpdateSvRectDragger();
+        
+        inputFieldValue.SetTextWithoutNotify((value * 100.0f).ToString());
     }
     
     private void OnSvRectTouchDown(Vector2 vector)
@@ -271,8 +296,71 @@ public class ColorPicker : MonoBehaviour
         );
     }
 
-    public void OnHueBarTouchDrag(PointerEventData eventData)
+    private void OnHueBarTouchDrag(PointerEventData eventData)
     {
         ConvertHueBarTouch(Input.mousePosition);
+    }
+
+    private void OnInputFieldRedEndEdit(string text)
+    {
+        if (float.TryParse(text, out var number))
+        {
+            var newColor = new Color(
+                number / 255.0f,
+                color.g,
+                color.b
+            );
+            color = newColor;
+        }
+    }
+    
+    private void OnInputFieldGreenEndEdit(string text)
+    {
+        if (float.TryParse(text, out var number))
+        {
+            var newColor = new Color(
+                color.r,
+                number / 255.0f,
+                color.b
+            );
+            color = newColor;
+        }
+    }
+    
+    private void OnInputFieldBlueEndEdit(string text)
+    {
+        if (float.TryParse(text, out var number))
+        {
+            var newColor = new Color(
+                color.r,
+                color.g,
+                number / 255.0f
+            );
+            color = newColor;
+        }
+    }
+    
+    private void OnInputFieldHueEndEdit(string text)
+    {
+        if (float.TryParse(text, out var number))
+        {
+            hue = number / 360.0f;
+        }
+    }
+    
+    private void OnInputFieldSaturationEndEdit(string text)
+    {
+        if (float.TryParse(text, out var number))
+        {
+            saturation = number / 100.0f;
+        }
+    }
+    
+    private void OnInputFieldValueEndEdit(string text)
+    {
+        if (float.TryParse(text, out var number))
+        {
+            value = number / 100.0f;
+        }
     }
 }
