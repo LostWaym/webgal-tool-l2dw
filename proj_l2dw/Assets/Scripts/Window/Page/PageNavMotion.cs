@@ -339,6 +339,8 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_curCurveLineItemTrackName = null;
         m_curCurveLineItemData = null;
 
+        SelectedDotIndexes.Clear();
+
         RefreshMotionTrack();
         RefreshTrackLabels();
         RefreshCurveLine();
