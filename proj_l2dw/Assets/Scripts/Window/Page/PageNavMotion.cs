@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -513,21 +514,120 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     }
 
     private Vector2 m_selectStartPosition;
+    private bool m_dragMode = false;
+    private int m_dragIndex = -1;
     private void OnTouchTrackAreaPointerDown(Vector2 vector)
     {
         m_selectStartPosition = vector;
-        UpdateSelectionRect(vector);
+
+        var trackWidget = GetTrackWidgetByWorldPos(vector);
+        Debug.Log($"track: {trackWidget?.track.name}");
+        var dot = GetDotWidgetByWorldPos(trackWidget, vector);
+        Debug.Log($"dot: {dot?.frameIndex}");
+        if (dot != null && SelectedDotIndexes.ContainsKey(trackWidget.track.name) && SelectedDotIndexes[trackWidget.track.name].Contains(dot.frameIndex))
+        {
+            m_dragMode = true;
+            m_dragIndex = dot.frameIndex;
+        }
+        else
+        {
+            m_dragMode = false;
+            m_dragIndex = -1;
+            UpdateSelectionRect(vector);
+        }
     }
 
     private void OnTouchTrackAreaPointerMove(Vector2 vector)
     {
-        UpdateSelectionRect(vector);
+        if (m_dragMode)
+        {
+            UpdateDragLogic(vector);
+        }
+        else
+        {
+            UpdateSelectionRect(vector);
+        }
     }
 
-    private void OnTouchTrackAreaPointerUp(Vector2 vector)
+    private void UpdateDragLogic(Vector2 vector)
     {
-        m_imgRect.gameObject.SetActive(false);
-        SelectDotArea();
+        int minIndex = m_pageNavMotionLabel.GetRelativeLabelByPosition(vector);
+        var finalIndex  = Mathf.Clamp(minIndex, 0, m_motionData.info.frameCount - 1);
+        var offset = finalIndex - m_dragIndex;
+        if (offset == 0)
+            return;
+
+        var frameIndexDict = new Dictionary<string, List<int>>();
+        var frameDataDict = new Dictionary<string, List<Live2dMotionData.TrackKeyFrameData>>();
+        bool CloneAndCheck()
+        {
+            int maxFrameIndex = m_motionData.info.frameCount - 1;
+            foreach (var entry in SelectedDotIndexes)
+            {
+                var frameIndexList = new List<int>();
+                frameIndexList.AddRange(entry.Value);
+                frameIndexDict[entry.Key] = frameIndexList;
+                var track = m_motionData.TryGetTrack(entry.Key);
+                var frameDataList = new List<Live2dMotionData.TrackKeyFrameData>();
+                for (int i = 0; i < frameIndexList.Count; i++)
+                {
+                    var originIndex = frameIndexList[i];
+                    var offsetIndex = frameIndexList[i] += offset;
+                    // 超出范围
+                    if (offsetIndex < 0 || offsetIndex > maxFrameIndex)
+                    {
+                        return false;
+                    }
+
+                    // 重复
+                    if (track.keyFrames.ContainsKey(offsetIndex) && !entry.Value.Contains(offsetIndex))
+                    {
+                        return false;
+                    }
+
+                    if (track.keyFrames.TryGetValue(originIndex, out var frameData))
+                    {
+                        frameData.frame = offsetIndex;
+                        frameDataList.Add(frameData);
+                    }
+                }
+
+                frameDataDict[entry.Key] = frameDataList;
+            }
+
+            return true;
+        }
+
+        if (CloneAndCheck())
+        {
+            // 删除原来的
+            foreach (var entry in SelectedDotIndexes)
+            {
+                var track = m_motionData.TryGetTrack(entry.Key);
+                foreach (var data in entry.Value)
+                {
+                    track.keyFrames.Remove(data);
+                }
+            }
+
+            // 添加新的
+            foreach (var entry in frameDataDict)
+            {
+                var track = m_motionData.TryGetTrack(entry.Key);
+                foreach (var data in entry.Value)
+                {
+                    track.SetKeyFrameData(data.frame, data);
+                    Debug.Log($"SetKeyFrameData: {entry.Key} {data.frame} {data.value}");
+                }
+            }
+
+            // 更新选中的
+            SelectedDotIndexes = frameIndexDict.ToDictionary(x => x.Key, x => new HashSet<int>(x.Value));
+            m_dragIndex = finalIndex;
+            m_motionData.BakeAllFrames();
+
+            RefreshAll();
+        }
     }
 
     private void UpdateSelectionRect(Vector2 vector)
@@ -543,7 +643,21 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_imgRect.rectTransform.position = Vector2.Lerp(pos1, pos2, 0.5f);
     }
 
-    public static Dictionary<string, HashSet<int>> s_selectedDotIndexes = new Dictionary<string, HashSet<int>>();
+    private void OnTouchTrackAreaPointerUp(Vector2 vector)
+    {
+        if (m_dragMode)
+        {
+            m_dragMode = false;
+            m_dragIndex = -1;
+        }
+        else
+        {
+            m_imgRect.gameObject.SetActive(false);
+            SelectDotArea();
+        }
+    }
+
+    public static Dictionary<string, HashSet<int>> SelectedDotIndexes = new Dictionary<string, HashSet<int>>();
 
     private void SelectDotArea()
     {
@@ -555,18 +669,18 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
 
         if (!Input.GetKey(KeyCode.LeftControl))
         {
-            s_selectedDotIndexes.Clear();
+            SelectedDotIndexes.Clear();
         }
 
         HashSet<int> TryGetSet(string key)
         {
-            if (s_selectedDotIndexes.TryGetValue(key, out var set))
+            if (SelectedDotIndexes.TryGetValue(key, out var set))
             {
                 return set;
             }
 
             set = new HashSet<int>();
-            s_selectedDotIndexes[key] = set;
+            SelectedDotIndexes[key] = set;
             return set;
         }
 
@@ -592,9 +706,43 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         RefreshAll();
     }
 
+    private MotionTrackWidget GetTrackWidgetByWorldPos(Vector2 worldPosition)
+    {
+        for (int i = 0; i < TrackItemCount; i++)
+        {
+            MotionTrackWidget track = m_listMotionTrack[i];
+            var rect = track.gameObject.GetComponent<RectTransform>();
+            if (UIUtils.IsPointInRect(rect, worldPosition))
+            {
+                return track;
+            }
+        }
+
+        return null;
+    }
+
+    private MotionTrackDotWidget GetDotWidgetByWorldPos(MotionTrackWidget track, Vector2 worldPosition)
+    {
+        if (track == null)
+        {
+            return null;
+        }
+
+        for (int i = 0; i < track.DotFrameCount; i++)
+        {
+            var dot = track.m_dots[i];
+            var rect = dot.gameObject.GetComponent<RectTransform>();
+            if (UIUtils.IsPointInRect(rect, worldPosition))
+            {
+                return dot;
+            }
+        }
+        return null;
+    }
+
     public static bool IsDotSelected(string key, int frameIndex)
     {
-        if (s_selectedDotIndexes.TryGetValue(key, out var set))
+        if (SelectedDotIndexes.TryGetValue(key, out var set))
         {
             return set.Contains(frameIndex);
         }
@@ -928,7 +1076,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             return;
         }
 
-        foreach (var entry in s_selectedDotIndexes)
+        foreach (var entry in SelectedDotIndexes)
         {
             var track = m_motionData.TryGetTrack(entry.Key, false);
             if (track == null)
@@ -940,7 +1088,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             }
         }
 
-        s_selectedDotIndexes.Clear();
+        SelectedDotIndexes.Clear();
         m_motionData.BakeAllFrames();
 
         RefreshAll();
@@ -969,7 +1117,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         }
 
         int minFrameIndex = int.MaxValue;
-        foreach (var entry in s_selectedDotIndexes)
+        foreach (var entry in SelectedDotIndexes)
         {
             foreach (var frameIndex in entry.Value)
             {
@@ -977,7 +1125,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             }
         }
 
-        foreach (var entry in s_selectedDotIndexes)
+        foreach (var entry in SelectedDotIndexes)
         {
             var track = m_motionData.TryGetTrack(entry.Key, false);
             if (track == null)
@@ -1001,7 +1149,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             }
         }
 
-        s_selectedDotIndexes.Clear();
+        SelectedDotIndexes.Clear();
         m_motionData.BakeAllFrames();
         RefreshAll();
     }
@@ -1016,7 +1164,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private void DoCacheSelectedDots()
     {
         m_cacheSelectedDotsEntries.Clear();
-        foreach (var entry in s_selectedDotIndexes)
+        foreach (var entry in SelectedDotIndexes)
         {
             var track = m_motionData.TryGetTrack(entry.Key, false);
             if (track == null)
