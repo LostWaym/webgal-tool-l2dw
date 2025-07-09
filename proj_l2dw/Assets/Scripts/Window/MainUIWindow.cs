@@ -3274,7 +3274,6 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
 public class PageBackgroundFunctions : UIPageWidget<PageBackgroundFunctions>
 {
     #region auto generated members
-    private Transform m_itemCopyCommand_Legacy;
     private Button m_btnCopyScene;
     private Button m_btnCopyTransform;
     private Button m_btnCopyAll;
@@ -3284,7 +3283,6 @@ public class PageBackgroundFunctions : UIPageWidget<PageBackgroundFunctions>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_itemCopyCommand_Legacy = transform.Find("m_itemCopyCommand_Legacy").GetComponent<Transform>();
         m_btnCopyScene = transform.Find("CopyCommand/Container/m_btnCopyScene").GetComponent<Button>();
         m_btnCopyTransform = transform.Find("CopyCommand/Container/m_btnCopyTransform").GetComponent<Button>();
         m_btnCopyAll = transform.Find("CopyCommand/Container/m_btnCopyAll").GetComponent<Button>();
