@@ -247,11 +247,11 @@ public class ColorPicker : MonoBehaviour
         inputFieldValue.SetTextWithoutNotify((value * 100.0f).ToString());
     }
     
-    private void OnSvRectTouchDown(Vector2 vector)
+    private void OnSvRectTouchDown(PointerEventData eventData)
     {
     }
 
-    private void OnSvRectTouchUp(Vector2 vector)
+    private void OnSvRectTouchUp(PointerEventData eventData)
     {
     }
     
@@ -274,11 +274,11 @@ public class ColorPicker : MonoBehaviour
         ConvertSvRectTouch(Input.mousePosition);
     }
 
-    private void OnHueBarTouchDown(Vector2 vector)
+    private void OnHueBarTouchDown(PointerEventData eventData)
     {
     }
 
-    private void OnHueBarTouchUp(Vector2 vector)
+    private void OnHueBarTouchUp(PointerEventData eventData)
     {
     }
     

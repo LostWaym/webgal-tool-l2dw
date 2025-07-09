@@ -266,133 +266,209 @@ public class FilterSetData
     public int Blur
     {
         get => blur;
-        set => blur = value;
+        set
+        {
+            value = Mathf.Max(value, 0);
+            blur = value;
+        }
     }
     
     private float brightness = 1.0f;
     public float Brightness
     {
         get => brightness;
-        set => brightness = value;
+        set
+        {
+            value = Mathf.Max(value, 0);
+            brightness = value;
+        }
     }
     
     private float contrast = 1.0f;
     public float Contrast
     {
         get => contrast;
-        set => contrast = value;
+        set
+        {
+            value = Mathf.Max(value, 0);
+            contrast = value;
+        }
     }
     
     private float saturation = 1.0f;
     public float Saturation
     {
         get => saturation;
-        set => saturation = value;
+        set
+        {
+            value = Mathf.Max(value, 0);
+            saturation = value;
+        }
     }
     
     private float gamma = 1.0f;
     public float Gamma
     {
         get => gamma;
-        set => gamma = value;
+        set
+        {
+            value = Mathf.Max(value, 0);
+            gamma = value;
+        }
     }
     
     private float colorRed = 255.0f;
     public float ColorRed
     {
         get => colorRed;
-        set => colorRed = value;
+        set
+        {
+            value = Mathf.Clamp(value, 0.0f, 255.0f);
+            colorRed = value;
+        }
     }
     
     private float colorGreen = 255.0f;
     public float ColorGreen
     {
         get => colorGreen;
-        set => colorGreen = value;
+        set
+        {
+            value = Mathf.Clamp(value, 0.0f, 255.0f);
+            colorGreen = value;
+        }
     }
     
     private float colorBlue = 255.0f;
     public float ColorBlue
     {
         get => colorBlue;
-        set => colorBlue = value;
+        set
+        {
+            value = Mathf.Clamp(value, 0.0f, 255.0f);
+            colorBlue = value;
+        }
     }
 
     private float bloom = 0.0f;
     public float Bloom
     {
         get => bloom;
-        set => bloom = value;
+        set
+        {
+            value = Mathf.Clamp01(value);
+            bloom = value;
+        }
     }
     
     private float bloomBrightness = 1.0f;
     public float BloomBrightness
     {
         get => bloomBrightness;
-        set => bloomBrightness = value;
+        set
+        {
+            value = Mathf.Max(value, 0);
+            bloomBrightness = value;
+        }
     }
     
     private float bloomBlur = 0.0f;
     public float BloomBlur
     {
         get => bloomBlur;
-        set => bloomBlur = value;
+        set
+        {
+            value = Mathf.Max(value, 0);
+            bloomBlur = value;
+        }
     }
     
     private float bloomThreshold = 0.0f;
     public float BloomThreshold
     {
         get => bloomThreshold;
-        set => bloomThreshold = value;
+        set
+        {
+            value = Mathf.Clamp01(value);
+            bloomThreshold = value;
+        }
     }
     
     private float bevel = 0.0f;
     public float Bevel
     {
         get => bevel;
-        set => bevel = value;
+        set
+        {
+            value = Mathf.Clamp01(value);
+            bevel = value;
+        }
     }
     
     private float bevelThickness = 0.0f;
     public float BevelThickness
     {
         get => bevelThickness;
-        set => bevelThickness = value;
+        set
+        {
+            value = Mathf.Max(value, 0);
+            bevelThickness = value;
+        }
     }
     
     private float bevelRotation = 0.0f;
     public float BevelRotation
     {
         get => bevelRotation;
-        set => bevelRotation = value;
+        set
+        {
+            value = Mathf.Max(value, 0);
+            bevelRotation = value;
+        }
     }
     
     private float bevelSoftness = 0.0f;
     public float BevelSoftness
     {
         get => bevelSoftness;
-        set => bevelSoftness = value;
+        set
+        {
+            value = Mathf.Clamp01(value);
+            bevelSoftness = value;
+        }
     }
     
     private float bevelRed = 255.0f;
     public float BevelRed
     {
         get => bevelRed;
-        set => bevelRed = value;
+        set
+        {
+            value = Mathf.Clamp(value, 0.0f, 255.0f);
+            bevelRed = value;
+        }
     }
     
     private float bevelGreen = 255.0f;
     public float BevelGreen
     {
         get => bevelGreen;
-        set => bevelGreen = value;
+        set
+        {
+            value = Mathf.Clamp(value, 0.0f, 255.0f);
+            bevelGreen = value;
+        }
     }
     
     private float bevelBlue = 255.0f;
     public float BevelBlue
     {
         get => bevelBlue;
-        set => bevelBlue = value;
+        set
+        {
+            value = Mathf.Clamp(value, 0.0f, 255.0f);
+            bevelBlue = value;
+        }
     }
 
     private bool oldFilm;

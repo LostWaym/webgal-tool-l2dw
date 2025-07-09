@@ -488,9 +488,9 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     }
 
     private Vector2 m_charaStartPosition;
-    private void OnTouchCharaPointerDown(Vector2 vector)
+    private void OnTouchCharaPointerDown(PointerEventData eventData)
     {
-        m_charaStartPosition = vector;
+        m_charaStartPosition = eventData.position;
     }
 
     private void OnTouchCharaPointerMove(Vector2 vector)
@@ -518,8 +518,9 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private Vector2 m_selectStartPosition;
     private bool m_dragMode = false;
     private int m_dragIndex = -1;
-    private void OnTouchTrackAreaPointerDown(Vector2 vector)
+    private void OnTouchTrackAreaPointerDown(PointerEventData eventData)
     {
+        var vector = eventData.position;
         m_selectStartPosition = vector;
 
         var trackWidget = GetTrackWidgetByWorldPos(vector);
@@ -645,7 +646,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_imgRect.rectTransform.position = Vector2.Lerp(pos1, pos2, 0.5f);
     }
 
-    private void OnTouchTrackAreaPointerUp(Vector2 vector)
+    private void OnTouchTrackAreaPointerUp(PointerEventData eventData)
     {
         if (m_dragMode)
         {
