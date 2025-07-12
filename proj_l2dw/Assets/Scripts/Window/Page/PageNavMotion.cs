@@ -582,6 +582,12 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
                         return false;
                     }
 
+                    // 不能删除第一帧
+                    if (originIndex == 0)
+                    {
+                        return false;
+                    }
+
                     // 重复
                     if (track.keyFrames.ContainsKey(offsetIndex) && !entry.Value.Contains(offsetIndex))
                     {
@@ -590,7 +596,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
 
                     if (track.keyFrames.TryGetValue(originIndex, out var frameData))
                     {
-                        frameData.frame = offsetIndex;
+                        // frameData.frame = offsetIndex; 不能直接修改
                         frameDataList.Add(frameData);
                     }
                 }
@@ -619,7 +625,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
                 var track = m_motionData.TryGetTrack(entry.Key);
                 foreach (var data in entry.Value)
                 {
-                    track.SetKeyFrameData(data.frame, data);
+                    track.SetKeyFrameData(data.frame + offset, data);
                     Debug.Log($"SetKeyFrameData: {entry.Key} {data.frame} {data.value}");
                 }
             }
