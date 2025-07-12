@@ -167,7 +167,7 @@ public class BGContainer : MonoBehaviour
         FilterUtils.UpdateBevelFilter(mat, filterSetData);
     }
 
-    private void UpdateAllFilter()
+    public void UpdateAllFilter()
     {
         UpdateScreenParams();
         UpdateAlphaFilter();

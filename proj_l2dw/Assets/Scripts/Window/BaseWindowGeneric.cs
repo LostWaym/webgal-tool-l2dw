@@ -33,16 +33,6 @@ public class BaseWindow<T> : BaseWindow where T : BaseWindow<T>
         base.Awake();
     }
 
-    public virtual void Show()
-    {
-        gameObject.SetActive(true);
-    }
-
-    public virtual void Close()
-    {
-        gameObject.SetActive(false);
-    }
-
     public void SetListItem<ListItem>(List<ListItem> list, GameObject prefab, Transform root, int count, Action<ListItem> onItemCreate) where ListItem : UIItemWidget<ListItem>, new()
     {
         prefab.SetActive(false);

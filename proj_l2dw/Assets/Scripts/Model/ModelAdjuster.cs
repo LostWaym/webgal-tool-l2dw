@@ -547,7 +547,7 @@ public class ModelAdjuster : ModelAdjusterBase
         FilterUtils.UpdateBevelFilter(mat, filterSetData);
     }
 
-    private void UpdateAllFilter()
+    public override void UpdateAllFilter()
     {
         UpdateScreenParams();
         UpdateAlphaFilter();

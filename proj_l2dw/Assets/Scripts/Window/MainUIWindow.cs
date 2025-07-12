@@ -1558,6 +1558,8 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
 
 
     #region auto generated members
+    private Button m_btnAddPreset;
+    private Button m_btnLoadPreset;
     private InputField m_iptAlpha;
     private InputField m_iptBlur;
     private InputField m_iptBrightness;
@@ -1585,6 +1587,10 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
+        m_btnAddPreset = transform.Find("Parameters/Container/Scroll/Viewport/Content/Operation/Container/m_btnAddPreset").GetComponent<Button>();
+        m_btnLoadPreset = transform.Find("Parameters/Container/Scroll/Viewport/Content/Operation/Container/m_btnLoadPreset").GetComponent<Button>();
+
+
         m_iptAlpha = transform.Find("Parameters/Container/Scroll/Viewport/Content/Effect/Container/透明度/Value/InputField/m_iptAlpha").GetComponent<InputField>();
         m_iptBlur = transform.Find("Parameters/Container/Scroll/Viewport/Content/Effect/Container/高斯模糊/Value/InputField/m_iptBlur").GetComponent<InputField>();
         
@@ -1611,6 +1617,10 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_toggleGlitchFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/Filter/Container/m_toggleGlitchFilm").GetComponent<Toggle>();
         m_toggleRgbFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/Filter/Container/m_toggleRgbFilm").GetComponent<Toggle>();
         m_toggleGodrayFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/Filter/Container/m_toggleGodrayFilm").GetComponent<Toggle>();
+
+        m_btnAddPreset.onClick.AddListener(OnButtonAddPresetClick);
+        m_btnLoadPreset.onClick.AddListener(OnButtonLoadPresetClick);
+
 
         m_iptAlpha.onValueChanged.AddListener(OnInputFieldAlphaChange);
         m_iptAlpha.onEndEdit.AddListener(OnInputFieldAlphaEndEdit);
@@ -1656,6 +1666,29 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     #endregion
 
     #region auto generated events
+    private void OnButtonAddPresetClick()
+    {
+        var json = new JSONObject();
+        m_filterSetData.ApplyToJson(json);
+        FilterSetPresetData preset = new FilterSetPresetData();
+        preset.name = "New Preset";
+        preset.jsonObject = json;
+        FilterUtils.AddFilterSetPreset(preset);
+        FilterSetUI.Instance.SetData(preset, (data) => {
+            m_filterSetData.ReadFromJson(data.jsonObject);
+            AskTargetApplyFilterSetData();
+            RefreshFilterSet();
+        });
+    }
+    private void OnButtonLoadPresetClick()
+    {
+        FilterSetUI.Instance.SetData(null, (data) => {
+            m_filterSetData.ReadFromJson(data.jsonObject);
+            AskTargetApplyFilterSetData();
+            RefreshFilterSet();
+        });
+    }
+
     private void OnInputFieldAlphaChange(string value)
     {
     }
@@ -1989,6 +2022,18 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         {
             m_model.OnFilterSetDataChanged(property);
         }
+    }
+
+    private void AskTargetApplyFilterSetData()
+    {
+        if (m_bgContainer != null)
+        {
+            m_bgContainer.UpdateAllFilter();
+        }
+        else if (m_model != null)
+        {
+            m_model.UpdateAllFilter();
+        }   
     }
 
     public void RefreshFilterSet()

@@ -246,6 +246,11 @@ public class ModelAdjusterBase : MonoBehaviour
 
     }
 
+    public virtual void UpdateAllFilter()
+    {
+
+    }
+
     #endregion
 }
 
@@ -550,6 +555,83 @@ public class FilterSetData
         ApplyIfTrue(json, "glitchFilm", glitchFilm);
         ApplyIfTrue(json, "rgbFilm", rgbFilm);
         ApplyIfTrue(json, "godrayFilm", godrayFilm);
+    }
+
+    public void ReadFromJson(JSONObject json)
+    {
+        if (json == null)
+            return;
+            
+        ReadFromJson_21_24(json);
+    }
+
+    private void ReadFromJson_21_24(JSONObject json)
+    {
+        alpha = GetFloatField(json, "alpha", 1);
+        blur = GetIntField(json, "blur", 0);
+
+        
+        brightness = GetFloatField(json, "brightness", 1.0f);
+        contrast = GetFloatField(json, "contrast", 1.0f);
+        saturation = GetFloatField(json, "saturation", 1.0f);
+        gamma = GetFloatField(json, "gamma", 1.0f);
+        colorRed = GetFloatField(json, "colorRed", 255.0f);
+        colorGreen = GetFloatField(json, "colorGreen", 255.0f);
+        colorBlue = GetFloatField(json, "colorBlue", 255.0f);
+
+
+        bloom = GetFloatField(json, "bloom", 0.0f);
+        bloomBrightness = GetFloatField(json, "bloomBrightness", 1.0f);
+        bloomBlur = GetFloatField(json, "bloomBlur", 0.0f);
+        bloomThreshold = GetFloatField(json, "bloomThreshold", 0.0f);
+
+
+        bevel = GetFloatField(json, "bevel", 0.0f);
+        bevelThickness = GetFloatField(json, "bevelThickness", 0.0f);
+        bevelRotation = GetFloatField(json, "bevelRotation", 0.0f);
+        bevelSoftness = GetFloatField(json, "bevelSoftness", 0.0f);
+        bevelRed = GetFloatField(json, "bevelRed", 255.0f);
+        bevelGreen = GetFloatField(json, "bevelGreen", 255.0f);
+        bevelBlue = GetFloatField(json, "bevelBlue", 255.0f);
+        
+
+        oldFilm = GetIntBoolField(json, "oldFilm", false);
+        dotFilm = GetIntBoolField(json, "dotFilm", false);
+        reflectionFilm = GetIntBoolField(json, "reflectionFilm", false);
+        glitchFilm = GetIntBoolField(json, "glitchFilm", false);
+        rgbFilm = GetIntBoolField(json, "rgbFilm", false);
+        godrayFilm = GetIntBoolField(json, "godrayFilm", false);
+    }
+
+    private int GetIntField(JSONObject json, string key, int defValue = 0)
+    {
+        var field = json.GetField(key);
+        if (field == null)
+        {
+            return defValue;
+        }
+        else
+        {
+            return (int)field.number;
+        }
+    }
+
+    private float GetFloatField(JSONObject json, string key, float defValue = 0)
+    {
+        var field = json.GetField(key);
+        if (field == null)
+        {
+            return defValue;
+        }
+        else
+        {
+            return (float)field.number;
+        }
+    }
+
+    private bool GetIntBoolField(JSONObject json, string key, bool defValue = false)
+    {
+        return GetIntField(json, key, defValue ? 1 : 0) == 1;
     }
 
     private void ApplyIfNot(JSONObject json, string key, int value, int notValue)

@@ -77,6 +77,8 @@ public class MainControl : MonoBehaviour
 
         UIEventBus.AddListener(UIEventType.OnModelChanged, RenderBatch);
         UIEventBus.AddListener(UIEventType.OnModelDeleted, RenderBatch);
+
+        FilterUtils.LoadFilterSetPreset();
     }
 
     private void OnSaveImageSetting(ImageModelMeta meta)
@@ -121,6 +123,7 @@ public class MainControl : MonoBehaviour
         PlayerPrefs.SetInt("CloseGreenLine", CloseGreenLine ? 1 : 0);
         Global.Save();
         SaveMainCamTransform();
+        FilterUtils.SaveFilterSetPreset();
     }
 
     private void OnSaveSetting(MyGOLive2DExMeta meta)

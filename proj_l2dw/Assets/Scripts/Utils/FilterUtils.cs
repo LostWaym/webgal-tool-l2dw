@@ -1,10 +1,13 @@
 
 
 
+using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public static class FilterUtils
 {
+    public static List<FilterSetPresetData> filterSetPresets = new List<FilterSetPresetData>();
     
     // 更新屏幕尺寸相关参数
     public static void UpdateScreenParams(Material mat, float modelAspect, float rootScaleValue, float pivotScale = 1f/1.5f)
@@ -77,5 +80,64 @@ public static class FilterUtils
             mat.EnableKeyword("_BEVEL_FILTER_SOFTNESS");
         else
             mat.DisableKeyword("_BEVEL_FILTER_SOFTNESS");
+    }
+
+    public static void AddFilterSetPreset(FilterSetPresetData preset)
+    {
+        filterSetPresets.Add(preset);
+        SaveFilterSetPreset();
+    }
+
+    public static void RemoveFilterSetPreset(FilterSetPresetData preset)
+    {
+        if (filterSetPresets.Remove(preset))
+            SaveFilterSetPreset();
+    }
+
+    public static void SaveFilterSetPreset()
+    {
+        var arrayObj = new JSONObject(JSONObject.Type.ARRAY);
+        for (int i = 0; i < filterSetPresets.Count; i++)
+        {
+            var preset = filterSetPresets[i];
+            var presetObj = new JSONObject();
+            presetObj.AddField("name", preset.name);
+            presetObj.AddField("jsonObject", preset.jsonObject);
+            arrayObj.Add(presetObj);
+        }
+        var folderPath = System.IO.Path.Combine(Application.dataPath, "..");
+        var path = System.IO.Path.Combine(folderPath, "FilterSetPreset.json");
+        File.WriteAllText(path, arrayObj.ToString(true));
+    }
+
+    public static void LoadFilterSetPreset()
+    {
+        var folderPath = System.IO.Path.Combine(Application.dataPath, "..");
+        var path = System.IO.Path.Combine(folderPath, "FilterSetPreset.json");
+        if (File.Exists(path))
+        {
+            var json = File.ReadAllText(path);
+            var arrayObj = new JSONObject(json);
+            for (int i = 0; i < arrayObj.Count; i++)
+            {
+                var presetObj = arrayObj[i];
+                var preset = new FilterSetPresetData();
+                preset.name = presetObj["name"].str;
+                preset.jsonObject = presetObj["jsonObject"];
+                filterSetPresets.Add(preset);
+            }
+        }
+    }
+}
+
+public class FilterSetPresetData
+{
+    public string name;
+    public JSONObject jsonObject;
+
+    public void CopyFrom(FilterSetData filterSetData)
+    {
+        jsonObject = new JSONObject();
+        filterSetData.ApplyToJson(jsonObject);
     }
 }
