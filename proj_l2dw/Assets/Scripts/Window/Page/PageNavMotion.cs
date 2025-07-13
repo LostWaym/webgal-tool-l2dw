@@ -247,7 +247,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     {
         Debug.Log("OnButtonRecordClick");
     }
-    private const string OPERATION_LINEAR_UNBAKE = "线性反烘焙";
+    private const string OPERATION_SIMPLE_UNBAKE = "简单反烘焙";
     private const string OPERATION_DELETE_SELECTED_DOT = "删除框选点";
     private const string OPERATION_CLONE_SELECTED_DOT = "复制框选点到当前帧（不建议使用）";
     private const string OPERATION_CACHE_CUR_FRAME = "缓存当前帧";
@@ -258,7 +258,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private const string OPERATION_CAST_ANIM_INSTRUCTION = "使用魔法口令";
     private List<string> m_listOperation = new List<string>()
     {
-        OPERATION_LINEAR_UNBAKE,
+        OPERATION_SIMPLE_UNBAKE,
         OPERATION_DELETE_SELECTED_DOT,
         OPERATION_CLONE_SELECTED_DOT,
         // OPERATION_CACHE_CUR_FRAME,
@@ -282,8 +282,8 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             TargetSelectUI.Instance.Close();
             switch (operationName)
             {
-                case OPERATION_LINEAR_UNBAKE:
-                    DoLinearUnbake();
+                case OPERATION_SIMPLE_UNBAKE:
+                    DoSimpleUnbake();
                     break;
                 case OPERATION_DELETE_SELECTED_DOT:
                     DoDeleteSelectedDot();
@@ -1068,8 +1068,8 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_motionData.BakeAllFrames();
         RefreshAll();
     }
-    // 线性反烘焙
-    private void DoLinearUnbake()
+    // 简单反烘焙
+    private void DoSimpleUnbake()
     {
         var curTarget = GetValidTarget();
         if (curTarget == null)
@@ -1077,7 +1077,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             return;
         }
         
-        m_motionData.UnBakeAllFramesByLinear();
+        m_motionData.UnBakeAllFramesByTrend();
         RefreshAll();
     }
 
@@ -1249,7 +1249,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
 
         if(minFrameIndex == 0)
         {
-            ConfirmUI.Instance.SetData("提示", "起始点不能为0", null, null);
+            MessageTipWindow.Instance.Show("提示", "禁止反转第零帧！！");
             return;
         }
 

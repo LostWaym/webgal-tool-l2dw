@@ -78,6 +78,20 @@ public class Live2dMotionData
         public Vector2 controlPoint1 = Vector2.zero;
         public Vector2 controlPoint2 = Vector2.one;
 
+        public TrackKeyFrameData()
+        {
+
+        }
+
+        public TrackKeyFrameData(bool isLinear)
+        {
+            if (!isLinear)
+            {
+                controlPoint1 = new Vector2(0.5f, 0f);
+                controlPoint2 = new Vector2(0.5f, 1f);
+            }
+        }
+
         public TrackKeyFrameData Clone()
         {
             var obj = MemberwiseClone() as TrackKeyFrameData;
@@ -138,7 +152,7 @@ public class Live2dMotionData
         return Mathf.Abs(a - b) < threshold;
     }
 
-    public void UnBakeAllFramesByLinear()
+    public void UnBakeAllFramesByTrend()
     {
         foreach (var track in tracks.Values)
         {
@@ -152,7 +166,7 @@ public class Live2dMotionData
             // 记录第一帧
             if (frames.Count > 0)
             {
-                track.keyFrames[0] = new TrackKeyFrameData()
+                track.keyFrames[0] = new TrackKeyFrameData(false)
                 {
                     frame = 0,
                     value = frames[0],
@@ -186,7 +200,7 @@ public class Live2dMotionData
                 if (curTrend != trend)
                 {
                     // 趋势改变,记录关键帧
-                    track.keyFrames[i-1] = new TrackKeyFrameData()
+                    track.keyFrames[i-1] = new TrackKeyFrameData(false)
                     {
                         frame = i-1,
                         value = frames[i-1],
@@ -212,7 +226,7 @@ public class Live2dMotionData
             // 记录最后一帧
             if (frames.Count > 0)
             {
-                track.keyFrames[frames.Count - 1] = new TrackKeyFrameData()
+                track.keyFrames[frames.Count - 1] = new TrackKeyFrameData(false)
                 {
                     frame = frames.Count - 1,
                     value = frames[frames.Count - 1],

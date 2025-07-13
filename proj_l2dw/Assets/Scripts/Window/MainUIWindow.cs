@@ -1558,6 +1558,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
 
 
     #region auto generated members
+    private Button m_btnHelpFilter;
     private Button m_btnAddPreset;
     private Button m_btnLoadPreset;
     private InputField m_iptAlpha;
@@ -1587,9 +1588,9 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
+        m_btnHelpFilter = transform.Find("Parameters/Container/Scroll/Viewport/Content/Operation/Title/m_btnHelpFilter").GetComponent<Button>();
         m_btnAddPreset = transform.Find("Parameters/Container/Scroll/Viewport/Content/Operation/Container/m_btnAddPreset").GetComponent<Button>();
         m_btnLoadPreset = transform.Find("Parameters/Container/Scroll/Viewport/Content/Operation/Container/m_btnLoadPreset").GetComponent<Button>();
-
 
         m_iptAlpha = transform.Find("Parameters/Container/Scroll/Viewport/Content/Effect/Container/透明度/Value/InputField/m_iptAlpha").GetComponent<InputField>();
         m_iptBlur = transform.Find("Parameters/Container/Scroll/Viewport/Content/Effect/Container/高斯模糊/Value/InputField/m_iptBlur").GetComponent<InputField>();
@@ -1618,6 +1619,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_toggleRgbFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/Filter/Container/m_toggleRgbFilm").GetComponent<Toggle>();
         m_toggleGodrayFilm = transform.Find("Parameters/Container/Scroll/Viewport/Content/Filter/Container/m_toggleGodrayFilm").GetComponent<Toggle>();
 
+        m_btnHelpFilter.onClick.AddListener(OnButtonHelpFilterClick);
         m_btnAddPreset.onClick.AddListener(OnButtonAddPresetClick);
         m_btnLoadPreset.onClick.AddListener(OnButtonLoadPresetClick);
 
@@ -1666,6 +1668,10 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     #endregion
 
     #region auto generated events
+    private void OnButtonHelpFilterClick()
+    {
+        MessageTipWindow.Instance.Show("帮助", "目前软化功能只在4.5.14默认模板和bandoricrafr1.2生效，mygo 2.5暂不支持");
+    }
     private void OnButtonAddPresetClick()
     {
         var json = new JSONObject();
