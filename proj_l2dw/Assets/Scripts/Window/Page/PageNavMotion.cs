@@ -254,6 +254,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private const string OPERATION_RESTORE_CUR_FRAME = "缓存帧覆盖到当前帧";
     private const string OPERATION_CACHE_SELECTED_DOTS = "缓存框选点（可跨动画工程）";
     private const string OPERATION_RESTORE_SELECTED_DOTS = "缓存框选点覆盖到当前帧";
+    private const string OPERATION_REVERSE_SELECTED_DOTS = "反转框选点(起始点互换结束点)";
     private const string OPERATION_CAST_ANIM_INSTRUCTION = "使用魔法口令";
     private List<string> m_listOperation = new List<string>()
     {
@@ -264,6 +265,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         // OPERATION_RESTORE_CUR_FRAME,
         OPERATION_CACHE_SELECTED_DOTS,
         OPERATION_RESTORE_SELECTED_DOTS,
+        OPERATION_REVERSE_SELECTED_DOTS,
         OPERATION_CAST_ANIM_INSTRUCTION,
     };
     private void OnButtonOperationClick()
@@ -300,6 +302,9 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
                     break;
                 case OPERATION_RESTORE_SELECTED_DOTS:
                     DoRestoreSelectedDots();
+                    break;
+                case OPERATION_REVERSE_SELECTED_DOTS:
+                    DoReverseSelectedDots();
                     break;
                 case OPERATION_CAST_ANIM_INSTRUCTION:
                     DoCastAnimInstruction();
@@ -1214,6 +1219,68 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             track.SetKeyFrameData(targetFrameIndex, entry.data.Clone());
         }
 
+        m_motionData.BakeAllFrames();
+        RefreshAll();
+    }
+
+    private void DoReverseSelectedDots()
+    {
+        // 步骤1: 先缓存所有的点
+        List<CacheSelectedDotsEntry> cacheDots = new List<CacheSelectedDotsEntry>();
+        var minFrameIndex = int.MaxValue;
+        var maxFrameIndex = int.MinValue;
+        foreach (var entry in SelectedDotIndexes)
+        {
+            var track = m_motionData.TryGetTrack(entry.Key, false);
+            if (track == null)
+                continue;
+
+            foreach (var frameIndex in entry.Value)
+            {
+                cacheDots.Add(new CacheSelectedDotsEntry() {
+                    trackName = track.name,
+                    frameIndex = frameIndex,
+                    data = track.keyFrames[frameIndex].Clone()
+                });
+                minFrameIndex = Mathf.Min(minFrameIndex, frameIndex);
+                maxFrameIndex = Mathf.Max(maxFrameIndex, frameIndex);
+            }
+        }
+
+        if(minFrameIndex == 0)
+        {
+            ConfirmUI.Instance.SetData("提示", "起始点不能为0", null, null);
+            return;
+        }
+
+        // 步骤2: 移除先前所有的点
+        foreach (var entry in SelectedDotIndexes)
+        {
+            var track = m_motionData.TryGetTrack(entry.Key, false);
+            if (track == null)
+                continue;
+
+            foreach (var frameIndex in entry.Value)
+            {
+                track.keyFrames.Remove(frameIndex);
+            }
+        }
+        SelectedDotIndexes.Clear();
+        // 步骤3: 恢复反转后缓存的点
+        foreach (var entry in cacheDots)
+        {
+            var track = m_motionData.TryGetTrack(entry.trackName, false);
+            if (track == null)
+                continue;
+            int reverseFrameIndex = maxFrameIndex - entry.frameIndex + minFrameIndex;
+            track.SetKeyFrameData(reverseFrameIndex, entry.data.Clone());
+
+            if (!SelectedDotIndexes.ContainsKey(entry.trackName))
+            {
+                SelectedDotIndexes[entry.trackName] = new HashSet<int>();
+            }
+            SelectedDotIndexes[entry.trackName].Add(reverseFrameIndex);
+        }
         m_motionData.BakeAllFrames();
         RefreshAll();
     }
