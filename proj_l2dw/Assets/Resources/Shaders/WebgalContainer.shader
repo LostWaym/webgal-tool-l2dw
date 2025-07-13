@@ -25,6 +25,7 @@ Shader "Webgal/WebgalContainer"
         [Toggle(_BLOOM_FILTER_BLUR)] _BloomFilterBlur ("BloomFilterBlur", Float) = 0
         _BloomThreshold ("BloomThreshold", Range(0, 1)) = 0
         
+        [Toggle(_BEVEL_FILTER_LEGACY)] _BevelFilterLegacy ("BevelFilterLegacy", Float) = 0
         _Bevel ("Bevel", Range(0, 1)) = 0
         _BevelThickness ("BevelThickness", Float) = 0
         _BevelRotation ("BevelRotation", Float) = 0

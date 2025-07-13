@@ -4,6 +4,7 @@
 #include "WebgalContainerInput.cginc"
 #include "AdjustmentFilter.cginc"
 
+#pragma multi_compile _ _BEVEL_FILTER_LEGACY
 #pragma multi_compile _ _BEVEL_FILTER_SOFTNESS
 
 float _Bevel;
@@ -25,13 +26,14 @@ fixed4 ApplyBevelFilter(float2 rawUv)
 
     fixed4 color = ApplyAdjustmentFilter(rawUv);
 
-#if _BEVEL_FILTER_SOFTNESS
+#if (_BEVEL_FILTER_SOFTNESS && !_BEVEL_FILTER_LEGACY)
     const int kernelSize = 7;
     float weightSum = 0.0;
     float sigma = 4;
     float bevelAlpha = 0.0;
 
-    UNITY_UNROLL
+    // UNITY_UNROLL
+    UNITY_LOOP
     for (int i = 0; i < kernelSize; i++)
     {
         // float weight = exp(-(i*i) / (2 * sigma * sigma));
@@ -49,11 +51,15 @@ fixed4 ApplyBevelFilter(float2 rawUv)
     float bevelAlpha = clamp((color.a - tex.a) * clamp(_Bevel, 0.0, 1.0), 0.0, 1.0);
 #endif
     
+#if _BEVEL_FILTER_LEGACY
+    color.rgb = lerp(color.rgb, bevelColor, bevelAlpha);
+#else
     color.rgb = lerp(
         color.rgb,
         1.0 - (1.0 - color.rgb) * (1.0 - bevelColor),
         bevelAlpha
     );
+#endif
     color.rgb = clamp(color.rgb, 0.0, 1.0);
     
     return color;

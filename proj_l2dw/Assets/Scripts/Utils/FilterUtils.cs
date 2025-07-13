@@ -68,6 +68,11 @@ public static class FilterUtils
     
     public static void UpdateBevelFilter(Material mat, FilterSetData filterSetData)
     {
+        if (filterSetData.BevelLegacy)
+            mat.EnableKeyword("_BEVEL_FILTER_LEGACY");
+        else
+            mat.DisableKeyword("_BEVEL_FILTER_LEGACY");
+        
         mat.SetFloat("_Bevel", filterSetData.Bevel);
         mat.SetFloat("_BevelThickness", filterSetData.BevelThickness);
         mat.SetFloat("_BevelRotation", filterSetData.BevelRotation);

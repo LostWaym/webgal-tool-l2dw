@@ -24,9 +24,12 @@ fixed4 ApplyBlurFilter(float2 rawUv)
     float2 blurUv = float2(_SampleScaleX, _SampleScaleY) * _Blur;
     
     // 高斯权重计算
-    UNITY_UNROLL
+    // UNITY_UNROLL
+    UNITY_LOOP
     for (int x = -kernelSize; x <= kernelSize; x++)
     {
+        // UNITY_UNROLL
+        UNITY_LOOP
         for (int y = -kernelSize; y <= kernelSize; y++)
         {
             float2 offset = float2(x, y) * blurUv / kernelSize;

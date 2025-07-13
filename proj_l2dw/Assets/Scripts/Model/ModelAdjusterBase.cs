@@ -399,6 +399,13 @@ public class FilterSetData
         }
     }
     
+    private bool bevelLegacy;
+    public bool BevelLegacy
+    {
+        get => bevelLegacy;
+        set => bevelLegacy = value;
+    }
+    
     private float bevel = 0.0f;
     public float Bevel
     {

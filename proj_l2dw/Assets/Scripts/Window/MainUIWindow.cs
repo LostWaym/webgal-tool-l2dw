@@ -1572,6 +1572,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     private InputField m_iptBloomBrightness;
     private InputField m_iptBloomBlur;
     private InputField m_iptBloomThreshold;
+    private Toggle m_toggleBevelLegacy;
     private InputField m_iptBevel;
     private InputField m_iptBevelThickness;
     private InputField m_iptBevelRotation;
@@ -1606,6 +1607,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_iptBloomBlur = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bloom/Container/模糊/Value/InputField/m_iptBloomBlur").GetComponent<InputField>();
         m_iptBloomThreshold = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bloom/Container/阈值/Value/InputField/m_iptBloomThreshold").GetComponent<InputField>();
         
+        m_toggleBevelLegacy = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/m_toggleBevelLegacy").GetComponent<Toggle>();
         m_iptBevel = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/透明度/Value/InputField/m_iptBevel").GetComponent<InputField>();
         m_iptBevelThickness = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/粗细/Value/InputField/m_iptBevelThickness").GetComponent<InputField>();
         m_iptBevelRotation = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/旋转/Value/InputField/m_iptBevelRotation").GetComponent<InputField>();
@@ -1648,6 +1650,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_iptBloomThreshold.onValueChanged.AddListener(OnInputFieldBloomThresholdChange);
         m_iptBloomThreshold.onEndEdit.AddListener(OnInputFieldBloomThresholdEndEdit);
         
+        m_toggleBevelLegacy.onValueChanged.AddListener(OnToggleBevelLegacyChange);
         m_iptBevel.onValueChanged.AddListener(OnInputFieldBevelChange);
         m_iptBevel.onEndEdit.AddListener(OnInputFieldBevelEndEdit);
         m_iptBevelThickness.onValueChanged.AddListener(OnInputFieldBevelThicknessChange);
@@ -1856,6 +1859,15 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
             m_filterSetData.BloomThreshold = bloomThreshold;
             SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bloom);
         }
+        RefreshFilterSet();
+    }
+    private void OnToggleBevelLegacyChange(bool value)
+    {
+        if (m_filterSetData == null)
+            return;
+        
+        m_filterSetData.BevelLegacy = value;
+        SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
         RefreshFilterSet();
     }
     private void OnInputFieldBevelChange(string value)
@@ -2068,6 +2080,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_iptBloomBlur.SetTextWithoutNotify(filterSetData.BloomBlur.ToString("F2"));
         m_iptBloomThreshold.SetTextWithoutNotify(filterSetData.BloomThreshold.ToString("F2"));
         
+        m_toggleBevelLegacy.SetIsOnWithoutNotify(filterSetData.BevelLegacy);
         m_iptBevel.SetTextWithoutNotify(filterSetData.Bevel.ToString("F2"));
         m_iptBevelThickness.SetTextWithoutNotify(filterSetData.BevelThickness.ToString("F2"));
         m_iptBevelRotation.SetTextWithoutNotify(filterSetData.BevelRotation.ToString("F2"));

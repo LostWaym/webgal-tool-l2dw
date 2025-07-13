@@ -36,9 +36,11 @@ fixed4 BloomBlur(float2 rawUv)
     float2 blurUv = float2(_SampleScaleX, _SampleScaleY) * _BloomBlur * 2.5;
     
     // 高斯权重计算
-    UNITY_UNROLL
+    // UNITY_UNROLL
+    UNITY_LOOP
     for (int x = -kernelSize; x <= kernelSize; x++)
     {
+        UNITY_LOOP
         for (int y = -kernelSize; y <= kernelSize; y++)
         {
             float2 offset = float2(x, y) * blurUv / kernelSize;
@@ -70,6 +72,7 @@ fixed4 ApplyBloomFilter(float2 rawUv)
     float oldBloomAlpha = bloomColor.a;
     bloomColor.rgb += (1.0 - color.a) * bloomColor.rgb / oldBloomAlpha;
     bloomColor.a = lerp(bloomColor.a * bloomColor.a, bloomColor.a, color.a);
+    bloomColor.a = lerp(color.a, bloomColor.a, _Bloom);
     // bloomColor.a = lerp(
     //     dot(bloomColor.rgb, bloomColor.rgb) / 3.0,
     //     bloomColor.a,
@@ -86,7 +89,7 @@ fixed4 ApplyBloomFilter(float2 rawUv)
     bloomColor.rgb *= _Bloom;
     
     fixed4 result = color + bloomColor;
-    result.a = saturate(result.a);
+    result = saturate(result);
     // const float baseAlpha = 0.0001;
     // result.rgb = lerp(result.rgb * result.a / baseAlpha, result.rgb, color.a);
     // result.a = lerp(baseAlpha, result.a, color.a);
