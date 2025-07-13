@@ -1573,6 +1573,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     private InputField m_iptBloomBlur;
     private InputField m_iptBloomThreshold;
     private Toggle m_toggleBevelLegacy;
+    private Button m_btnHelpBevel;
     private InputField m_iptBevel;
     private InputField m_iptBevelThickness;
     private InputField m_iptBevelRotation;
@@ -1608,6 +1609,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_iptBloomThreshold = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bloom/Container/阈值/Value/InputField/m_iptBloomThreshold").GetComponent<InputField>();
         
         m_toggleBevelLegacy = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/m_toggleBevelLegacy").GetComponent<Toggle>();
+        m_btnHelpBevel = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/m_toggleBevelLegacy/m_btnHelpBevel").GetComponent<Button>();
         m_iptBevel = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/透明度/Value/InputField/m_iptBevel").GetComponent<InputField>();
         m_iptBevelThickness = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/粗细/Value/InputField/m_iptBevelThickness").GetComponent<InputField>();
         m_iptBevelRotation = transform.Find("Parameters/Container/Scroll/Viewport/Content/Bevel/Container/旋转/Value/InputField/m_iptBevelRotation").GetComponent<InputField>();
@@ -1651,6 +1653,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_iptBloomThreshold.onEndEdit.AddListener(OnInputFieldBloomThresholdEndEdit);
         
         m_toggleBevelLegacy.onValueChanged.AddListener(OnToggleBevelLegacyChange);
+        m_btnHelpBevel.onClick.AddListener(OnButtonHelpBevelClick);
         m_iptBevel.onValueChanged.AddListener(OnInputFieldBevelChange);
         m_iptBevel.onEndEdit.AddListener(OnInputFieldBevelEndEdit);
         m_iptBevelThickness.onValueChanged.AddListener(OnInputFieldBevelThicknessChange);
@@ -1673,7 +1676,9 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     #region auto generated events
     private void OnButtonHelpFilterClick()
     {
-        MessageTipWindow.Instance.Show("帮助", "目前软化功能只在4.5.14默认模板和bandoricrafr1.2生效，mygo 2.5暂不支持");
+        string text = "目前软化功能只在4.5.14默认模板和bandoricrafr1.2生效，mygo 2.5暂不支持";
+        text += "\n" + "Webgal 默认引擎 <= 4.5.13, mygo <=2.5, bandoricraft engine <= 1.1, 需开启旧版倒角效果, 否则显示效果与引擎不一致";
+        MessageTipWindow.Instance.Show("帮助", text);
     }
     private void OnButtonAddPresetClick()
     {
@@ -1869,6 +1874,11 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_filterSetData.BevelLegacy = value;
         SendFilterSetDataChanged(ModelAdjusterBase.FilterProperty.Bevel);
         RefreshFilterSet();
+    }
+    private void OnButtonHelpBevelClick()
+    {
+        string text = "Webgal 默认引擎 <= 4.5.13, mygo <=2.5, bandoricraft engine <= 1.1, 需开启旧版倒角效果, 否则显示效果与引擎不一致";
+        MessageTipWindow.Instance.Show("帮助", text);
     }
     private void OnInputFieldBevelChange(string value)
     {
