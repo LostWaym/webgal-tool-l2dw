@@ -447,7 +447,11 @@ public class Live2dMotionInfo
         var lines = text.Replace("\r", "").Split('\n').Where(line => !string.IsNullOrWhiteSpace(line));
         foreach (var line in lines)
         {
-            if (line.StartsWith("$"))
+            if (line.StartsWith("#"))
+            {
+                continue;
+            }
+            else if (line.StartsWith("$"))
             {
                 var parts = line.Split('=');
                 var nameParts = parts[0].Split(':');
