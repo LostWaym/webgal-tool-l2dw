@@ -34,12 +34,6 @@ public class ExpQueueManager
         curExp?.Apply(model);
     }
 
-    public void RevertExp(Live2DModelUnity model)
-    {
-        curExp?.Revert(model);
-        prevExp?.Revert(model);
-    }
-
     public void startExp(MygoExp exp, Live2DModelUnity model)
     {
         nextExp = exp;

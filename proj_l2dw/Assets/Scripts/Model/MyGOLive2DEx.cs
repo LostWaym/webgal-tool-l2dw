@@ -298,6 +298,7 @@ public class EmotionEditor
 
     public Dictionary<string, float> paramApplyDict = new Dictionary<string, float>();
     public HashSet<string> paramSet = new HashSet<string>();
+    public Dictionary<string, string> paramCalcDict = new Dictionary<string, string>();
 
     public void Start()
     {
@@ -312,6 +313,7 @@ public class EmotionEditor
         }
 
         paramSet.Clear();
+        paramCalcDict.Clear();
     }
 
     public void SetParam(string name, float value)
@@ -330,12 +332,28 @@ public class EmotionEditor
     public void AddControl(string name)
     {
         paramSet.Add(name);
+        SetCalcType(name, MygoExp.CALC_TYPE_SET);
     }
 
     public void RemoveControl(string name)
     {
         paramSet.Remove(name);
         SetDefaultParam(name);
+    }
+
+    public string GetCalcType(string name)
+    {
+        if (paramCalcDict.TryGetValue(name, out var value))
+        {
+            return value;
+        }
+
+        return MygoExp.CALC_TYPE_ADD;
+    }
+
+    public void SetCalcType(string name, string type)
+    {
+        paramCalcDict[name] = type;
     }
 
     public void CopyFromExp(MygoExp exp)
@@ -345,6 +363,7 @@ public class EmotionEditor
         {
             AddControl(item.id);
             SetParam(item.id, item.val);
+            SetCalcType(item.id, item.calc);
         }
     }
 
@@ -353,17 +372,17 @@ public class EmotionEditor
         foreach (var item in paramApplyDict)
         {
             var inSet = paramSet.Contains(item.Key);
+            float value;
             if (inSet)
             {
-                model.setParamFloat(item.Key, item.Value);
+                value = item.Value;
             }
-            else
+            else if (!list.paramDefDict.TryGetValue(item.Key, out value))
             {
-                if (list.paramDefDict.TryGetValue(item.Key, out var value))
-                {
-                    model.setParamFloat(item.Key, value);
-                }
+                continue;
             }
+
+            MygoExp.Apply(model, item.Key, GetCalcType(item.Key), value, 1.0f);
         }
     }
 
@@ -381,11 +400,21 @@ public class EmotionEditor
         {
             if (paramSet.Contains(item.Key))
             {
-                ret.keyDatas.Add(new MygoExpKeyData()
+                var data = new MygoExpKeyData()
                 {
                     id = item.Key,
                     val = item.Value,
-                });
+                };
+                if (paramCalcDict.TryGetValue(item.Key, out var type))
+                {
+                    data.calc = type;
+                }
+                else
+                {
+                    data.calc = MygoExp.CALC_TYPE_DEFAULT;
+                }
+
+                ret.keyDatas.Add(data);
             }
         }
 

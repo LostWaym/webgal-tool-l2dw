@@ -199,12 +199,10 @@ public class MygoExp
     public float elapsedTime;
     public float t;
 
-    public Dictionary<string, float> cacheValues = new Dictionary<string, float>();
     public void Reset()
     {
         elapsedTime = 0;
         t = 0;
-        cacheValues.Clear();
     }
 
     public void Update(float delta, bool reverse = false)
@@ -217,47 +215,51 @@ public class MygoExp
     public const string CALC_TYPE_MULT = "mult";
     public const string CALC_TYPE_SET = "set";
     public const string CALC_TYPE_ADD = "add";
+    public const string CALC_TYPE_DEFAULT = CALC_TYPE_ADD;
 
     public void Apply(ALive2DModel model)
     {
-        cacheValues.Clear();
         foreach (var item in data.keyDatas)
         {
-            var modelValue = model.getParamFloat(item.id);
-            cacheValues[item.id] = modelValue;
-            float expValue = item.val;
-            string calc = item.calc;
-            if (MainControl.WebGalExpressionSupport)
-            {
-                calc = CALC_TYPE_SET;
-            }
+            Apply(model, item.id, item.calc, item.val, t);
+        }
+    }
 
-            switch (calc)
+    public static void Apply(ALive2DModel model, string key, string calc, float value, float t)
+    {
+        var modelValue = model.getParamFloat(key);
+        
+        calc = MainControl.WebGalExpressionSupport ? CALC_TYPE_SET : calc;
+        switch (calc)
+        {
+            case CALC_TYPE_MULT:
             {
-                case CALC_TYPE_MULT:
-                {
-                    model.multParamFloat(item.id, Mathf.Lerp(1, expValue, t));
-                    break;
-                }
-                case CALC_TYPE_SET:
-                {
-                    model.setParamFloat(item.id, Mathf.Lerp(modelValue, expValue, t));
-                    break;
-                }
-                default:
-                {
-                    model.addToParamFloat(item.id, Mathf.Lerp(0, expValue, t));
-                    break;
-                }
+                model.multParamFloat(key, Mathf.Lerp(1, value, t));
+                break;
+            }
+            case CALC_TYPE_SET:
+            {
+                model.setParamFloat(key, Mathf.Lerp(modelValue, value, t));
+                break;
+            }
+            default:
+            {
+                model.addToParamFloat(key, Mathf.Lerp(0, value, t));
+                break;
             }
         }
     }
 
-    public void Revert(ALive2DModel model)
+    public static string GetNextCalcType(string type)
     {
-        foreach (var item in cacheValues)
+        switch (type)
         {
-            model.setParamFloat(item.Key, item.Value);
+            case CALC_TYPE_ADD:
+                return CALC_TYPE_MULT;
+            case CALC_TYPE_MULT:
+                return CALC_TYPE_SET;
+            default:
+                return CALC_TYPE_ADD;
         }
     }
 }
