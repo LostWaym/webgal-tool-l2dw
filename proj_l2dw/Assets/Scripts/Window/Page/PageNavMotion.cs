@@ -256,6 +256,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     private const string OPERATION_RESTORE_SELECTED_DOTS = "缓存框选点覆盖到当前帧";
     private const string OPERATION_REVERSE_SELECTED_DOTS = "反转框选点(起始点互换结束点)";
     private const string OPERATION_CAST_ANIM_INSTRUCTION = "使用魔法口令";
+    private const string OPERATION_SET_MAX_FRAME_COUNT_BY_DURATION = "取最长帧为总时长";
     private List<string> m_listOperation = new List<string>()
     {
         OPERATION_SIMPLE_UNBAKE,
@@ -266,6 +267,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         OPERATION_CACHE_SELECTED_DOTS,
         OPERATION_RESTORE_SELECTED_DOTS,
         OPERATION_REVERSE_SELECTED_DOTS,
+        OPERATION_SET_MAX_FRAME_COUNT_BY_DURATION,
         OPERATION_CAST_ANIM_INSTRUCTION,
     };
     private void OnButtonOperationClick()
@@ -309,9 +311,26 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
                 case OPERATION_CAST_ANIM_INSTRUCTION:
                     DoCastAnimInstruction();
                     break;
+                case OPERATION_SET_MAX_FRAME_COUNT_BY_DURATION:
+                    DoSetMaxFrameCountByDuration();
+                    break;
             }
         };
     }
+    private void DoSetMaxFrameCountByDuration()
+    {
+        var maxFrameIndex = 0;
+        foreach (var track in m_motionData.tracks)
+        {
+            foreach (var keyFrame in track.Value.keyFrames)
+            {
+                maxFrameIndex = Mathf.Max(maxFrameIndex, keyFrame.Key);
+            }
+        }
+        m_motionData.info.frameCount = maxFrameIndex + 1;
+        RefreshAll();
+    }
+
     private void DoCastAnimInstruction()
     {
         AnimInstructionUI.Instance.SetPageNavMotion(this);
