@@ -508,6 +508,40 @@ public class Live2dMotionInfo
         }
     }
 
+    public void Parse2(string text)
+    {
+        var paramDict = text
+            .Replace("\r", "")
+            .Split('\n')
+            .Select(line => line.Split("#")[0])
+            .Where(line => !string.IsNullOrWhiteSpace(line))
+            .Select(line =>
+            {
+                var parts = line.Split('=');
+                if (parts.Length != 2)
+                {
+                    return null;
+                }
+                var name = parts[0];
+                var value = parts[1];
+                var valueParts = value.Split(',').Select(float.Parse).ToList();
+                return new { name, valueParts };
+            })
+            .Where(x => x != null)
+            .ToDictionary(x => x.name, x => x.valueParts);
+
+        var fadeinDict = paramDict.Where(x => x.Key.StartsWith("$fadein:")).ToDictionary(x => x.Key[8..], x => (int)x.Value[0]);
+        var fadeoutDict = paramDict.Where(x => x.Key.StartsWith("$fadeout:")).ToDictionary(x => x.Key[9..], x => (int)x.Value[0]);
+
+        // fadein fadeout fps都是在paramdict的
+        this.fadein = (int)paramDict["$fadein"][0];
+        this.fadeout = (int)paramDict["$fadeout"][0];
+        this.fps = (int)paramDict["$fps"][0];
+        this.keyFrames = paramDict.Where(x => !x.Key.StartsWith("$")).ToDictionary(x => x.Key, x => x.Value);
+        this.paramFadein = fadeinDict;
+        this.paramFadeout = fadeoutDict;
+    }
+
     public string Print()
     {
         var sb = new StringBuilder();
