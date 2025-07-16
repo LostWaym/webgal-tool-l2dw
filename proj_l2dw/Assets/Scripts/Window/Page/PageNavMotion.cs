@@ -1464,7 +1464,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     public void RefreshSlider()
     {
         m_sliderH.maxValue = m_motionData.info.frameCount - MAX_FRAME_DISPLAY_COUNT;
-        m_sliderV.maxValue = filteredParamKeys.Count - MAX_TRACK_DISPLAY_COUNT;
+        m_sliderV.maxValue = filteredParamKeys.Count;// - MAX_TRACK_DISPLAY_COUNT; // 不需要减少这个值了
 
         m_sliderH.maxValue = Mathf.Max(m_sliderH.maxValue, 0);
         m_sliderV.maxValue = Mathf.Max(m_sliderV.maxValue, 0);
