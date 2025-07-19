@@ -502,7 +502,7 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
                         worldPos.y - group.root.position.y,
                         0
                     );
-                    group.SetRotation(Vector3.SignedAngle(oldVector, newVector, Vector3.forward));
+                    group.SetRotation(group.RotationDeg + Vector3.SignedAngle(oldVector, newVector, Vector3.forward));
                 }
                 else
                 {
@@ -529,7 +529,7 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
                         worldPos.y - group.root.position.y,
                         0
                     ).magnitude;
-                    group.SetScale(newDistance / oldDistance);
+                    group.SetScale(group.Scale * (newDistance / oldDistance));
                 }
                 else
                 {
@@ -2694,10 +2694,16 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
     private ScrollRect m_scrollGroup;
     private Transform m_tfGroupItems;
     private Transform m_itemGroup;
+    private Text m_lblTitle;
     private InputField m_iptGroupName;
     private Transform m_itemPosX;
     private Transform m_itemPosY;
+    private Transform m_itemScale;
+    private Transform m_itemRot;
     private Button m_btnSetPivotCenter;
+    private Button m_btnApply;
+    private Button m_btnHelpAutoApply;
+    private Toggle m_toggleAutoApply;
     #endregion
 
     #region auto generated binders
@@ -2707,15 +2713,24 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
         m_scrollGroup = transform.Find("m_scrollGroup").GetComponent<ScrollRect>();
         m_tfGroupItems = transform.Find("m_scrollGroup/Viewport/m_tfGroupItems").GetComponent<Transform>();
         m_itemGroup = transform.Find("m_scrollGroup/Viewport/m_tfGroupItems/m_itemGroup").GetComponent<Transform>();
+        m_lblTitle = transform.Find("Properties/Container/GroupName/Label/m_lblTitle").GetComponent<Text>();
         m_iptGroupName = transform.Find("Properties/Container/GroupName/Value/InputField/m_iptGroupName").GetComponent<InputField>();
         m_itemPosX = transform.Find("Properties/Container/m_itemPosX").GetComponent<Transform>();
         m_itemPosY = transform.Find("Properties/Container/m_itemPosY").GetComponent<Transform>();
+        m_itemScale = transform.Find("Properties/Container/m_itemScale").GetComponent<Transform>();
+        m_itemRot = transform.Find("Properties/Container/m_itemRot").GetComponent<Transform>();
         m_btnSetPivotCenter = transform.Find("Properties/Container/m_btnSetPivotCenter").GetComponent<Button>();
+        m_btnApply = transform.Find("Properties/Container/m_btnApply").GetComponent<Button>();
+        m_btnHelpAutoApply = transform.Find("Properties/Container/m_btnApply/m_btnHelpAutoApply").GetComponent<Button>();
+        m_toggleAutoApply = transform.Find("Properties/Container/m_toggleAutoApply").GetComponent<Toggle>();
 
         m_btnAddGroup.onClick.AddListener(OnButtonAddGroupClick);
         m_iptGroupName.onValueChanged.AddListener(OnInputFieldGroupNameChange);
         m_iptGroupName.onEndEdit.AddListener(OnInputFieldGroupNameEndEdit);
         m_btnSetPivotCenter.onClick.AddListener(OnButtonSetPivotCenterClick);
+        m_btnApply.onClick.AddListener(OnButtonApplyClick);
+        m_btnHelpAutoApply.onClick.AddListener(OnButtonHelpAutoApplyClick);
+        m_toggleAutoApply.onValueChanged.AddListener(OnToggleAutoApplyChange);
     }
     #endregion
 
@@ -2770,6 +2785,33 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
         RefreshAll();
     }
 
+    private void OnButtonApplyClick()
+    {
+        var group = MainControl.Instance.curGroup;
+        if (group == null)
+        {
+            return;
+        }
+        group.ApplyGroup();
+        RefreshAll();
+    }
+
+    private void OnToggleAutoApplyChange(bool value)
+    {
+        var group = MainControl.Instance.curGroup;
+        if (group == null)
+        {
+            return;
+        }
+        group.autoApply = value;
+        RefreshAll();
+    }
+
+    private void OnButtonHelpAutoApplyClick()
+    {
+        // res in chinese
+        MessageTipWindow.Instance.Show("自动应用", "当你在修改组的时候，会自动将组的缩放和旋转回到默认值\n但是凡事都有例外，你可能想要精确操纵某个数值\n所以这里提供了新的功能让你自己根据需要调整。");
+    }
 
     #endregion
 
@@ -2777,17 +2819,24 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
     private Transform m_tfCursor;
     private LabelInputFieldWidget m_liptPosX;
     private LabelInputFieldWidget m_liptPosY;
+    private LabelInputFieldWidget m_liptScale;
+    private LabelInputFieldWidget m_liptRot;
 
     protected override void OnInit()
     {
         base.OnInit();
         m_liptPosX = LabelInputFieldWidget.CreateWidget(m_itemPosX.gameObject);
         m_liptPosY = LabelInputFieldWidget.CreateWidget(m_itemPosY.gameObject);
-        
+        m_liptScale = LabelInputFieldWidget.CreateWidget(m_itemScale.gameObject);
+        m_liptRot = LabelInputFieldWidget.CreateWidget(m_itemRot.gameObject);
+
         m_liptPosX.SetDataSubmit(OnGroupPosXSubmit);
         m_liptPosY.SetDataSubmit(OnGroupPosYSubmit);
         m_liptPosX.SetToggleChange(OnLockXChange);
         m_liptPosY.SetToggleChange(OnLockYChange);
+
+        m_liptRot.SetDataSubmit(OnGroupRotSubmit);
+        m_liptScale.SetDataSubmit(OnGroupScaleSubmit);
     }
 
     public void Inject(PageGroupFunctions pageGroupFunctions, Transform tfCursor)
@@ -2801,8 +2850,8 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
         base.OnPageShown();
         UIEventBus.AddListener(UIEventType.GroupTransformChanged, OnGroupTransformChanged);
         UIEventBus.AddListener(UIEventType.CameraTransformChanged, OnCameraTransformChanged);
-        UIEventBus.AddListener(UIEventType.LockXChanged, RefreshGroupPos);
-        UIEventBus.AddListener(UIEventType.LockYChanged, RefreshGroupPos);
+        UIEventBus.AddListener(UIEventType.LockXChanged, RefreshGroupUI);
+        UIEventBus.AddListener(UIEventType.LockYChanged, RefreshGroupUI);
         MainControl.Instance.editType = EditType.Group;
         RefreshAll();
     }
@@ -2812,15 +2861,15 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
         base.OnPageHidden();
         UIEventBus.RemoveListener(UIEventType.GroupTransformChanged, OnGroupTransformChanged);
         UIEventBus.RemoveListener(UIEventType.CameraTransformChanged, OnCameraTransformChanged);
-        UIEventBus.RemoveListener(UIEventType.LockXChanged, RefreshGroupPos);
-        UIEventBus.RemoveListener(UIEventType.LockYChanged, RefreshGroupPos);
+        UIEventBus.RemoveListener(UIEventType.LockXChanged, RefreshGroupUI);
+        UIEventBus.RemoveListener(UIEventType.LockYChanged, RefreshGroupUI);
         m_tfCursor.gameObject.SetActive(false);
     }
 
     private void OnGroupTransformChanged()
     {
         UpdateCursorPosition();
-        RefreshGroupPos();
+        RefreshGroupUI();
     }
 
     private void OnCameraTransformChanged()
@@ -2841,7 +2890,7 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
         m_tfCursor.position = screenPos;
     }
 
-    private void RefreshGroupPos()
+    private void RefreshGroupUI()
     {
         var group = MainControl.Instance.curGroup;
         if (group == null)
@@ -2855,6 +2904,11 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
 
         m_liptPosX.SetToggleValue(MainControl.Instance.LockX);
         m_liptPosY.SetToggleValue(MainControl.Instance.LockY);
+
+        m_liptRot.SetData(group.RotationDeg.ToString("F2"));
+        m_liptScale.SetData(group.Scale.ToString("F2"));
+
+        m_toggleAutoApply.SetIsOnWithoutNotify(group.autoApply);
     }
 
     private void OnGroupPosXSubmit(string x)
@@ -2897,6 +2951,34 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
         UIEventBus.SendEvent(UIEventType.LockYChanged);
     }
 
+    private void OnGroupRotSubmit(string rot)
+    {
+        var group = MainControl.Instance.curGroup;
+        if (group == null)
+        {
+            return;
+        }
+        if (float.TryParse(rot, out float rotValue))
+        {
+            group.SetRotation(rotValue);
+        }
+        RefreshGroupUI();
+    }
+
+    private void OnGroupScaleSubmit(string scale)
+    {
+        var group = MainControl.Instance.curGroup;
+        if (group == null)
+        {
+            return;
+        }
+        if (float.TryParse(scale, out float scaleValue))
+        {
+            group.SetScale(scaleValue);
+        }
+        RefreshGroupUI();
+    }
+
     private List<GroupItemWidget> m_listGroupItem = new List<GroupItemWidget>();
     public void RefreshAll()
     {
@@ -2913,7 +2995,7 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
         }
         m_pageGroupFunctions.RefreshAll();
         UpdateCursorPosition();
-        RefreshGroupPos();
+        RefreshGroupUI();
 
         if (curGroup != null)
         {

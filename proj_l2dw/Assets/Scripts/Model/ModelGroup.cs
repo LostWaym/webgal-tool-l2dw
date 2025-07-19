@@ -14,6 +14,10 @@ public class ModelGroup : MonoBehaviour
 
     public bool containBackground = false;
     public bool containBackgroundCopy = false;
+    public bool autoApply = true;
+
+    public float RotationDeg => root.transform.rotation.eulerAngles.z;
+    public float Scale => root.transform.localScale.x;
 
     public void RemoveInvalidModel()
     {
@@ -90,11 +94,17 @@ public class ModelGroup : MonoBehaviour
         RemoveInvalidModel();
         MoveModelRootToRoot();
 
+        float delta = rotation - RotationDeg;
         root.transform.rotation = Quaternion.Euler(0, 0, rotation);
 
-        MoveModelRootToModel(rotation);
+        MoveModelRootToModel(delta);
 
-        root.transform.rotation = Quaternion.Euler(0, 0, 0);
+        if (autoApply)
+        {
+            ApplyGroup();
+        }
+
+        UIEventBus.SendEvent(UIEventType.GroupTransformChanged);
     }
 
     public void SetScale(float scale)
@@ -105,6 +115,17 @@ public class ModelGroup : MonoBehaviour
 
         MoveModelRootToModel();
 
+        if (autoApply)
+        {
+            ApplyGroup();
+        }
+
+        UIEventBus.SendEvent(UIEventType.GroupTransformChanged);
+    }
+
+    public void ApplyGroup()
+    {
+        root.transform.rotation = Quaternion.Euler(0, 0, 0);
         root.transform.localScale = new Vector3(1, 1, 1);
     }
 }

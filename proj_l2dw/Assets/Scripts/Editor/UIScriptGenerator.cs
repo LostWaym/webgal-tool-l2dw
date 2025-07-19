@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEditor;
 using System.Linq;
+using System;
 
 public static class UIScriptGenerator
 {
@@ -46,8 +47,12 @@ public static class UIScriptGenerator
         // replace m_xx to XX
         if (reserverPrefixToComponentType.TryGetValue(type, out var prefix))
         {
-            name = name.Replace(prefix, "");
-            return name.Substring(0, 1).ToUpper() + name.Substring(1);
+            var fixedName = name.Replace(prefix, "");
+            if (string.IsNullOrEmpty(fixedName))
+            {
+                throw new Exception($"name is empty: {name}, prefix: {prefix}");
+            }
+            return fixedName.Substring(0, 1).ToUpper() + fixedName.Substring(1);
         }
         return name;
     }
