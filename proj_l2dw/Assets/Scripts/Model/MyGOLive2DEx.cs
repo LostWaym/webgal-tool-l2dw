@@ -386,6 +386,14 @@ public class EmotionEditor
         }
     }
 
+    public void ApplyModelDefaultValues(ALive2DModel model)
+    {
+        foreach (var item in list.paramDefDict)
+        {
+            MygoExp.Apply(model, item.Key, MygoExp.CALC_TYPE_SET, item.Value, 1.0f);
+        }
+    }
+
     public MygoExpJson ToMygoExpJson()
     {
         var ret = new MygoExpJson()

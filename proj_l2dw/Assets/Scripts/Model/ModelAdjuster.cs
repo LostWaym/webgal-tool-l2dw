@@ -214,12 +214,12 @@ public class ModelAdjuster : ModelAdjusterBase
             else if (mode == ModelDisplayMode.EmotionEditor)
             {
                 model.emotionEditor.Reset();
-                model.emotionEditor.ApplyValue(model.Live2DModel);
+                model.emotionEditor.ApplyModelDefaultValues(model.Live2DModel);
             }
             else if (mode == ModelDisplayMode.MotionEditor)
             {
                 model.emotionEditor.Reset();
-                model.emotionEditor.ApplyValue(model.Live2DModel);
+                model.emotionEditor.ApplyModelDefaultValues(model.Live2DModel);
             }
         }
     }
