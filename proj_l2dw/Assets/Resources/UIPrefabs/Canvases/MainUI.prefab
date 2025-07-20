@@ -6317,7 +6317,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.49803922}
+  m_Color: {r: 0.45882353, g: 0.45882353, b: 0.45882353, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -6334,10 +6334,12 @@ MonoBehaviour:
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 1
-    m_VerticalOverflow: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u611F\u8C22\u4F7F\u7528live2dwatcher\u3002\u5F00\u53D1\u8005\uFF1A\u732B\u732B\u732B\u5BAB\u3001Hardy-Lee\n\u8BF7\u770B\u76EE\u5F55\u5E95\u4E0B\u7684\u6559\u7A0B\u5B66\u4E60\u6216\u52A0\u5165\u4EA4\u6D41\u7FA4\u4EA4\u6D41~"
+  m_Text: "\u611F\u8C22\u4F7F\u7528 live2dwatcher  \u5F00\u53D1\u8005: \u732B\u732B\u732B\u5BAB,
+    Hardy--Lee  \u8BF7\u770B\u76EE\u5F55\u5E95\u4E0B\u7684\u6559\u7A0B\u5B66\u4E60
+    \u6216\u52A0\u5165\u4EA4\u6D41\u7FA4\u4EA4\u6D41~"
 --- !u!114 &7762039546982520032
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6351,7 +6353,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
-  m_EffectDistance: {x: 3, y: -3}
+  m_EffectDistance: {x: 2, y: -2}
   m_UseGraphicAlpha: 1
 --- !u!1 &3277913624417524133
 GameObject:
@@ -9945,7 +9947,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 799, y: -16}
+  m_AnchoredPosition: {x: 416, y: -16}
   m_SizeDelta: {x: 256, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2427416504010581795
@@ -21750,7 +21752,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1045868233941766884, guid: bf23def21b6219e4ab8da22cd3655ed8, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -595
+      value: -593
       objectReference: {fileID: 0}
     - target: {fileID: 1045868233941766884, guid: bf23def21b6219e4ab8da22cd3655ed8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

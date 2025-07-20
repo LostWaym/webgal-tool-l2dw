@@ -134,7 +134,7 @@ public class BGContainer : MonoBehaviour
     {
         var mat = bg.material;
         var modelAspect = bg.sprite.bounds.size.x / bg.sprite.bounds.size.y;
-        FilterUtils.UpdateScreenParams(mat, modelAspect, rootScale, 1f);
+        FilterUtils.UpdateScreenParams(mat, modelAspect, rootScale, 1.0f, true);
     }
 
     private void UpdateAlphaFilter()

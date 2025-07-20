@@ -189,7 +189,7 @@ public class ImageModel : ModelAdjusterBase
     {
         var mat = spriteRenderer.material;
         var modelAspect = sprite.bounds.size.x / sprite.bounds.size.y;
-        FilterUtils.UpdateScreenParams(mat, modelAspect, RootScaleValue, 1f);
+        FilterUtils.UpdateScreenParams(mat, modelAspect, RootScaleValue, 1.0f, false);
     }
 
     private void UpdateAlphaFilter()

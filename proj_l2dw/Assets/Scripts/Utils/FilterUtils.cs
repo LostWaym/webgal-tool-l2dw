@@ -10,22 +10,33 @@ public static class FilterUtils
     public static List<FilterSetPresetData> filterSetPresets = new List<FilterSetPresetData>();
     
     // 更新屏幕尺寸相关参数
-    public static void UpdateScreenParams(Material mat, float modelAspect, float rootScaleValue, float pivotScale = 1f/1.5f)
+    public static void UpdateScreenParams(Material mat, float modelAspect, float rootScaleValue, float pivotScale, bool isBackground)
     {
         var stageAspect = (float)Constants.WebGalWidth / (float)Constants.WebGalHeight;
         var aspectRatio = stageAspect / modelAspect;
-        var factor = 1.0f;
-        if (!Global.__PIVOT_2_4)
-            factor = pivotScale;
-        
-        mat.SetFloat(
-            "_SampleScaleX",
-            factor * Mathf.Max(aspectRatio, 1.0f) / (float)Constants.WebGalWidth / rootScaleValue
-        );
-        mat.SetFloat(
-            "_SampleScaleY",
-            factor * Mathf.Min(aspectRatio, 1.0f) / (float)Constants.WebGalHeight / rootScaleValue
-        );
+
+        if (isBackground)
+        {
+            mat.SetFloat(
+                "_SampleScaleX",
+                pivotScale * Mathf.Min(aspectRatio, 1.0f) / (float)Constants.WebGalWidth / rootScaleValue
+            );
+            mat.SetFloat(
+                "_SampleScaleY",
+                pivotScale * Mathf.Max(aspectRatio, 1.0f) / (float)Constants.WebGalHeight / rootScaleValue
+            );
+        }
+        else
+        {
+            mat.SetFloat(
+                "_SampleScaleX",
+                pivotScale * Mathf.Max(aspectRatio, 1.0f) / (float)Constants.WebGalWidth / rootScaleValue
+            );
+            mat.SetFloat(
+                "_SampleScaleY",
+                pivotScale * Mathf.Min(aspectRatio, 1.0f) / (float)Constants.WebGalHeight / rootScaleValue
+            );
+        }
     }
 
     public static void UpdateAlphaFilter(Material mat, FilterSetData filterSetData)
