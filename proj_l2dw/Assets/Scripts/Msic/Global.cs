@@ -5,6 +5,13 @@ using UnityEngine;
 
 public static class Global
 {
+    public enum FigurePivotMode
+    {
+        W_4_5_12 = 0,
+        W_4_5_13 = 1,
+        BC_1_0 = 2,
+    }
+    
     public static string ModelPath = "";
     public static string BGPath = "";
     public static string BGChangeTemplate = "";
@@ -23,7 +30,7 @@ public static class Global
         set { _CameraZoomBoostFactor = math.max(value, 1.0f); }
     }
 
-    public static bool __PIVOT_2_4 = false;
+    public static FigurePivotMode PivotMode = FigurePivotMode.W_4_5_12;
     public static bool DisableJsonModelProfileInit = false;
 
     public static bool IsLoaded = false;
@@ -42,7 +49,7 @@ public static class Global
         PlayerPrefs.SetString("Global.BGPath", BGPath);
         PlayerPrefs.SetString("Global.BGChangeTemplate", BGChangeTemplate);
         PlayerPrefs.SetString("Global.BGTransformTemplate", BGTransformTemplate);
-        PlayerPrefs.SetInt("Global.__PIVOT_2_4", __PIVOT_2_4 ? 1 : 0);
+        PlayerPrefs.SetInt("Global.PivotMode", (int)PivotMode);
         PlayerPrefs.SetInt("Global.InstNextMode", (int)InstNextMode);
         PlayerPrefs.SetFloat("Global.CameraZoomFactor", CameraZoomFactor);
         PlayerPrefs.SetFloat("Global.CameraZoomBoostFactor", CameraZoomBoostFactor);
@@ -59,7 +66,7 @@ public static class Global
         BGPath = PlayerPrefs.GetString("Global.BGPath", "");
         BGChangeTemplate = PlayerPrefs.GetString("Global.BGChangeTemplate", "");
         BGTransformTemplate = PlayerPrefs.GetString("Global.BGTransformTemplate", "");
-        __PIVOT_2_4 = PlayerPrefs.GetInt("Global.__PIVOT_2_4", 0) == 1;
+        PivotMode = (FigurePivotMode)PlayerPrefs.GetInt("Global.PivotMode", 0);
         InstNextMode = (InstDealOperation)PlayerPrefs.GetInt("Global.InstNextMode", 0);
         CameraZoomFactor = PlayerPrefs.GetFloat("Global.CameraZoomFactor", 1.1f);
         CameraZoomBoostFactor = PlayerPrefs.GetFloat("Global.CameraZoomBoostFactor", 1.5f);

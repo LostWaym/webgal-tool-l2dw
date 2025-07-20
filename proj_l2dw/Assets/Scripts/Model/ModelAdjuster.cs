@@ -319,7 +319,7 @@ public class ModelAdjuster : ModelAdjusterBase
 
     public override void Adjust()
     {
-        if (!Global.__PIVOT_2_4)
+        if (Global.PivotMode == Global.FigurePivotMode.W_4_5_12)
         {
             pivot.transform.localPosition = Vector3.zero;
         }
@@ -331,7 +331,7 @@ public class ModelAdjuster : ModelAdjusterBase
             pos.Adjust(offsetX, offsetY);
         }
 
-        if (Global.__PIVOT_2_4)
+        if (Global.PivotMode != Global.FigurePivotMode.W_4_5_12)
         {
             var mainPos = MainPos.localPosition;
             for (int i = 0; i < webgalPoses.Count; i++)
@@ -514,7 +514,26 @@ public class ModelAdjuster : ModelAdjusterBase
     {
         var mat = MainModel.meshRenderer.material;
         var modelAspect = MainModel.Live2DModel.getCanvasWidth() / MainModel.Live2DModel.getCanvasHeight();
-        FilterUtils.UpdateScreenParams(mat, modelAspect, RootScaleValue, 1f/1.5f);
+        var pivotScale = 1.0f;
+        switch (Global.PivotMode)
+        {
+            case Global.FigurePivotMode.W_4_5_12:
+            {
+                pivotScale = 1f / 1.5f;
+                break;
+            }
+            case Global.FigurePivotMode.W_4_5_13:
+            {
+                pivotScale = 1.0f;
+                break;
+            }
+            case Global.FigurePivotMode.BC_1_0:
+            {
+                pivotScale = 1.0f / 1.25f;
+                break;
+            }
+        }
+        FilterUtils.UpdateScreenParams(mat, modelAspect, RootScaleValue, pivotScale, false);
     }
 
     private void UpdateAlphaFilter()

@@ -10,14 +10,31 @@ public class WebGalModelPos : MonoBehaviour
 
     public void Adjust(float offsetX, float offsetY)
     {
-        if (Global.__PIVOT_2_4)
+        // if (Global.__PIVOT_2_4)
+        // {
+        //     Adjust2_4(offsetX, offsetY);
+        // }
+        // else
+        // {
+        //     Adjust2_1___2_3(offsetX, offsetY);
+        // }
+        switch (Global.PivotMode)
         {
-            Adjust2_4(offsetX, offsetY);
-
-        }
-        else
-        {
-            Adjust2_1___2_3(offsetX, offsetY);
+            case Global.FigurePivotMode.W_4_5_12:
+            {
+                Adjust2_1___2_3(offsetX, offsetY);
+                break;
+            }
+            case Global.FigurePivotMode.W_4_5_13:
+            {
+                Adjust2_4(offsetX, offsetY);
+                break;
+            }
+            case Global.FigurePivotMode.BC_1_0:
+            {
+                AdjustBC_1_0(offsetX, offsetY);
+                break;
+            }
         }
     }
 
@@ -69,6 +86,32 @@ public class WebGalModelPos : MonoBehaviour
         transform.localEulerAngles = Vector3.zero;
         pivot.localScale = new Vector3(scale, scale, scale);
         // pivot.transform.localPosition = new Vector3(0, Constants.WebGalHeight / 2, 0);
+        transform.localPosition = new Vector3(localX + offsetX, -localY - offsetY, 0);
+        // 需要根据除以缩放比例来让偏移正确
+        model.left = offsetX / scale;
+        model.up = offsetY / scale;
+    }
+    
+    private void AdjustBC_1_0(float offsetX, float offsetY)
+    {
+        float modelWidth = model.Live2DModel.getCanvasWidth();
+        float modelHeight = model.Live2DModel.getCanvasHeight();
+        
+        anchor.localScale = Vector3.one * 0.5f;
+        anchor.transform.localPosition = new Vector3(-modelWidth * 0.5f, modelHeight / 2.2f);
+
+        float scaleX = Constants.WebGalWidth / modelWidth;
+        float scaleY = Constants.WebGalHeight / modelHeight;
+
+        float scale = Mathf.Min(scaleX, scaleY);
+        scale *= 1.25f;
+
+        float localY = Constants.WebGalHeight / 2;
+        float localX = Constants.WebGalWidth / 2;
+
+        transform.localScale = Vector3.one;
+        transform.localEulerAngles = Vector3.zero;
+        pivot.localScale = new Vector3(scale, scale, scale);
         transform.localPosition = new Vector3(localX + offsetX, -localY - offsetY, 0);
         // 需要根据除以缩放比例来让偏移正确
         model.left = offsetX / scale;
