@@ -382,7 +382,8 @@ public class EmotionEditor
                 continue;
             }
 
-            MygoExp.Apply(model, item.Key, GetCalcType(item.Key), value, 1.0f);
+            string calcType = inSet ? GetCalcType(item.Key) : MygoExp.CALC_TYPE_SET;
+            MygoExp.Apply(model, item.Key, calcType, value, 1.0f);
         }
     }
 
