@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Klak.Spout;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -55,6 +56,13 @@ public class MainControl : MonoBehaviour
     };
 
     public GameObject canvasRoot;
+    
+    public Camera stageCaptureCamera = null;
+    public SpoutSender stageCaptureSender = null;
+    public RenderTexture stageCaptureRenderTexture = null;
+    public int stageCaptureWidth = 1920;
+    public int stageCaptureHeight = 1080;
+    public string stageCaptureScopeName = "l2dw";
 
     public Action UpdateBeat;
 
@@ -73,12 +81,19 @@ public class MainControl : MonoBehaviour
         ImageProfileSettingWindow.onSaveAction += OnSaveImageSetting;
         Live2D.init();
         LoadMainCamTransform();
+        LoadStageCaptureSettings();
         SetCloseGreenLine(CloseGreenLine);
 
         UIEventBus.AddListener(UIEventType.OnModelChanged, RenderBatch);
         UIEventBus.AddListener(UIEventType.OnModelDeleted, RenderBatch);
 
         FilterUtils.LoadFilterSetPreset();
+    }
+
+    private void OnDestroy()
+    {
+        if (stageCaptureRenderTexture)
+            stageCaptureRenderTexture.Release();
     }
 
     private void OnSaveImageSetting(ImageModelMeta meta)
@@ -111,6 +126,20 @@ public class MainControl : MonoBehaviour
         PlayerPrefs.SetFloat("MainCam.Size", mainCam.orthographicSize);
     }
 
+    private void SaveStageCaptureSettings()
+    {
+        PlayerPrefs.SetInt("StageCapture.Width", stageCaptureWidth);
+        PlayerPrefs.SetInt("StageCapture.Height", stageCaptureHeight);
+        PlayerPrefs.SetString("StageCapture.ScopeName", stageCaptureScopeName);
+    }
+
+    private void LoadStageCaptureSettings()
+    {
+        stageCaptureWidth = PlayerPrefs.GetInt("StageCapture.Width", 1920);
+        stageCaptureHeight = PlayerPrefs.GetInt("StageCapture.Height", 1080);
+        stageCaptureScopeName = PlayerPrefs.GetString("StageCapture.ScopeName", "l2dw");
+    }
+
     void OnApplicationQuit()
     {
         if (!Global.IsLoaded)
@@ -123,6 +152,7 @@ public class MainControl : MonoBehaviour
         PlayerPrefs.SetInt("CloseGreenLine", CloseGreenLine ? 1 : 0);
         Global.Save();
         SaveMainCamTransform();
+        SaveStageCaptureSettings();
         FilterUtils.SaveFilterSetPreset();
     }
 

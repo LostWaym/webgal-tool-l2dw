@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.UI;
 
 public class SettingUIWindow : BaseWindow<SettingUIWindow>
@@ -290,6 +291,10 @@ public class SettingPageExperiment : SettingPageBase<SettingPageExperiment>
     private Toggle m_toggleUseCustomResolution;
     private InputField m_iptValueResolutionWidth;
     private InputField m_iptValueResolutionHeight;
+    private Toggle m_toggleStageCapture;
+    private InputField m_iptStageCaptureWidth;
+    private InputField m_iptStageCaptureHeight;
+    private InputField m_iptSpoutScopeName;
     #endregion
 
     #region auto generated binders
@@ -301,6 +306,11 @@ public class SettingPageExperiment : SettingPageBase<SettingPageExperiment>
         m_toggleUseCustomResolution = transform.Find("ScrollRect/Viewport/Content/m_toggleUseCustomResolution").GetComponent<Toggle>();
         m_iptValueResolutionWidth = transform.Find("ScrollRect/Viewport/Content/LabelInputField/Value/m_iptValueResolutionWidth").GetComponent<InputField>();
         m_iptValueResolutionHeight = transform.Find("ScrollRect/Viewport/Content/LabelInputField/Value/m_iptValueResolutionHeight").GetComponent<InputField>();
+        
+        m_toggleStageCapture = transform.Find("ScrollRect/Viewport/Content/Spout/m_toggleStageCapture").GetComponent<Toggle>();
+        m_iptStageCaptureWidth = transform.Find("ScrollRect/Viewport/Content/Spout/Width/m_iptStageCaptureWidth").GetComponent<InputField>();
+        m_iptStageCaptureHeight = transform.Find("ScrollRect/Viewport/Content/Spout/Height/m_iptStageCaptureHeight").GetComponent<InputField>();
+        m_iptSpoutScopeName = transform.Find("ScrollRect/Viewport/Content/SpoutScopeName/Value/InputField/m_iptSpoutScopeName").GetComponent<InputField>();
 
         m_toggleBlink.onValueChanged.AddListener(OnToggleBlinkChange);
         m_toggleWebgalExpSupport.onValueChanged.AddListener(OnToggleWebgalExpSupportChange);
@@ -310,6 +320,14 @@ public class SettingPageExperiment : SettingPageBase<SettingPageExperiment>
         m_iptValueResolutionWidth.onEndEdit.AddListener(OnInputFieldValueResolutionWidthEndEdit);
         m_iptValueResolutionHeight.onValueChanged.AddListener(OnInputFieldValueResolutionHeightChange);
         m_iptValueResolutionHeight.onEndEdit.AddListener(OnInputFieldValueResolutionHeightEndEdit);
+        
+        m_toggleStageCapture.onValueChanged.AddListener(OnToggleStageCaptureChange);
+        m_iptStageCaptureWidth.onValueChanged.AddListener(OnInputFieldStageCaptureWidthChange);
+        m_iptStageCaptureWidth.onEndEdit.AddListener(OnInputFieldStageCaptureWidthEndEdit);
+        m_iptStageCaptureHeight.onValueChanged.AddListener(OnInputFieldStageCaptureHeightChange);
+        m_iptStageCaptureHeight.onEndEdit.AddListener(OnInputFieldStageCaptureHeightEndEdit);
+        m_iptSpoutScopeName.onValueChanged.AddListener(OnInputFieldSpoutScopeNameChange);
+        m_iptSpoutScopeName.onEndEdit.AddListener(OnInputFieldSpoutScopeNameEndEdit);
 
         m_dropdownPivotMode.value = (int)Global.PivotMode;
     }
@@ -339,23 +357,115 @@ public class SettingPageExperiment : SettingPageBase<SettingPageExperiment>
     }
     private void OnInputFieldValueResolutionWidthChange(string value)
     {
-        if (int.TryParse(value, out var width))
-        {
-            Global.NewResolutionWidth = width;
-        }
     }
     private void OnInputFieldValueResolutionWidthEndEdit(string value)
     {
+        if (int.TryParse(value, out var width))
+        {
+            Global.NewResolutionWidth = math.max(width, 1);
+        }
+        m_iptValueResolutionWidth.SetTextWithoutNotify(Global.NewResolutionWidth.ToString());
     }
     private void OnInputFieldValueResolutionHeightChange(string value)
     {
-        if (int.TryParse(value, out var height))
-        {
-            Global.NewResolutionHeight = height;
-        }
     }
     private void OnInputFieldValueResolutionHeightEndEdit(string value)
     {
+        if (int.TryParse(value, out var height))
+        {
+            Global.NewResolutionHeight = math.max(height, 1);
+        }
+        m_iptValueResolutionHeight.SetTextWithoutNotify(Global.NewResolutionHeight.ToString());
+    }
+    private void OnToggleStageCaptureChange(bool value)
+    {
+        var mainCtl = MainControl.Instance;
+        if (value)
+        {
+            // 检查是否需要重建 RT
+            var rtNeedsUpdate = false;
+            if (!mainCtl.stageCaptureRenderTexture)
+            {
+                rtNeedsUpdate = true;
+            }
+            else
+            {
+                var rt = mainCtl.stageCaptureRenderTexture;
+                if (
+                    rt.width != mainCtl.stageCaptureWidth
+                    || rt.height != mainCtl.stageCaptureHeight
+                )
+                {
+                    rtNeedsUpdate = true;
+                }
+            }
+            // 重建 RT
+            if (rtNeedsUpdate)
+            {
+                mainCtl.stageCaptureCamera.targetTexture = null;
+                mainCtl.stageCaptureSender.sourceTexture = null;
+                if (mainCtl.stageCaptureRenderTexture)
+                    mainCtl.stageCaptureRenderTexture.Release();
+                mainCtl.stageCaptureRenderTexture = null;
+
+                var newRt = new RenderTexture(
+                    mainCtl.stageCaptureWidth,
+                    mainCtl.stageCaptureHeight,
+                    24,
+                    GraphicsFormat.R8G8B8A8_UNorm
+                );
+                mainCtl.stageCaptureRenderTexture = newRt;
+                mainCtl.stageCaptureCamera.targetTexture = newRt;
+                mainCtl.stageCaptureSender.sourceTexture = newRt;
+            }
+            // 根据舞台分辨率设置相机缩放
+            var size = (float)Constants.WebGalHeight / (float)Constants.defaultHeight * 7.2f;
+            mainCtl.stageCaptureCamera.orthographicSize = size;
+            // 设置名称
+            mainCtl.stageCaptureSender.spoutName = mainCtl.stageCaptureScopeName;
+            
+            mainCtl.stageCaptureCamera.gameObject.SetActive(true);
+            mainCtl.stageCaptureSender.gameObject.SetActive(true);
+        }
+        else
+        {
+            mainCtl.stageCaptureCamera.gameObject.SetActive(false);
+            mainCtl.stageCaptureSender.gameObject.SetActive(false);
+        }
+    }
+    private void OnInputFieldStageCaptureWidthChange(string value)
+    {
+    }
+    private void OnInputFieldStageCaptureWidthEndEdit(string value)
+    {
+        if (int.TryParse(value, out var width))
+        {
+            MainControl.Instance.stageCaptureWidth = math.max(width, 1);
+        }
+        m_iptStageCaptureWidth.SetTextWithoutNotify(MainControl.Instance.stageCaptureWidth.ToString());
+    }
+
+    private void OnInputFieldStageCaptureHeightChange(string value)
+    {
+    }
+    private void OnInputFieldStageCaptureHeightEndEdit(string value)
+    {
+        if (int.TryParse(value, out var height))
+        {
+            MainControl.Instance.stageCaptureHeight = math.max(height, 1);
+        }
+        m_iptStageCaptureWidth.SetTextWithoutNotify(MainControl.Instance.stageCaptureWidth.ToString());
+    }
+    private void OnInputFieldSpoutScopeNameChange(string value)
+    {
+    }
+    private void OnInputFieldSpoutScopeNameEndEdit(string value)
+    {
+        if (value.Trim() == "")
+            value = "l2dw";
+        var mainCtl = MainControl.Instance;
+        mainCtl.stageCaptureScopeName = value.Trim();
+        m_iptSpoutScopeName.SetTextWithoutNotify(mainCtl.stageCaptureScopeName);
     }
 
     #endregion
@@ -375,6 +485,9 @@ public class SettingPageExperiment : SettingPageBase<SettingPageExperiment>
         m_toggleUseCustomResolution.SetIsOnWithoutNotify(Global.IsSetResolution);
         m_iptValueResolutionWidth.SetTextWithoutNotify(Global.NewResolutionWidth.ToString());
         m_iptValueResolutionHeight.SetTextWithoutNotify(Global.NewResolutionHeight.ToString());
+        m_iptStageCaptureWidth.SetTextWithoutNotify(MainControl.Instance.stageCaptureWidth.ToString());
+        m_iptStageCaptureHeight.SetTextWithoutNotify(MainControl.Instance.stageCaptureHeight.ToString());
+        m_iptSpoutScopeName.SetTextWithoutNotify(MainControl.Instance.stageCaptureScopeName);
     }
 }
 
@@ -486,6 +599,7 @@ public class SettingPageNavigation : SettingPageBase<SettingPageNavigation>
             m_itemCameraZoomFactorWidget.SetValue(Global.CameraZoomFactor.ToString());
             m_itemCameraZoomBoostFactorWidget.SetValue(Global.CameraZoomBoostFactor.ToString());
         }
+        
     }
 }
 
