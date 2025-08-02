@@ -12,35 +12,37 @@ using UnityEngine.UI;
 public class MainUIWindow : BaseWindow<MainUIWindow>
 {
     #region auto generated members
-    private Toggle m_togglePreview;
-    private Toggle m_toggleMotion;
-    private Toggle m_toggleInstructions;
-    private Button m_btnSetting;
     private Transform m_itemPageNavPreview;
     private Transform m_itemPageNavMotion;
     private Transform m_itemPageNavInstructions;
+    private Transform m_itemPageNavModification;
+    private Toggle m_togglePreview;
+    private Toggle m_toggleMotion;
+    private Toggle m_toggleInstructions;
+    private Toggle m_toggleModification;
+    private Button m_btnSetting;
     #endregion
 
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_togglePreview = transform.Find("Tabs/toggles/m_togglePreview").GetComponent<Toggle>();
-        m_toggleMotion = transform.Find("Tabs/toggles/m_toggleMotion").GetComponent<Toggle>();
-        m_toggleInstructions = transform.Find("Tabs/toggles/m_toggleInstructions").GetComponent<Toggle>();
-        m_btnSetting = transform.Find("Tabs/m_btnSetting").GetComponent<Button>();
         m_itemPageNavPreview = transform.Find("pages/m_itemPageNavPreview").GetComponent<Transform>();
         m_itemPageNavMotion = transform.Find("pages/m_itemPageNavMotion").GetComponent<Transform>();
         m_itemPageNavInstructions = transform.Find("pages/m_itemPageNavInstructions").GetComponent<Transform>();
+        m_itemPageNavModification = transform.Find("pages/m_itemPageNavModification").GetComponent<Transform>();
+        m_togglePreview = transform.Find("Tabs/toggles/m_togglePreview").GetComponent<Toggle>();
+        m_toggleMotion = transform.Find("Tabs/toggles/m_toggleMotion").GetComponent<Toggle>();
+        m_toggleInstructions = transform.Find("Tabs/toggles/m_toggleInstructions").GetComponent<Toggle>();
+        m_toggleModification = transform.Find("Tabs/toggles/m_toggleModification").GetComponent<Toggle>();
+        m_btnSetting = transform.Find("Tabs/m_btnSetting").GetComponent<Button>();
 
         m_togglePreview.onValueChanged.AddListener(OnTogglePreviewChange);
         m_toggleMotion.onValueChanged.AddListener(OnToggleMotionChange);
         m_toggleInstructions.onValueChanged.AddListener(OnToggleInstructionsChange);
+        m_toggleModification.onValueChanged.AddListener(OnToggleModificationChange);
         m_btnSetting.onClick.AddListener(OnButtonSettingClick);
     }
     #endregion
-
-
-
 
     #region auto generated events
     private void OnTogglePreviewChange(bool value)
@@ -52,6 +54,9 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
     private void OnToggleInstructionsChange(bool value)
     {
     }
+    private void OnToggleModificationChange(bool value)
+    {
+    }
     private void OnButtonSettingClick()
     {
         MainControl.Instance.ShowSettingUIWindow();
@@ -61,6 +66,7 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
     private PageNavPreview m_pageNavPreview;
     private PageNavMotion m_pageNavMotion;
     private PageNavInstructions m_pageNavInstructions;
+    private PageNavModification m_pageNavModification;
     protected override void OnInit()
     {
         base.OnInit();
@@ -70,6 +76,8 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
         m_pageNavMotion.BindToToggle(m_toggleMotion);
         m_pageNavInstructions = PageNavInstructions.CreateWidget(m_itemPageNavInstructions.gameObject);
         m_pageNavInstructions.BindToToggle(m_toggleInstructions);
+        m_pageNavModification = PageNavModification.CreateWidget(m_itemPageNavModification.gameObject);
+        m_pageNavModification.BindToToggle(m_toggleModification);
     }
 
     public void Update()
@@ -81,6 +89,10 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
         if (m_pageNavMotion.IsActive)
         {
             // m_pageNavMotion.Update();
+        }
+        if (m_pageNavModification.IsActive)
+        {
+            // m_pageNavModification.Update();
         }
     }
 }
