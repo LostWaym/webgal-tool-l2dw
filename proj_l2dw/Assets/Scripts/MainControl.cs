@@ -1039,6 +1039,72 @@ public class MainControl : MonoBehaviour
         mainCamera.transform.position = new Vector3(0, 0, -10);
         mainCamera.orthographicSize = 7.2f;
     }
+
+    public class TransformData
+    {
+        public Vector3 position;
+        public float scale;
+        public float rotation;
+        public bool reverseX;
+        public FilterSetData filterSetData;
+    }
+
+    public TransformData transformData;
+    public void SaveTransform()
+    {
+        if (curTarget == null)
+            return;
+            
+        transformData = new TransformData();
+        transformData.position = curTarget.MainPos.position;
+        transformData.scale = curTarget.RootScaleValue;
+        transformData.rotation = curTarget.RootRotation;
+        transformData.reverseX = curTarget.ReverseXScale;
+        transformData.filterSetData = curTarget.filterSetData.Clone();
+
+        ShowDebugText("保存变换成功！");
+    }
+
+    public void LoadTransform(bool position, bool scale, bool rotation, bool filter)
+    {
+        if (curTarget == null)
+            return;
+
+        var oldPos = curTarget.MainPos.position;
+
+        if (rotation)
+        {
+            curTarget.SetRotation(transformData.rotation);
+        }
+
+        if (scale)
+        {
+            curTarget.SetScale(transformData.scale);
+            curTarget.SetReverseXScale(transformData.reverseX);
+        }
+
+        if (position)
+        {
+            curTarget.SetCharacterWorldPosition(transformData.position.x, transformData.position.y);
+        }
+        else
+        {
+            curTarget.SetCharacterWorldPosition(oldPos.x, oldPos.y);
+        }
+
+        if (filter)
+        {
+            var json = new JSONObject();
+            transformData.filterSetData.ApplyToJson(json);
+            curTarget.filterSetData.ReadFromJson(json);
+            curTarget.UpdateAllFilter();
+        }
+
+        curTarget.Adjust();
+        ShowDebugText("加载变换成功！");
+
+        UIEventBus.SendEvent(UIEventType.ModelTransformChanged);
+    }
 }
 
 public enum EditType

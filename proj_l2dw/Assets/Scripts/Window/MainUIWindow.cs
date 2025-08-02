@@ -1030,10 +1030,12 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
     private Button m_btnMoreProp;
     private Button m_btnSaveProfile;
     private Button m_btnTop;
-    private Button m_btnUp;
-    private Button m_btnZSortHelp;
-    private Button m_btnDown;
     private Button m_btnBottom;
+    private Button m_btnZSortHelp;
+    private Button m_btnUp;
+    private Button m_btnDown;
+    private Button m_btnSaveTransform;
+    private Button m_btnLoadTransform;
     private Transform m_itemPosX;
     private Transform m_itemPosY;
     private Transform m_itemScale;
@@ -1055,10 +1057,12 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         m_btnMoreProp = transform.Find("Properties/Title/m_btnMoreProp").GetComponent<Button>();
         m_btnSaveProfile = transform.Find("Properties/Title/m_btnSaveProfile").GetComponent<Button>();
         m_btnTop = transform.Find("Properties/Container/zsetgroup/m_btnTop").GetComponent<Button>();
-        m_btnUp = transform.Find("Properties/Container/zsetgroup/m_btnUp").GetComponent<Button>();
-        m_btnZSortHelp = transform.Find("Properties/Container/zsetgroup/m_btnZSortHelp").GetComponent<Button>();
-        m_btnDown = transform.Find("Properties/Container/zsetgroup/m_btnDown").GetComponent<Button>();
         m_btnBottom = transform.Find("Properties/Container/zsetgroup/m_btnBottom").GetComponent<Button>();
+        m_btnZSortHelp = transform.Find("Properties/Container/zsetgroup/m_btnZSortHelp").GetComponent<Button>();
+        m_btnUp = transform.Find("Properties/Container/zsetgroup/m_btnUp").GetComponent<Button>();
+        m_btnDown = transform.Find("Properties/Container/zsetgroup/m_btnDown").GetComponent<Button>();
+        m_btnSaveTransform = transform.Find("Properties/Container/GameObject (1)/m_btnSaveTransform").GetComponent<Button>();
+        m_btnLoadTransform = transform.Find("Properties/Container/GameObject (1)/m_btnLoadTransform").GetComponent<Button>();
         m_itemPosX = transform.Find("Properties/Container/m_itemPosX").GetComponent<Transform>();
         m_itemPosY = transform.Find("Properties/Container/m_itemPosY").GetComponent<Transform>();
         m_itemScale = transform.Find("Properties/Container/m_itemScale").GetComponent<Transform>();
@@ -1073,17 +1077,17 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         m_btnMoreProp.onClick.AddListener(OnButtonMorePropClick);
         m_btnSaveProfile.onClick.AddListener(OnButtonSaveProfileClick);
         m_btnTop.onClick.AddListener(OnButtonTopClick);
-        m_btnUp.onClick.AddListener(OnButtonUpClick);
-        m_btnZSortHelp.onClick.AddListener(OnButtonZSortHelpClick);
-        m_btnDown.onClick.AddListener(OnButtonDownClick);
         m_btnBottom.onClick.AddListener(OnButtonBottomClick);
+        m_btnZSortHelp.onClick.AddListener(OnButtonZSortHelpClick);
+        m_btnUp.onClick.AddListener(OnButtonUpClick);
+        m_btnDown.onClick.AddListener(OnButtonDownClick);
+        m_btnSaveTransform.onClick.AddListener(OnButtonSaveTransformClick);
+        m_btnLoadTransform.onClick.AddListener(OnButtonLoadTransformClick);
         m_btnReloadModel.onClick.AddListener(OnButtonReloadModelClick);
         m_btnReloadTexture.onClick.AddListener(OnButtonReloadTextureClick);
         m_btnOpenModelPath.onClick.AddListener(OnButtonOpenModelPathClick);
     }
     #endregion
-
-
 
     #region auto-generated code event
     public void OnButtonLoadConfClick()
@@ -1131,6 +1135,26 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         SetTargetZSort(false, true);
     }
 
+    private void OnButtonSaveTransformClick()
+    {
+        MainControl.Instance.SaveTransform();
+    }
+    private void OnButtonLoadTransformClick()
+    {
+        if (MainControl.Instance.curTarget == null)
+        {
+            MainControl.Instance.ShowErrorDebugText("请先选择一个模型");
+            return;
+        }
+
+        if (MainControl.Instance.transformData == null)
+        {
+            MainControl.Instance.ShowErrorDebugText("请先保存一个变换");
+            return;
+        }
+
+        TransformCopyUI.Instance.Show();
+    }
 
     public void OnButtonReloadModelClick()
     {
@@ -2219,8 +2243,8 @@ public class PageCharacterPreview : UIPageWidget<PageCharacterPreview>
             RefreshExpressionList();
             return;
         }
-        m_iptFilterMotion.text = model.meta.m_filterMotion;
-        m_iptFilterExpression.text = model.meta.m_filterExp;
+        m_iptFilterMotion.SetTextWithoutNotify(model.meta.m_filterMotion);
+        m_iptFilterExpression.SetTextWithoutNotify(model.meta.m_filterExp);
         RefreshMotionList();
         RefreshExpressionList();
         model.SetDisplayMode(ModelDisplayMode.Normal);
@@ -2263,8 +2287,20 @@ public class PageCharacterPreview : UIPageWidget<PageCharacterPreview>
 
     public void RefreshAll()
     {
+        UpdateFilterText();
         RefreshExpressionList();
         RefreshMotionList();
+    }
+
+    private void UpdateFilterText()
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model == null || !model.HasMotions)
+        {
+            return;
+        }
+        m_iptFilterMotion.SetTextWithoutNotify(model.meta.m_filterMotion);
+        m_iptFilterExpression.SetTextWithoutNotify(model.meta.m_filterExp);
     }
 
     public void RefreshExpressionList()

@@ -664,4 +664,13 @@ public class FilterSetData
             json.AddField(key, 1);
         }
     }
+
+    public FilterSetData Clone()
+    {
+        var data = new FilterSetData();
+        var json = new JSONObject();
+        ApplyToJson(json);
+        data.ReadFromJson(json);
+        return data;
+    }
 }
