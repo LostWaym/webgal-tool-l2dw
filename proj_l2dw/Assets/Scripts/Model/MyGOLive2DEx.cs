@@ -263,6 +263,7 @@ public class Live2DParamInfoList
 {
     public List<Live2DParamInfo> list = new List<Live2DParamInfo>();
     public Dictionary<string, float> paramDefDict = new Dictionary<string, float>();
+    public Dictionary<string, float> realParamDefDict = new Dictionary<string, float>();
 
     public void ReadFrom(ALive2DModel model)
     {
@@ -292,6 +293,7 @@ public class Live2DParamInfoList
     {
         list.Clear();
         paramDefDict.Clear();
+        realParamDefDict.Clear();
 
         HashSet<string> paramSet = new HashSet<string>();
 
@@ -319,7 +321,21 @@ public class Live2DParamInfoList
                     value = param,
                 });
                 paramDefDict.Add(paramID.ToString(), param);
+                realParamDefDict.Add(paramID.ToString(), param);
             }
+        }
+    }
+
+    public void SetDefParam(string name, float value)
+    {
+        paramDefDict[name] = value;
+    }
+
+    public void RemoveDefParam(string name)
+    {
+        if (realParamDefDict.TryGetValue(name, out var value))
+        {
+            paramDefDict[name] = value;
         }
     }
 

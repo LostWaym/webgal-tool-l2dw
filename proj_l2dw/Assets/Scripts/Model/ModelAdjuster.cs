@@ -140,7 +140,7 @@ public class ModelAdjuster : ModelAdjusterBase
         }
     }
 
-    private void ApplyMotionDefaultValues()
+    public void ApplyParamDefaultValues()
     {
         foreach (var pos in webgalPoses)
         {
@@ -220,12 +220,32 @@ public class ModelAdjuster : ModelAdjusterBase
         else if (mode == ModelDisplayMode.EmotionEditor)
         {
             emotionEditor.Reset();
-            ApplyMotionDefaultValues();
+            ApplyParamDefaultValues();
         }
         else if (mode == ModelDisplayMode.MotionEditor)
         {
             emotionEditor.Reset();
-            ApplyMotionDefaultValues();
+            ApplyParamDefaultValues();
+        }
+    }
+
+    public void ApplyModelInitOpacities()
+    {
+        foreach (var pos in webgalPoses)
+        {
+            var model = pos.model;
+            foreach(var part in model.m_partsDataList)
+            {
+                var partKey = part.getPartsDataID().ToString();
+                if (model.myGOConfig.initOpacities.TryGetValue(partKey, out var opacity))
+                {
+                    model.Live2DModel.setPartsOpacity(partKey, opacity);
+                }
+                else
+                {
+                    model.Live2DModel.setPartsOpacity(partKey, 1);
+                }
+            }
         }
     }
 

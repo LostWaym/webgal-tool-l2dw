@@ -789,7 +789,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         SetFrameIndex(minIndex);
     }
 
-    public override void OnPageShown()
+    protected override void OnPageShown()
     {
         base.OnPageShown();
 
@@ -858,7 +858,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         }
     }
 
-    public override void OnPageHidden()
+    protected override void OnPageHidden()
     {
         base.OnPageHidden();
         MainControl.Instance.UpdateBeat -= Update;
@@ -1511,7 +1511,8 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
 
     public void RefreshMotionTrackHeader()
     {
-        if (GetValidTarget() == null)
+        var curTarget = GetValidTarget();
+        if (curTarget == null)
         {
             return;
         }
@@ -1526,7 +1527,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             var paramInfo = filteredParamKeys[headerIndex + i];
             if (!m_motionData.info.TryGetKeyFrameValue(paramInfo.name, curFrameIndex, out float value))
             {
-                value = paramInfo.value;
+                curTarget.GetEmotionEditorList().paramDefDict.TryGetValue(paramInfo.name, out value);
             }
             var track = m_motionData.TryGetTrack(paramInfo.name, true);
             bool hasKeyFrameInIndex = track.HasKeyFrame(curFrameIndex);
@@ -1618,7 +1619,15 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         {
             if (!m_motionData.info.TryGetKeyFrameValue(widget.info.name, curFrameIndex, out float value))
             {
-                value = widget.info.value;
+                var curTarget = GetValidTarget();
+                if (curTarget != null)
+                {
+                    curTarget.GetEmotionEditorList().paramDefDict.TryGetValue(widget.info.name, out value);
+                }
+                else
+                {
+                    value = widget.info.value;
+                }
             }
             SetTrackValue(widget.info.name, curFrameIndex, value);
         }

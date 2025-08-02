@@ -125,7 +125,7 @@ public class SettingPageBase<T> : UIPageWidget<T> where T : SettingPageBase<T>, 
         BindToToggle(toggle);
     }
 
-    public override void OnPageShown()
+    protected override void OnPageShown()
     {
         base.OnPageShown();
         owner.SetTitle(Title);
@@ -247,7 +247,7 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
         Global.BGTransformTemplate = value;
     }
 
-    public override void OnPageShown()
+    protected override void OnPageShown()
     {
         base.OnPageShown();
 
@@ -476,7 +476,7 @@ public class SettingPageExperiment : SettingPageBase<SettingPageExperiment>
         base.OnInit();
     }
 
-    public override void OnPageShown()
+    protected override void OnPageShown()
     {
         base.OnPageShown();
         m_toggleBlink.SetIsOnWithoutNotify(MainControl.AllowBlink);
@@ -590,7 +590,7 @@ public class SettingPageNavigation : SettingPageBase<SettingPageNavigation>
         m_itemCameraZoomBoostFactorWidget.SetValue(Global.CameraZoomBoostFactor.ToString());
     }
 
-    public override void OnPageShown()
+    protected override void OnPageShown()
     {
         base.OnPageShown();
 

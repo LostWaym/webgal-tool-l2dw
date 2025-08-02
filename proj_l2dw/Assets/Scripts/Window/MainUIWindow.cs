@@ -847,18 +847,24 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
         m_pageCharaMenu.Inject(m_pageCharaFunctions);
         m_pageCharaMenu.BindToToggle(m_toggleChara);
         m_pageCharaFunctions.BindToToggle(m_toggleChara);
+        BindChild(m_pageCharaMenu);
+        BindChild(m_pageCharaFunctions);
 
         m_pageGroupMenu = PageGroupMenu.CreateWidget(m_itemPageGroupMenu.gameObject);
         m_pageGroupFunctions = PageGroupFunctions.CreateWidget(m_itemPageGroupFunctions.gameObject);
         m_pageGroupMenu.Inject(m_pageGroupFunctions, m_tfCursor);
         m_pageGroupMenu.BindToToggle(m_toggleGroup);
         m_pageGroupFunctions.BindToToggle(m_toggleGroup);
+        BindChild(m_pageGroupMenu);
+        BindChild(m_pageGroupFunctions);
 
         m_pageBackgroundMenu = PageBackgroundMenu.CreateWidget(m_itemPageBackgroundMenu.gameObject);
         m_pageBackgroundFunctions = PageBackgroundFunctions.CreateWidget(m_itemPageBackgroundFunctions.gameObject);
         m_pageBackgroundMenu.BindToToggle(m_toggleBackGround);
         m_pageBackgroundFunctions.BindToToggle(m_toggleBackGround);
         m_pageBackgroundMenu.Inject(m_pageBackgroundFunctions);
+        BindChild(m_pageBackgroundMenu);
+        BindChild(m_pageBackgroundFunctions);
 
         m_toolWidget = ToolWidget.CreateWidget(m_itemTools.gameObject);
     }
@@ -1218,7 +1224,7 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         m_liptRotation.SetDataSubmit(OnRotationSubmit);
     }
 
-    public override void OnPageShown()
+    protected override void OnPageShown()
     {
         base.OnPageShown();
         MainControl.OnLoadConf += OnLoadConf;
@@ -1235,7 +1241,7 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         RefreshAll();
     }
 
-    public override void OnPageHidden()
+    protected override void OnPageHidden()
     {
         base.OnPageHidden();
         MainControl.OnLoadConf -= OnLoadConf;
@@ -1575,9 +1581,13 @@ public class PageCharaFunctions : UIPageWidget<PageCharaFunctions>
         m_pageExpressionEditor = PageExpressionEditor.CreateWidget(m_itemPageExpressionEdit.gameObject);
         //m_pageAnimationEditor = PageAnimationEditor.CreateWidget(m_itemPageAnimationEditor.gameObject);
         m_pageFilterSet = PageFilterSet.CreateWidget(m_itemPageFilterSet.gameObject);
+
+        BindChild(m_pageCharacterPreview);
+        BindChild(m_pageExpressionEditor);
+        BindChild(m_pageFilterSet);
     }
 
-    public override void OnPageShown()
+    protected override void OnPageShown()
     {
         base.OnPageShown();
         m_pageCharacterPreview.BindToToggle(m_togglePreview);
@@ -2044,7 +2054,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     }
     #endregion
 
-    public override void OnPageShown()
+    protected override void OnPageShown()
     {
         base.OnPageShown();
         TryInitAsModel();
@@ -2245,7 +2255,7 @@ public class PageCharacterPreview : UIPageWidget<PageCharacterPreview>
     private List<MotionEntryWidget> m_listExpression = new List<MotionEntryWidget>();
 
 
-    public override void OnPageShown()
+    protected override void OnPageShown()
     {
         base.OnPageShown();
         var model = MainControl.Instance.curTarget;
@@ -2452,7 +2462,7 @@ public class PageExpressionEditor : UIPageWidget<PageExpressionEditor>
 
     private List<ExpEntryWidget> m_listExpEntry = new List<ExpEntryWidget>();
 
-    public override void OnPageShown()
+    protected override void OnPageShown()
     {
         base.OnPageShown();
         var model = MainControl.Instance.curTarget;
@@ -2888,7 +2898,7 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
         m_tfCursor = tfCursor;
     }
 
-    public override void OnPageShown()
+    protected override void OnPageShown()
     {
         base.OnPageShown();
         UIEventBus.AddListener(UIEventType.GroupTransformChanged, OnGroupTransformChanged);
@@ -2899,7 +2909,7 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
         RefreshAll();
     }
 
-    public override void OnPageHidden()
+    protected override void OnPageHidden()
     {
         base.OnPageHidden();
         UIEventBus.RemoveListener(UIEventType.GroupTransformChanged, OnGroupTransformChanged);
@@ -3170,7 +3180,7 @@ public class PageGroupFunctions : UIPageWidget<PageGroupFunctions>
         m_itemBackgroundCopy = GroupSelectedItemWidget.CreateWidget(m_itemBackgroundTransformCopy.gameObject);
         m_itemBackgroundCopy._OnTitleClick = OnBackgroundCopyItemClicked;
     }
-    public override void OnPageShown()
+    protected override void OnPageShown()
     {
         base.OnPageShown();
         RefreshAll();
@@ -3355,7 +3365,7 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
         m_liptPosY.SetToggleChange(OnUILockYChange);
     }
 
-    public override void OnPageShown()
+    protected override void OnPageShown()
     {
         base.OnPageShown();
 
@@ -3368,7 +3378,7 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
         RefreshAll();
     }
 
-    public override void OnPageHidden()
+    protected override void OnPageHidden()
     {
         base.OnPageHidden();
         UIEventBus.RemoveListener(UIEventType.BGTransformChanged, RefreshAll);
@@ -3517,7 +3527,7 @@ public class PageBackgroundFunctions : UIPageWidget<PageBackgroundFunctions>
         m_filterSetData = new FilterSetData();
     }
 
-    public override void OnPageShown()
+    protected override void OnPageShown()
     {
         base.OnPageShown();
         m_pageFilterSet.TryInitAsBG();

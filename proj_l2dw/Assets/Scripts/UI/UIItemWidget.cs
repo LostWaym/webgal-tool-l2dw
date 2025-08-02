@@ -109,9 +109,18 @@ public class UIItemWidget<T> : UIItemWidget where T : UIItemWidget<T>, new()
     }
 }
 
-public class UIPageWidget<T> : UIItemWidget<T> where T : UIPageWidget<T>, new()
+public interface IPageBind
+{
+    void ExternalShow();
+    void ExternalHide();
+}
+
+public class UIPageWidget<T> : UIItemWidget<T>, IPageBind where T : UIPageWidget<T>, new()
 {
     private Toggle bindedToggle;
+    private List<IPageBind> childPages = new List<IPageBind>();
+
+    private bool isActive = false;
 
     public void BindToToggle(Toggle toggle)
     {
@@ -120,14 +129,29 @@ public class UIPageWidget<T> : UIItemWidget<T> where T : UIPageWidget<T>, new()
         OnToggleValueChanged(toggle.isOn);
     }
 
+    public void BindChild(IPageBind page)
+    {
+        childPages.Add(page);
+    }
+
     private void OnToggleValueChanged(bool value)
     {
         if (value)
         {
+            if (isActive)
+            {
+                gameObject.SetActive(true);
+                return;
+            }
             OnPageShown();
         }
         else
         {
+            if (!isActive)
+            {
+                gameObject.SetActive(false);
+                return;
+            }
             OnPageHidden();
         }
     }
@@ -140,21 +164,41 @@ public class UIPageWidget<T> : UIItemWidget<T> where T : UIPageWidget<T>, new()
         }
     }
 
-    public virtual void OnPageShown()
+    protected virtual void OnPageShown()
     {
+        Debug.Log("OnPageShown" + gameObject.name);
         gameObject.SetActive(true);
-        if (bindedToggle != null)
+        isActive = true;
+        foreach (var page in childPages)
         {
-            bindedToggle.isOn = true;
+            page.ExternalShow();
         }
     }
 
-    public virtual void OnPageHidden()
+    protected virtual void OnPageHidden()
     {
-        gameObject.SetActive(false);
-        if (bindedToggle != null)
+        Debug.Log("OnPageHidden" + gameObject.name);
+        isActive = false;
+        foreach (var page in childPages)
         {
-            bindedToggle.isOn = false;
+            page.ExternalHide();
+        }
+        gameObject.SetActive(false);
+    }
+
+    public void ExternalShow()
+    {
+        if (bindedToggle && bindedToggle.isOn)
+        {
+            OnToggleValueChanged(true);
+        }
+    }
+
+    public void ExternalHide()
+    {
+        if (bindedToggle && bindedToggle.isOn)
+        {
+            OnToggleValueChanged(false);
         }
     }
 }
