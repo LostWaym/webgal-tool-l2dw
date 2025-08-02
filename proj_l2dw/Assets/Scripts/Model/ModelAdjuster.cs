@@ -180,6 +180,14 @@ public class ModelAdjuster : ModelAdjusterBase
         }
     }
 
+    private void SetModelDisplayMode(ModelDisplayMode mode)
+    {
+        foreach (var pos in webgalPoses)
+        {
+            pos.model.displayMode = mode;
+        }
+    }
+
     public override void SetDisplayMode(ModelDisplayMode mode, bool force = false)
     {
         if (MainModel.displayMode == mode && !force)
@@ -189,6 +197,8 @@ public class ModelAdjuster : ModelAdjusterBase
 
         var curMotionName = MainModel.curMotionName;
         var curExpName = MainModel.curExpName;
+
+        SetModelDisplayMode(mode);
 
         if (mode == ModelDisplayMode.Normal)
         {

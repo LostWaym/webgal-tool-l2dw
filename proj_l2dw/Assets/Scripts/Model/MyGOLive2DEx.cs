@@ -370,7 +370,7 @@ public class AnimationEditor
 
 public class EmotionEditor
 {
-    public Live2DParamInfoList list;
+    public Live2DParamInfoList list = new();
 
     public Dictionary<string, float> paramApplyDict = new Dictionary<string, float>();
     public HashSet<string> paramSet = new HashSet<string>();
