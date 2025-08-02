@@ -15,6 +15,7 @@ public class PageNavModification : UIPageWidget<PageNavModification>
     private Button m_btnMotion;
     private Text m_lblMotion;
     private RectTransform m_rectSelectMotionArea;
+    private Button m_btnHelp;
     private Button m_btnSave;
     private GameObject m_goLeft;
     private Transform m_tfTrackHeaderRoot;
@@ -39,6 +40,7 @@ public class PageNavModification : UIPageWidget<PageNavModification>
         m_btnMotion = transform.Find("CharaArea/ToolBar/m_btnMotion").GetComponent<Button>();
         m_lblMotion = transform.Find("CharaArea/ToolBar/m_btnMotion/m_lblMotion").GetComponent<Text>();
         m_rectSelectMotionArea = transform.Find("CharaArea/ToolBar/m_btnMotion/m_rectSelectMotionArea").GetComponent<RectTransform>();
+        m_btnHelp = transform.Find("CharaArea/ToolBar/m_btnHelp").GetComponent<Button>();
         m_btnSave = transform.Find("CharaArea/ToolBar/m_btnSave").GetComponent<Button>();
         m_goLeft = transform.Find("m_goLeft").gameObject;
         m_tfTrackHeaderRoot = transform.Find("m_goLeft/m_tfTrackHeaderRoot").GetComponent<Transform>();
@@ -54,6 +56,7 @@ public class PageNavModification : UIPageWidget<PageNavModification>
 
         m_btnResetCharaArea.onClick.AddListener(OnButtonResetCharaAreaClick);
         m_btnMotion.onClick.AddListener(OnButtonMotionClick);
+        m_btnHelp.onClick.AddListener(OnButtonHelpClick);
         m_btnSave.onClick.AddListener(OnButtonSaveClick);
         m_toggleParts.onValueChanged.AddListener(OnTogglePartsChange);
         m_toggleInitParams.onValueChanged.AddListener(OnToggleInitParamsChange);
@@ -65,9 +68,16 @@ public class PageNavModification : UIPageWidget<PageNavModification>
     #region auto generated events
     private void OnButtonResetCharaAreaClick()
     {
+        m_tfCharaRoot.localScale = Vector3.one;
+        m_rawChara.rectTransform.localPosition = Vector3.zero;
     }
     private void OnButtonMotionClick()
     {
+    }
+    private void OnButtonHelpClick()
+    {
+        string helpText = "目前不支持拼好模的编辑，只支持单个模型的编辑嗷…\n执意要在拼好模的编辑器里编辑的话，请先在拼好模的编辑器里导出单个模型，再在单个模型的编辑器里编辑嗷…\n否则会出现可怕的事情嗷…";
+        MessageTipWindow.Instance.Show("帮助", helpText);
     }
     private void OnButtonSaveClick()
     {
@@ -141,6 +151,38 @@ public class PageNavModification : UIPageWidget<PageNavModification>
         m_pageNavModificationInitParams.BindToToggle(m_toggleInitParams);
         m_pageNavModificationMotion.BindToToggle(m_toggleMotion);
         m_pageNavModificationExpression.BindToToggle(m_toggleExpression);
+
+        m_touchChara._OnPointerDown += OnTouchCharaPointerDown;
+        m_touchChara._OnPointerMove += OnTouchCharaPointerMove;
+        m_touchChara._OnScroll += OnTouchCharaScroll;
+    }
+
+    private Vector2 m_charaStartPosition;
+    private void OnTouchCharaPointerDown(PointerEventData eventData)
+    {
+        m_charaStartPosition = eventData.position;
+    }
+
+    private void OnTouchCharaPointerMove(Vector2 vector)
+    {
+        var delta = vector - m_charaStartPosition;
+        m_charaStartPosition = vector;
+        var pos = m_rawChara.rectTransform.position;
+        pos += new Vector3(delta.x, delta.y, 0);
+        m_rawChara.rectTransform.position = pos;
+    }
+
+    private void OnTouchCharaScroll(PointerEventData eventData)
+    {
+        var ctrlPressed = Input.GetKey(KeyCode.LeftControl);
+        var scaleFactor = ctrlPressed ? Global.CameraZoomBoostFactor : Global.CameraZoomFactor;
+        if (eventData.scrollDelta.y < 0)
+            scaleFactor = 1.0f / scaleFactor;
+        m_tfCharaRoot.localScale = new Vector3(
+            m_tfCharaRoot.localScale.x * scaleFactor,
+            m_tfCharaRoot.localScale.y * scaleFactor,
+            m_tfCharaRoot.localScale.z
+        );
     }
 
     protected override void OnPageShown()

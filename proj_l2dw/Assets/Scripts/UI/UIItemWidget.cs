@@ -166,7 +166,7 @@ public class UIPageWidget<T> : UIItemWidget<T>, IPageBind where T : UIPageWidget
 
     protected virtual void OnPageShown()
     {
-        Debug.Log("OnPageShown" + gameObject.name);
+        // Debug.Log("OnPageShown" + gameObject.name);
         gameObject.SetActive(true);
         isActive = true;
         foreach (var page in childPages)
@@ -177,7 +177,7 @@ public class UIPageWidget<T> : UIItemWidget<T>, IPageBind where T : UIPageWidget
 
     protected virtual void OnPageHidden()
     {
-        Debug.Log("OnPageHidden" + gameObject.name);
+        // Debug.Log("OnPageHidden" + gameObject.name);
         isActive = false;
         foreach (var page in childPages)
         {
