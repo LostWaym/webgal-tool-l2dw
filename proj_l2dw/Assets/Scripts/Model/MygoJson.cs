@@ -15,43 +15,25 @@ public class MygoJson
     public string filename;
     public string model;
     public string physics;
-    public List<string> textures;
-    public Dictionary<string, List<MygoJsonFileItem>> motions;
-    public List<MygoJsonExpItem> expressions;
+    public List<string> textures = new();
+    public Dictionary<string, List<MygoJsonFileItem>> motions = new();
+    public List<MygoJsonExpItem> expressions = new();
+    public List<InitParamEntry> initParams = new();
+    public List<InitOpacity> initOpacities = new();
+}
 
+[Serializable]
+public class InitParamEntry
+{
+    public string id;
+    public float value;
+}
 
-
-    //已经在别处做了容错，这里不再移除
-    public void ClearEmptyMotions()
-    {
-        // var basePath = Path.GetDirectoryName(filename);
-        // List<string> removeKeys = new List<string>();
-        // foreach (var item in motions)
-        // {
-        //     if (File.Exists(Path.Combine(basePath, item.Value[0].file)) || File.Exists(Path.Combine(basePath, item.Value[0].file + ".bytes")))
-        //         continue;
-
-        //     removeKeys.Add(item.Key);
-        // }
-
-        // foreach (var key in removeKeys)
-        // {
-        //     motions.Remove(key);
-        // }
-    }
-
-    public void ClearEmptyExpressions()
-    {
-        // var basePath = Path.GetDirectoryName(filename);
-        // for (int i = expressions.Count - 1; i >= 0; i--)
-        // {
-        //     MygoJsonExpItem item = expressions[i];
-        //     if (File.Exists(Path.Combine(basePath, item.file)) || File.Exists(Path.Combine(basePath, item.file + ".bytes")))
-        //         continue;
-
-        //     expressions.RemoveAt(i);
-        // }
-    }
+[Serializable]
+public class InitOpacity
+{
+    public string id;
+    public float value;
 }
 
 [Serializable]
@@ -74,6 +56,8 @@ public class MygoConfig
     public List<Texture2D> textures;
     public Dictionary<string, byte[]> motions;
     public Dictionary<string, MygoExpJson> expressions;
+    public Dictionary<string, float> initParams;
+    public Dictionary<string, float> initOpacities;
 
     public MygoJson json;
 
@@ -125,6 +109,16 @@ public class MygoConfig
             }
             var expJson = JsonConvert.DeserializeObject<MygoExpJson>(text);
             expressions[item.name] = expJson;
+        }
+        initParams = new Dictionary<string, float>();
+        foreach (var item in json.initParams)
+        {
+            initParams[item.id] = item.value;
+        }
+        initOpacities = new Dictionary<string, float>();
+        foreach (var item in json.initOpacities)
+        {
+            initOpacities[item.id] = item.value;
         }
     }
 

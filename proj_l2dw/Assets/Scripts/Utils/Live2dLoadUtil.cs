@@ -10,16 +10,21 @@ using UnityEngine;
 
 public static class Live2dLoadUtils
 {
+    private static JsonSerializerSettings settings = new JsonSerializerSettings()
+    {
+        MissingMemberHandling = MissingMemberHandling.Ignore,
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore,
+    };
+
     public static MygoConfig LoadConfig(string path)
     {
         string content = File.ReadAllText(path);
-        var mygo = JsonConvert.DeserializeObject<MygoJson>(content);
+        var mygo = JsonConvert.DeserializeObject<MygoJson>(content, settings);
         mygo.filename = path;
         if (string.IsNullOrEmpty(mygo.model))
             return null;
-
-        mygo.ClearEmptyMotions();
-        mygo.ClearEmptyExpressions();
+        
         var config = new MygoConfig();
         config.Load(mygo);
 

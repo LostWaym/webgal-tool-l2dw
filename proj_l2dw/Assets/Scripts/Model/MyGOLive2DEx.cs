@@ -25,9 +25,6 @@ public class MyGOLive2DEx : MonoBehaviour
 
     public string curMotionName, curExpName;
 
-    public Live2DParamInfoList paramInfoList = new Live2DParamInfoList();
-    public EmotionEditor emotionEditor = new EmotionEditor();
-
     public ModelDisplayMode displayMode = ModelDisplayMode.Normal;
 
     public float left, up;
@@ -37,6 +34,8 @@ public class MyGOLive2DEx : MonoBehaviour
     // 是否为主渲染循环
     public bool isMainRenderLoop = true;
     public MeshRenderer meshRenderer;
+
+    public List<PartsData> m_partsDataList = new List<PartsData>();
     
     public void LoadConfig(MygoConfig config)
     {
@@ -56,8 +55,6 @@ public class MyGOLive2DEx : MonoBehaviour
         expMgr = new ExpQueueManager();
         LoadMotionPairs(config);
         LoadExpPairs(config);
-        paramInfoList.ReadFrom(live2DModel);
-        emotionEditor.list = paramInfoList;
 
         var plane = meshRenderer.transform;
         plane.localPosition = new Vector3(
@@ -71,6 +68,28 @@ public class MyGOLive2DEx : MonoBehaviour
             1.0f,
             live2DModel.getCanvasHeight() * 0.2f
         );
+
+        InitPartsDataList();
+        ApplyInitOpacities(live2DModel);
+    }
+
+    private void InitPartsDataList()
+    {
+        var type = live2DModel.getModelContext().GetType();
+        var field = type.GetField("partsDataList", BindingFlags.NonPublic | BindingFlags.Instance);
+        m_partsDataList = field.GetValue(live2DModel.getModelContext()) as List<PartsData>;
+    }
+
+    private void ApplyInitOpacities(ALive2DModel model)
+    {
+        foreach (var item in m_partsDataList)
+        {
+            var id = item.getPartsDataID();
+            if (myGOConfig.initOpacities.TryGetValue(id.ToString(), out var value))
+            {
+                model.setPartsOpacity(id.ToString(), value);
+            }
+        }
     }
 
     public void ReloadTextures()
@@ -269,6 +288,69 @@ public class Live2DParamInfoList
         }
     }
 
+    public void CombineParamInfoList(IEnumerable<ALive2DModel> models)
+    {
+        list.Clear();
+        paramDefDict.Clear();
+
+        HashSet<string> paramSet = new HashSet<string>();
+
+        foreach (var model in models)
+        {
+            var context = model.getModelContext();
+            var paramIDList = GetParamIDListReflection(context);
+            foreach (var paramID in paramIDList)
+            {
+                if (paramID == null)
+                    continue;
+
+                if (paramSet.Contains(paramID.ToString()))
+                    continue;
+
+                paramSet.Add(paramID.ToString());
+
+                var paramIndex = context.getParamIndex(paramID);
+                var param = context.getParamFloat(paramIndex);
+                list.Add(new Live2DParamInfo()
+                {
+                    name = paramID.ToString(),
+                    min = context.getParamMin(paramIndex),
+                    max = context.getParamMax(paramIndex),
+                    value = param,
+                });
+                paramDefDict.Add(paramID.ToString(), param);
+            }
+        }
+    }
+
+    public void ApplyInitParams(MygoConfig config)
+    {
+        foreach (var item in config.initParams)
+        {
+            paramDefDict[item.Key] = item.Value;
+        }
+    }
+
+    public void CombineInitParams(IEnumerable<MygoConfig> configs)
+    {
+        Dictionary<string, float> dict = new Dictionary<string, float>();
+        foreach (var config in configs)
+        {
+            foreach (var item in config.initParams)
+            {
+                if (dict.ContainsKey(item.Key))
+                    continue;
+
+                dict[item.Key] = item.Value;
+            }
+        }
+
+        foreach (var item in dict)
+        {
+            paramDefDict[item.Key] = item.Value;
+        }
+    }
+
     private List<ParamID> GetParamIDListReflection(ModelContext context)
     {
         var type = context.GetType();
@@ -278,12 +360,6 @@ public class Live2DParamInfoList
 
         var list = field.GetValue(context) as ParamID[];
         return list.ToList();
-    }
-
-    public string GetAllParamInfoTextOutput()
-    {
-        string paramList = string.Join("\n", list.Select(x => $"{x.name}: {x.value} ({x.min} ~ {x.max})"));
-        return $"����������: {list.Count}\n{paramList}";
     }
 }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -65,6 +66,8 @@ public class ModelAdjuster : ModelAdjusterBase
     private Matrix4x4 modelMatrix;
     private FieldInfo canvasHackField;
 
+    public EmotionEditor emotionEditor = new();
+
     private void Start()
     {
         this.canvasHackField = typeof(Canvas).GetField("willRenderCanvases", BindingFlags.NonPublic | BindingFlags.Static);
@@ -72,7 +75,7 @@ public class ModelAdjuster : ModelAdjusterBase
     
     public override Live2DParamInfoList GetEmotionEditorList()
     {
-        return MainModel.emotionEditor.list;
+        return emotionEditor.list;
     }
 
     public override void InitTransform(Vector3 pos, float scale, float rotation, bool reverseXScale)
@@ -105,39 +108,27 @@ public class ModelAdjuster : ModelAdjusterBase
 
     public override bool IsMotionParamSetContains(string name)
     {
-        return MainModel.emotionEditor.paramSet.Contains(name);
+        return emotionEditor.paramSet.Contains(name);
     }
 
     public override float GetMotionParamValue(string name)
     {
-        return MainModel.emotionEditor.paramApplyDict[name];
+        return emotionEditor.paramApplyDict[name];
     }
 
     public override void AddMotionParamControl(string name)
     {
-        foreach (var pos in webgalPoses)
-        {
-            var model = pos.model;
-            model.emotionEditor.AddControl(name);
-        }
+        emotionEditor.AddControl(name);
     }
 
     public override void RemoveMotionParamControl(string name)
     {
-        foreach (var pos in webgalPoses)
-        {
-            var model = pos.model;
-            model.emotionEditor.RemoveControl(name);
-        }
+        emotionEditor.RemoveControl(name);
     }
 
     public override void SetMotionParamValue(string name, float value)
     {
-        foreach (var pos in webgalPoses)
-        {
-            var model = pos.model;
-            model.emotionEditor.SetParam(name, value);
-        }
+        emotionEditor.SetParam(name, value);
     }
 
     public override void ApplyMotionParamValue()
@@ -145,23 +136,28 @@ public class ModelAdjuster : ModelAdjusterBase
         foreach (var pos in webgalPoses)
         {
             var model = pos.model;
-            model.emotionEditor.ApplyValue(model.Live2DModel);
+            emotionEditor.ApplyValue(model.Live2DModel);
+        }
+    }
+
+    private void ApplyMotionDefaultValues()
+    {
+        foreach (var pos in webgalPoses)
+        {
+            var model = pos.model;
+            emotionEditor.ApplyModelDefaultValues(model.Live2DModel);
         }
     }
 
     public override void CopyFromExp(MygoExp exp)
     {
-        foreach (var pos in webgalPoses)
-        {
-            var model = pos.model;
-            model.emotionEditor.CopyFromExp(exp);
-            model.emotionEditor.ApplyValue(model.Live2DModel);
-        }
+        emotionEditor.CopyFromExp(exp);
+        ApplyMotionParamValue();
     }
 
     public override string GetMotionEditorExpJson()
     {
-        return MainModel.emotionEditor.ToMygoExpJson().PrintJson();
+        return emotionEditor.ToMygoExpJson().PrintJson();
     }
 
     public override void Sample(string paramName, float value)
@@ -174,9 +170,9 @@ public class ModelAdjuster : ModelAdjusterBase
 
     public override void SampleDefaultParam(string paramName)
     {
+        var list = emotionEditor.list;
         foreach (var pos in webgalPoses)
         {
-            var list = pos.model.emotionEditor.list;
             if (list.paramDefDict.TryGetValue(paramName, out var value))
             {
                 pos.model.Live2DModel.setParamFloat(paramName, value);
@@ -194,14 +190,13 @@ public class ModelAdjuster : ModelAdjusterBase
         var curMotionName = MainModel.curMotionName;
         var curExpName = MainModel.curExpName;
 
-        foreach (var pos in webgalPoses)
+        if (mode == ModelDisplayMode.Normal)
         {
-            var model = pos.model;
-            model.displayMode = mode;
-            if (mode == ModelDisplayMode.Normal)
+            emotionEditor.Reset();
+            foreach (var pos in webgalPoses)
             {
-                model.emotionEditor.Reset();
-                model.emotionEditor.ApplyValue(model.Live2DModel);
+                var model = pos.model;
+                emotionEditor.ApplyValue(model.Live2DModel);
                 if (!string.IsNullOrEmpty(curMotionName))
                 {
                     model.PlayMotion(curMotionName);
@@ -211,16 +206,16 @@ public class ModelAdjuster : ModelAdjusterBase
                     model.PlayExp(curExpName);
                 }
             }
-            else if (mode == ModelDisplayMode.EmotionEditor)
-            {
-                model.emotionEditor.Reset();
-                model.emotionEditor.ApplyModelDefaultValues(model.Live2DModel);
-            }
-            else if (mode == ModelDisplayMode.MotionEditor)
-            {
-                model.emotionEditor.Reset();
-                model.emotionEditor.ApplyModelDefaultValues(model.Live2DModel);
-            }
+        }
+        else if (mode == ModelDisplayMode.EmotionEditor)
+        {
+            emotionEditor.Reset();
+            ApplyMotionDefaultValues();
+        }
+        else if (mode == ModelDisplayMode.MotionEditor)
+        {
+            emotionEditor.Reset();
+            ApplyMotionDefaultValues();
         }
     }
 
@@ -241,6 +236,13 @@ public class ModelAdjuster : ModelAdjusterBase
         Adjust();
         PlayExp(expName);
         PlayMotion(motionName);
+        InitParamInfoList();
+    }
+
+    private void InitParamInfoList()
+    {
+        emotionEditor.list.CombineParamInfoList(webgalPoses.Select(pos => pos.model.Live2DModel));
+        emotionEditor.list.CombineInitParams(webgalPoses.Select(pos => pos.model.myGOConfig));
     }
 
     public override string GetMotionExpressionParamsText()
@@ -294,7 +296,8 @@ public class ModelAdjuster : ModelAdjusterBase
         }
 
         webgalPoses.RemoveAll(pos => pos == null);
-        
+        InitParamInfoList();
+
         if (this.rt)
         {
             rt.Release();
