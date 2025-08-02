@@ -2682,11 +2682,6 @@ public class ExpEntryWidget : UIItemWidget<ExpEntryWidget>
     }
 }
 
-public class PageAnimationEditor : UIPageWidget<PageAnimationEditor>
-{
-
-}
-
 public class PageGroupMenu : UIPageWidget<PageGroupMenu>
 {
     #region auto generated members
