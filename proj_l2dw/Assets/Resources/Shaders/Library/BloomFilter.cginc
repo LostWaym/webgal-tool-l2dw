@@ -72,7 +72,8 @@ fixed4 ApplyBloomFilter(float2 rawUv)
     float oldBloomAlpha = bloomColor.a;
     bloomColor.rgb += (1.0 - color.a) * bloomColor.rgb / oldBloomAlpha;
     bloomColor.a = lerp(bloomColor.a * bloomColor.a, bloomColor.a, color.a);
-    bloomColor.a = lerp(color.a, bloomColor.a, _Bloom);
+    // bloomColor.a = lerp(color.a, bloomColor.a, _Bloom);
+    bloomColor.a = bloomColor.a * _Bloom;
     // bloomColor.a = lerp(
     //     dot(bloomColor.rgb, bloomColor.rgb) / 3.0,
     //     bloomColor.a,
@@ -81,7 +82,7 @@ fixed4 ApplyBloomFilter(float2 rawUv)
 #else
     fixed4 bloomColor = fixed4(
         ExtractBrightness(color.rgb),
-        color.a
+        0.0
     );
 #endif
 
