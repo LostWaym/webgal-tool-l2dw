@@ -88,7 +88,7 @@ public class PageNavModification : UIPageWidget<PageNavModification>
         var initParamsObj = new JSONObject(JSONObject.Type.ARRAY);
         var initOpacitiesObj = new JSONObject(JSONObject.Type.ARRAY);
 
-        foreach (var part in m_curModel.MyGOConfig.initOpacities)
+        foreach (var part in m_curModel.MyGOConfig.init_opacities)
         {
             var partObj = new JSONObject();
             partObj.AddField("id", part.Key);
@@ -96,7 +96,7 @@ public class PageNavModification : UIPageWidget<PageNavModification>
             initOpacitiesObj.Add(partObj);
         }
 
-        foreach (var param in m_curModel.MyGOConfig.initParams)
+        foreach (var param in m_curModel.MyGOConfig.init_params)
         {
             var paramObj = new JSONObject();
             paramObj.AddField("id", param.Key);
@@ -104,8 +104,8 @@ public class PageNavModification : UIPageWidget<PageNavModification>
             initParamsObj.Add(paramObj);
         }
 
-        jsonObj.AddField("initParams", initParamsObj);
-        jsonObj.AddField("initOpacities", initOpacitiesObj);
+        jsonObj.AddField("init_params", initParamsObj);
+        jsonObj.AddField("init_opacities", initOpacitiesObj);
 
         GUIUtility.systemCopyBuffer = jsonObj.ToString(true);
         MessageTipWindow.Instance.Show("配置", "已复制到剪贴板！");
@@ -277,7 +277,7 @@ public class PageNavModificationParts : PageOfPageNavModification<PageNavModific
             var partsData = partsDataList[i];
             var entry = m_listPartsEntries[i];
             var partKey = partsData.getPartsDataID().ToString();
-            var enable = CurModel.MyGOConfig.initOpacities.TryGetValue(partKey, out var opacity);
+            var enable = CurModel.MyGOConfig.init_opacities.TryGetValue(partKey, out var opacity);
             entry.SetData(partKey, enable, enable ? opacity : 1);
         }
 
@@ -293,11 +293,11 @@ public class PageNavModificationParts : PageOfPageNavModification<PageNavModific
         var partKey = entry.m_partKey;
         if (value)
         {
-            CurModel.MyGOConfig.initOpacities[partKey] = entry.SliderValue;
+            CurModel.MyGOConfig.init_opacities[partKey] = entry.SliderValue;
         }
         else
         {
-            CurModel.MyGOConfig.initOpacities.Remove(partKey);
+            CurModel.MyGOConfig.init_opacities.Remove(partKey);
         }
 
         RefreshAll();
@@ -309,7 +309,7 @@ public class PageNavModificationParts : PageOfPageNavModification<PageNavModific
             return;
         }
         var partKey = entry.m_partKey;
-        CurModel.MyGOConfig.initOpacities[partKey] = value;
+        CurModel.MyGOConfig.init_opacities[partKey] = value;
         RefreshAll();
     }
 }
@@ -435,7 +435,7 @@ public class PageNavModificationInitParams : PageOfPageNavModification<PageNavMo
         {
             var initParam = initParams[i];
             var entry = m_listInitParamsEntries[i];
-            var enable = CurModel.MyGOConfig.initParams.TryGetValue(initParam.name, out var value);
+            var enable = CurModel.MyGOConfig.init_params.TryGetValue(initParam.name, out var value);
             defValues.TryGetValue(initParam.name, out var defValue);
             entry.SetData(initParam.name, enable, enable ? value : defValue, initParam.min, initParam.max);
         }
@@ -453,13 +453,13 @@ public class PageNavModificationInitParams : PageOfPageNavModification<PageNavMo
         {
             var defValues = CurModel.emotionEditor.list.realParamDefDict;
             defValues.TryGetValue(entry.m_paramName, out var defValue);
-            CurModel.MyGOConfig.initParams[entry.m_paramName] = defValue;
+            CurModel.MyGOConfig.init_params[entry.m_paramName] = defValue;
 
             CurModel.emotionEditor.list.SetDefParam(entry.m_paramName, defValue);
         }
         else
         {
-            CurModel.MyGOConfig.initParams.Remove(entry.m_paramName);
+            CurModel.MyGOConfig.init_params.Remove(entry.m_paramName);
 
             CurModel.emotionEditor.list.RemoveDefParam(entry.m_paramName);
         }
@@ -473,7 +473,7 @@ public class PageNavModificationInitParams : PageOfPageNavModification<PageNavMo
         {
             return;
         }
-        CurModel.MyGOConfig.initParams[entry.m_paramName] = arg2;
+        CurModel.MyGOConfig.init_params[entry.m_paramName] = arg2;
         CurModel.emotionEditor.list.SetDefParam(entry.m_paramName, arg2);
         RefreshAll();
     }
@@ -487,7 +487,7 @@ public class PageNavModificationInitParams : PageOfPageNavModification<PageNavMo
         if (float.TryParse(arg2, out var value))
         {
             value = Mathf.Clamp(value, entry.m_min, entry.m_max);
-            CurModel.MyGOConfig.initParams[entry.m_paramName] = value;
+            CurModel.MyGOConfig.init_params[entry.m_paramName] = value;
             CurModel.emotionEditor.list.SetDefParam(entry.m_paramName, value);
         }
         RefreshAll();

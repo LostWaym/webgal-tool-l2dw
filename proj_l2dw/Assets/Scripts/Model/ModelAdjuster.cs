@@ -237,7 +237,7 @@ public class ModelAdjuster : ModelAdjusterBase
             foreach(var part in model.m_partsDataList)
             {
                 var partKey = part.getPartsDataID().ToString();
-                if (model.myGOConfig.initOpacities.TryGetValue(partKey, out var opacity))
+                if (model.myGOConfig.init_opacities.TryGetValue(partKey, out var opacity))
                 {
                     model.Live2DModel.setPartsOpacity(partKey, opacity);
                 }

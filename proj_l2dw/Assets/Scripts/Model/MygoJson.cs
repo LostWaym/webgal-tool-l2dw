@@ -18,8 +18,8 @@ public class MygoJson
     public List<string> textures = new();
     public Dictionary<string, List<MygoJsonFileItem>> motions = new();
     public List<MygoJsonExpItem> expressions = new();
-    public List<InitParamEntry> initParams = new();
-    public List<InitOpacity> initOpacities = new();
+    public List<InitParamEntry> init_params = new();
+    public List<InitOpacity> init_opacities = new();
 }
 
 [Serializable]
@@ -56,8 +56,8 @@ public class MygoConfig
     public List<Texture2D> textures;
     public Dictionary<string, byte[]> motions;
     public Dictionary<string, MygoExpJson> expressions;
-    public Dictionary<string, float> initParams;
-    public Dictionary<string, float> initOpacities;
+    public Dictionary<string, float> init_params;
+    public Dictionary<string, float> init_opacities;
 
     public MygoJson json;
 
@@ -110,15 +110,15 @@ public class MygoConfig
             var expJson = JsonConvert.DeserializeObject<MygoExpJson>(text);
             expressions[item.name] = expJson;
         }
-        initParams = new Dictionary<string, float>();
-        foreach (var item in json.initParams)
+        init_params = new Dictionary<string, float>();
+        foreach (var item in json.init_params)
         {
-            initParams[item.id] = item.value;
+            init_params[item.id] = item.value;
         }
-        initOpacities = new Dictionary<string, float>();
-        foreach (var item in json.initOpacities)
+        init_opacities = new Dictionary<string, float>();
+        foreach (var item in json.init_opacities)
         {
-            initOpacities[item.id] = item.value;
+            init_opacities[item.id] = item.value;
         }
     }
 

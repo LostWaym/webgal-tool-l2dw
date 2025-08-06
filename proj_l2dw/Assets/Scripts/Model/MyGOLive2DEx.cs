@@ -85,7 +85,7 @@ public class MyGOLive2DEx : MonoBehaviour
         foreach (var item in m_partsDataList)
         {
             var id = item.getPartsDataID();
-            if (myGOConfig.initOpacities.TryGetValue(id.ToString(), out var value))
+            if (myGOConfig.init_opacities.TryGetValue(id.ToString(), out var value))
             {
                 model.setPartsOpacity(id.ToString(), value);
             }
@@ -341,7 +341,7 @@ public class Live2DParamInfoList
 
     public void ApplyInitParams(MygoConfig config)
     {
-        foreach (var item in config.initParams)
+        foreach (var item in config.init_params)
         {
             paramDefDict[item.Key] = item.Value;
         }
@@ -352,7 +352,7 @@ public class Live2DParamInfoList
         Dictionary<string, float> dict = new Dictionary<string, float>();
         foreach (var config in configs)
         {
-            foreach (var item in config.initParams)
+            foreach (var item in config.init_params)
             {
                 if (dict.ContainsKey(item.Key))
                     continue;
