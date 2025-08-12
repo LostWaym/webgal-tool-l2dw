@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.WSA;
 
 public class PageNavTools : UIPageWidget<PageNavTools>
 {
@@ -65,6 +66,7 @@ public class PageNavTools_Param : UIPageWidget<PageNavTools_Param>
     private Button m_btnSetInputParam;
     private Text m_lblInputParamName;
     private InputField m_iptValue;
+    private Toggle m_toggleIncludeChildren;
     private Button m_btnSetParam;
     private Button m_btnRemoveParam;
     #endregion
@@ -77,6 +79,7 @@ public class PageNavTools_Param : UIPageWidget<PageNavTools_Param>
         m_btnSetInputParam = transform.Find("LabelValueH (1)/m_btnSetInputParam").GetComponent<Button>();
         m_lblInputParamName = transform.Find("LabelValueH (1)/m_btnSetInputParam/m_lblInputParamName").GetComponent<Text>();
         m_iptValue = transform.Find("LabelValueH (2)/Value/InputField/m_iptValue").GetComponent<InputField>();
+        m_toggleIncludeChildren = transform.Find("LabelValueH (2)/m_toggleIncludeChildren").GetComponent<Toggle>();
         m_btnSetParam = transform.Find("LabelValueH (2)/m_btnSetParam").GetComponent<Button>();
         m_btnRemoveParam = transform.Find("LabelValueH (2)/m_btnRemoveParam").GetComponent<Button>();
 
@@ -87,28 +90,26 @@ public class PageNavTools_Param : UIPageWidget<PageNavTools_Param>
         m_btnSetInputParam.onClick.AddListener(OnButtonSetInputParamClick);
         m_iptValue.onValueChanged.AddListener(OnInputFieldValueChange);
         m_iptValue.onEndEdit.AddListener(OnInputFieldValueEndEdit);
+        m_toggleIncludeChildren.onValueChanged.AddListener(OnToggleIncludeChildrenChange);
         m_btnSetParam.onClick.AddListener(OnButtonSetParamClick);
         m_btnRemoveParam.onClick.AddListener(OnButtonRemoveParamClick);
     }
     #endregion
 
 
+
     #region auto generated events
     private void OnInputFieldPathChange(string value)
     {
-        Debug.Log("OnInputFieldPathChange");
     }
     private void OnInputFieldPathEndEdit(string value)
     {
-        Debug.Log("OnInputFieldPathEndEdit");
     }
     private void OnInputFieldNameChange(string value)
     {
-        Debug.Log("OnInputFieldNameChange");
     }
     private void OnInputFieldNameEndEdit(string value)
     {
-        Debug.Log("OnInputFieldNameEndEdit");
     }
     private void OnButtonSetInputParamClick()
     {
@@ -116,11 +117,12 @@ public class PageNavTools_Param : UIPageWidget<PageNavTools_Param>
     }
     private void OnInputFieldValueChange(string value)
     {
-        Debug.Log("OnInputFieldValueChange");
     }
     private void OnInputFieldValueEndEdit(string value)
     {
-        Debug.Log("OnInputFieldValueEndEdit");
+    }
+    private void OnToggleIncludeChildrenChange(bool value)
+    {
     }
     private void OnButtonSetParamClick()
     {
@@ -147,6 +149,7 @@ public class PageNavTools_Param : UIPageWidget<PageNavTools_Param>
     private string FolderPath => m_iptPath.text;
     private string ParamName => m_iptName.text;
     private string ParamValue => m_iptValue.text;
+    private bool IncludeChildren => m_toggleIncludeChildren.isOn;
 
     private bool CheckMtnFolderValid(string path)
     {
@@ -167,8 +170,10 @@ public class PageNavTools_Param : UIPageWidget<PageNavTools_Param>
         {
             return new string[0];
         }
-        var files = Directory.GetFiles(path, "*.mtn");
-        return files;
+        if (IncludeChildren)
+            return Directory.GetFiles(path, "*.mtn", SearchOption.AllDirectories);
+        else
+            return Directory.GetFiles(path, "*.mtn");
     }
 
     private void WriteMtnFile(string filePath, List<string> lines)
@@ -249,16 +254,241 @@ public class PageNavTools_Param : UIPageWidget<PageNavTools_Param>
 public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
 {
     #region auto generated members
+    private InputField m_iptJsonPath;
+    private InputField m_iptFolder;
+    private InputField m_iptPrefix;
+    private Toggle m_toggleIncludeChildren;
+    private Button m_btnAddMotion;
+    private Button m_btnAddExp;
+    private Button m_btnAddAll;
     #endregion
 
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
+        m_iptJsonPath = transform.Find("LabelValueH/Value/InputField/m_iptJsonPath").GetComponent<InputField>();
+        m_iptFolder = transform.Find("LabelValueH (1)/Value/InputField/m_iptFolder").GetComponent<InputField>();
+        m_iptPrefix = transform.Find("LabelValueH (2)/Value/InputField/m_iptPrefix").GetComponent<InputField>();
+        m_toggleIncludeChildren = transform.Find("GameObject/m_toggleIncludeChildren").GetComponent<Toggle>();
+        m_btnAddMotion = transform.Find("GameObject/m_btnAddMotion").GetComponent<Button>();
+        m_btnAddExp = transform.Find("GameObject/m_btnAddExp").GetComponent<Button>();
+        m_btnAddAll = transform.Find("GameObject/m_btnAddAll").GetComponent<Button>();
 
+        m_iptJsonPath.onValueChanged.AddListener(OnInputFieldJsonPathChange);
+        m_iptJsonPath.onEndEdit.AddListener(OnInputFieldJsonPathEndEdit);
+        m_iptFolder.onValueChanged.AddListener(OnInputFieldFolderChange);
+        m_iptFolder.onEndEdit.AddListener(OnInputFieldFolderEndEdit);
+        m_iptPrefix.onValueChanged.AddListener(OnInputFieldPrefixChange);
+        m_iptPrefix.onEndEdit.AddListener(OnInputFieldPrefixEndEdit);
+        m_toggleIncludeChildren.onValueChanged.AddListener(OnToggleIncludeChildrenChange);
+        m_btnAddMotion.onClick.AddListener(OnButtonAddMotionClick);
+        m_btnAddExp.onClick.AddListener(OnButtonAddExpClick);
+        m_btnAddAll.onClick.AddListener(OnButtonAddAllClick);
     }
     #endregion
 
     #region auto generated events
+    private void OnInputFieldJsonPathChange(string value)
+    {
+    }
+    private void OnInputFieldJsonPathEndEdit(string value)
+    {
+    }
+    private void OnInputFieldFolderChange(string value)
+    {
+    }
+    private void OnInputFieldFolderEndEdit(string value)
+    {
+    }
+    private void OnInputFieldPrefixChange(string value)
+    {
+    }
+    private void OnInputFieldPrefixEndEdit(string value)
+    {
+    }
+    private void OnToggleIncludeChildrenChange(bool value)
+    {
+    }
+    private void OnButtonAddMotionClick()
+    {
+        DoExecute(true, false);
+        MessageTipWindow.Instance.Show("提示", "复制成功");
+    }
+    private void OnButtonAddExpClick()
+    {
+        DoExecute(false, true);
+        MessageTipWindow.Instance.Show("提示", "复制成功");
+    }
+    private void OnButtonAddAllClick()
+    {
+        DoExecute(true, true);
+        MessageTipWindow.Instance.Show("提示", "复制成功");
+    }
     #endregion
 
+    private string JsonPath => m_iptJsonPath.text;
+    private string FolderPath => m_iptFolder.text;
+    private string Prefix => m_iptPrefix.text;
+    private bool IncludeChildren => m_toggleIncludeChildren.isOn;
+
+    private void DoExecute(bool isMotion, bool isExp)
+    {
+        if (!IsJsonPathValid())
+        {
+            MessageTipWindow.Instance.Show("提示", "请输入正确的Json路径");
+            return;
+        }
+
+        if (!IsFolderValid())
+        {
+            MessageTipWindow.Instance.Show("提示", "请输入正确的文件夹路径");
+            return;
+        }
+
+        var namePrefix = Prefix;
+        if (!string.IsNullOrWhiteSpace(namePrefix) && !namePrefix.EndsWith("/"))
+        {
+            namePrefix += "/";
+        }
+
+        var relativeFolderPath = PathHelper.GetRelativePath(JsonPath, FolderPath);
+
+        var jsonObject = GetJsonObject(JsonPath);
+        if (isMotion)
+        {
+            var files = GetMotionFiles(FolderPath);
+            var relativeFiles = files.Select(file => PathHelper.GetRelativePath(JsonPath, file)).ToList();
+
+            var motions_obj = jsonObject.GetField("motions");
+            if (motions_obj == null)
+            {
+                motions_obj = new JSONObject(JSONObject.Type.OBJECT);
+                jsonObject.SetField("motions", motions_obj);
+            }
+
+            foreach (var relativeFile in relativeFiles)
+            {
+                var fixedName = GetFixedName(relativeFile.Replace(relativeFolderPath, ""));
+                var motion_arrobj = new JSONObject(JSONObject.Type.ARRAY);
+                var motion_obj = new JSONObject(JSONObject.Type.OBJECT);
+                motion_obj.SetField("file", JSONObject.StringObject(relativeFile));
+                motion_arrobj.Add(motion_obj);
+                motions_obj.SetField(namePrefix + fixedName, motion_arrobj);
+            }
+        }
+
+        if (isExp)
+        {
+            var files = GetExpFiles(FolderPath);
+            var relativeFiles = files.Select(file => PathHelper.GetRelativePath(JsonPath, file)).ToList();
+
+            var exps_obj = jsonObject.GetField("expressions");
+            if (exps_obj == null)
+            {
+                exps_obj = new JSONObject(JSONObject.Type.ARRAY);
+                jsonObject.SetField("expressions", exps_obj);
+            }
+
+            foreach (var relativeFile in relativeFiles)
+            {
+                var fixedName = GetFixedName(relativeFile.Replace(relativeFolderPath, ""));
+                var exp_obj = new JSONObject(JSONObject.Type.OBJECT);
+                exp_obj["name"] = JSONObject.StringObject(namePrefix + fixedName);
+                exp_obj["file"] = JSONObject.StringObject(relativeFile);
+                exps_obj.Add(exp_obj);
+            }
+        }
+
+        GUIUtility.systemCopyBuffer = jsonObject.ToString(true);
+    }
+
+    private bool IsJsonPathValid()
+    {
+        if (string.IsNullOrEmpty(JsonPath))
+        {
+            return false;
+        }
+        return true;
+    }
+
+    private bool IsFolderValid()
+    {
+        if (string.IsNullOrEmpty(FolderPath))
+        {
+            return false;
+        }
+        return true;
+    }
+
+    private string[] GetMotionFiles(string path)
+    {
+        if (!IsFolderValid())
+        {
+            return new string[0];
+        }
+        if (IncludeChildren)
+            return Directory.GetFiles(path, "*.mtn", SearchOption.AllDirectories);
+        else
+            return Directory.GetFiles(path, "*.mtn");
+    }
+
+    private string[] GetExpFiles(string path)
+    {
+        if (!IsFolderValid())
+        {
+            return new string[0];
+        }
+        if (IncludeChildren)
+            return Directory.GetFiles(path, "*.json", SearchOption.AllDirectories);
+        else
+            return Directory.GetFiles(path, "*.json");
+    }
+
+    private string GetFixedName(string relativePath)
+    {
+        // 处理逻辑：
+        // 1. A/B/C.json -> A/B/C
+        // 2. ../A.json -> __/A
+
+        if (relativePath.StartsWith("/"))
+        {
+            relativePath = relativePath.Substring(1);
+        }
+
+        // 获取不带扩展名的文件名
+        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(relativePath);
+        fileNameWithoutExtension = fileNameWithoutExtension.Split(".")[0];
+
+        // 获取目录部分（处理根目录情况）
+        var directoryPart = Path.GetDirectoryName(relativePath);
+        if (string.IsNullOrEmpty(directoryPart))
+        {
+            // 如果没有目录部分（同一目录下的文件）
+            return fileNameWithoutExtension;
+        }
+
+        // 将目录中的".."替换为"__"，并统一路径分隔符为"/"
+        var fixedDirectory = directoryPart.Replace("..", "__").Replace(Path.DirectorySeparatorChar, '/');
+
+        // 组合目录和文件名
+        var fixedName = $"{fixedDirectory}/{fileNameWithoutExtension}";
+
+        // 处理特殊情况：如果路径以"/"或"./"开头，移除多余的斜杠
+        if (fixedName.StartsWith("/"))
+        {
+            fixedName = fixedName.Substring(1);
+        }
+        else if (fixedName.StartsWith("./"))
+        {
+            fixedName = fixedName.Substring(2);
+        }
+
+        return fixedName;
+    }
+
+    private JSONObject GetJsonObject(string filePath)
+    {
+        var file = File.ReadAllText(filePath);
+        return new JSONObject(file);
+    }
 }
