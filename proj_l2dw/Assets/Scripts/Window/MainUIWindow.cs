@@ -16,10 +16,12 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
     private Transform m_itemPageNavMotion;
     private Transform m_itemPageNavInstructions;
     private Transform m_itemPageNavModification;
+    private Transform m_itemPageNavTools;
     private Toggle m_togglePreview;
     private Toggle m_toggleMotion;
     private Toggle m_toggleInstructions;
     private Toggle m_toggleModification;
+    private Toggle m_toggleTools;
     private Button m_btnSetting;
     #endregion
 
@@ -30,16 +32,19 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
         m_itemPageNavMotion = transform.Find("pages/m_itemPageNavMotion").GetComponent<Transform>();
         m_itemPageNavInstructions = transform.Find("pages/m_itemPageNavInstructions").GetComponent<Transform>();
         m_itemPageNavModification = transform.Find("pages/m_itemPageNavModification").GetComponent<Transform>();
+        m_itemPageNavTools = transform.Find("pages/m_itemPageNavTools").GetComponent<Transform>();
         m_togglePreview = transform.Find("Tabs/toggles/m_togglePreview").GetComponent<Toggle>();
         m_toggleMotion = transform.Find("Tabs/toggles/m_toggleMotion").GetComponent<Toggle>();
         m_toggleInstructions = transform.Find("Tabs/toggles/m_toggleInstructions").GetComponent<Toggle>();
         m_toggleModification = transform.Find("Tabs/toggles/m_toggleModification").GetComponent<Toggle>();
+        m_toggleTools = transform.Find("Tabs/toggles/m_toggleTools").GetComponent<Toggle>();
         m_btnSetting = transform.Find("Tabs/m_btnSetting").GetComponent<Button>();
 
         m_togglePreview.onValueChanged.AddListener(OnTogglePreviewChange);
         m_toggleMotion.onValueChanged.AddListener(OnToggleMotionChange);
         m_toggleInstructions.onValueChanged.AddListener(OnToggleInstructionsChange);
         m_toggleModification.onValueChanged.AddListener(OnToggleModificationChange);
+        m_toggleTools.onValueChanged.AddListener(OnToggleToolsChange);
         m_btnSetting.onClick.AddListener(OnButtonSettingClick);
     }
     #endregion
@@ -57,6 +62,9 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
     private void OnToggleModificationChange(bool value)
     {
     }
+    private void OnToggleToolsChange(bool value)
+    {
+    }
     private void OnButtonSettingClick()
     {
         MainControl.Instance.ShowSettingUIWindow();
@@ -67,6 +75,7 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
     private PageNavMotion m_pageNavMotion;
     private PageNavInstructions m_pageNavInstructions;
     private PageNavModification m_pageNavModification;
+    private PageNavTools m_pageNavTools;
     protected override void OnInit()
     {
         base.OnInit();
@@ -78,6 +87,8 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
         m_pageNavInstructions.BindToToggle(m_toggleInstructions);
         m_pageNavModification = PageNavModification.CreateWidget(m_itemPageNavModification.gameObject);
         m_pageNavModification.BindToToggle(m_toggleModification);
+        m_pageNavTools = PageNavTools.CreateWidget(m_itemPageNavTools.gameObject);
+        m_pageNavTools.BindToToggle(m_toggleTools);
     }
 
     public void Update()
@@ -93,6 +104,10 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
         if (m_pageNavModification.IsActive)
         {
             // m_pageNavModification.Update();
+        }
+        if (m_pageNavTools.IsActive)
+        {
+            // m_pageNavTools.Update();
         }
     }
 }
