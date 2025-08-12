@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.WSA;
 
 public class PageNavTools : UIPageWidget<PageNavTools>
 {
