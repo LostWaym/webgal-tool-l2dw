@@ -261,6 +261,10 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
     private Button m_btnAddMotion;
     private Button m_btnAddExp;
     private Button m_btnAddAll;
+    private Button m_btnSelectAddAll;
+    private Button m_btnRemoveMotion;
+    private Button m_btnRemoveExp;
+    private Button m_btnRemoveAll;
     #endregion
 
     #region auto generated binders
@@ -273,6 +277,10 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
         m_btnAddMotion = transform.Find("GameObject/m_btnAddMotion").GetComponent<Button>();
         m_btnAddExp = transform.Find("GameObject/m_btnAddExp").GetComponent<Button>();
         m_btnAddAll = transform.Find("GameObject/m_btnAddAll").GetComponent<Button>();
+        m_btnSelectAddAll = transform.Find("GameObject (2)/m_btnSelectAddAll").GetComponent<Button>();
+        m_btnRemoveMotion = transform.Find("GameObject (1)/m_btnRemoveMotion").GetComponent<Button>();
+        m_btnRemoveExp = transform.Find("GameObject (1)/m_btnRemoveExp").GetComponent<Button>();
+        m_btnRemoveAll = transform.Find("GameObject (1)/m_btnRemoveAll").GetComponent<Button>();
 
         m_iptJsonPath.onValueChanged.AddListener(OnInputFieldJsonPathChange);
         m_iptJsonPath.onEndEdit.AddListener(OnInputFieldJsonPathEndEdit);
@@ -284,6 +292,10 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
         m_btnAddMotion.onClick.AddListener(OnButtonAddMotionClick);
         m_btnAddExp.onClick.AddListener(OnButtonAddExpClick);
         m_btnAddAll.onClick.AddListener(OnButtonAddAllClick);
+        m_btnSelectAddAll.onClick.AddListener(OnButtonSelectAddAllClick);
+        m_btnRemoveMotion.onClick.AddListener(OnButtonRemoveMotionClick);
+        m_btnRemoveExp.onClick.AddListener(OnButtonRemoveExpClick);
+        m_btnRemoveAll.onClick.AddListener(OnButtonRemoveAllClick);
     }
     #endregion
 
@@ -311,18 +323,43 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
     }
     private void OnButtonAddMotionClick()
     {
-        DoExecute(true, false);
+        DoExecute(true, false, false);
         MessageTipWindow.Instance.Show("提示", "复制成功");
     }
     private void OnButtonAddExpClick()
     {
-        DoExecute(false, true);
+        DoExecute(false, true, false);
         MessageTipWindow.Instance.Show("提示", "复制成功");
     }
     private void OnButtonAddAllClick()
     {
-        DoExecute(true, true);
+        DoExecute(true, true, false);
         MessageTipWindow.Instance.Show("提示", "复制成功");
+    }
+    private void OnButtonRemoveMotionClick()
+    {
+        DoExecute(true, false, true);
+        MessageTipWindow.Instance.Show("提示", "删除成功");
+    }
+    private void OnButtonRemoveExpClick()
+    {
+        DoExecute(false, true, true);
+        MessageTipWindow.Instance.Show("提示", "删除成功");
+    }
+    private void OnButtonRemoveAllClick()
+    {
+        DoExecute(true, true, true);
+        MessageTipWindow.Instance.Show("提示", "删除成功");
+    }
+
+    private void OnButtonSelectAddAllClick()
+    {
+        var files = L2DWUtils.OpenFileDialog("选择动作或表情文件", "motion", "json|mtn", true);
+        if (files == null || files.Length == 0)
+            return;
+        
+        DoAdds(files);
+        MessageTipWindow.Instance.Show("提示", "添加成功！");
     }
     #endregion
 
@@ -331,7 +368,7 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
     private string Prefix => m_iptPrefix.text;
     private bool IncludeChildren => m_toggleIncludeChildren.isOn;
 
-    private void DoExecute(bool isMotion, bool isExp)
+    private void DoAdds(string[] files)
     {
         if (!IsJsonPathValid())
         {
@@ -339,7 +376,74 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
             return;
         }
 
-        if (!IsFolderValid())
+        var namePrefix = Prefix;
+        if (!string.IsNullOrWhiteSpace(namePrefix) && !namePrefix.EndsWith("/"))
+        {
+            namePrefix += "/";
+        }
+
+        var jsonObject = GetJsonObject(JsonPath);
+
+        var motions_obj = jsonObject.GetField("motions");
+        if (motions_obj == null)
+        {
+            motions_obj = new JSONObject(JSONObject.Type.OBJECT);
+            jsonObject.SetField("motions", motions_obj);
+        }
+        var exps_obj = jsonObject.GetField("expressions");
+        if (exps_obj == null)
+        {
+            exps_obj = new JSONObject(JSONObject.Type.ARRAY);
+            jsonObject.SetField("expressions", exps_obj);
+        }
+
+        files = files.Select(file => PathHelper.GetRelativePath(JsonPath, file)).ToArray();
+        foreach (var file in files)
+        {
+            string name = Path.GetFileNameWithoutExtension(file);
+            name = name.Split(".")[0];
+            string extension = Path.GetExtension(file);
+            var finalName = namePrefix + name;
+            if (extension == ".mtn")
+            {
+                motions_obj.SetField(finalName, CreateMotionObj(file));
+            }
+            else if (extension == ".json" || extension == ".exp")
+            {
+                exps_obj.Add(CreateExpObj(finalName, file));
+            }
+        }
+
+        GUIUtility.systemCopyBuffer = jsonObject.ToString(true);
+        File.WriteAllText(JsonPath, jsonObject.ToString(true));
+    }
+
+    private JSONObject CreateMotionObj(string path)
+    {
+        var objarr = new JSONObject(JSONObject.Type.ARRAY);
+        var obj = new JSONObject(JSONObject.Type.OBJECT);
+        obj.SetField("file", JSONObject.StringObject(path));
+        objarr.Add(obj);
+        return objarr;
+    }
+
+    private JSONObject CreateExpObj(string name, string path)
+    {
+        var obj = new JSONObject(JSONObject.Type.OBJECT);
+        obj.SetField("name", JSONObject.StringObject(name));
+        obj.SetField("file", JSONObject.StringObject(path));
+        return obj;
+    }
+
+    private void DoExecute(bool isMotion, bool isExp, bool isRemove)
+    {
+        if (!IsJsonPathValid())
+        {
+            MessageTipWindow.Instance.Show("提示", "请输入正确的Json路径");
+            return;
+        }
+
+        if (!IsFolderValid() && !isRemove)
         {
             MessageTipWindow.Instance.Show("提示", "请输入正确的文件夹路径");
             return;
@@ -351,55 +455,71 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
             namePrefix += "/";
         }
 
-        var relativeFolderPath = PathHelper.GetRelativePath(JsonPath, FolderPath);
 
         var jsonObject = GetJsonObject(JsonPath);
         if (isMotion)
         {
-            var files = GetMotionFiles(FolderPath);
-            var relativeFiles = files.Select(file => PathHelper.GetRelativePath(JsonPath, file)).ToList();
-
-            var motions_obj = jsonObject.GetField("motions");
-            if (motions_obj == null)
+            if (isRemove)
             {
-                motions_obj = new JSONObject(JSONObject.Type.OBJECT);
-                jsonObject.SetField("motions", motions_obj);
+                jsonObject.SetField("motions", new JSONObject(JSONObject.Type.OBJECT));
             }
-
-            foreach (var relativeFile in relativeFiles)
+            else
             {
-                var fixedName = GetFixedName(relativeFile.Replace(relativeFolderPath, ""));
-                var motion_arrobj = new JSONObject(JSONObject.Type.ARRAY);
-                var motion_obj = new JSONObject(JSONObject.Type.OBJECT);
-                motion_obj.SetField("file", JSONObject.StringObject(relativeFile));
-                motion_arrobj.Add(motion_obj);
-                motions_obj.SetField(namePrefix + fixedName, motion_arrobj);
+                var files = GetMotionFiles(FolderPath);
+                var relativeFiles = files.Select(file => PathHelper.GetRelativePath(JsonPath, file)).ToList();
+
+                var motions_obj = jsonObject.GetField("motions");
+                if (motions_obj == null)
+                {
+                    motions_obj = new JSONObject(JSONObject.Type.OBJECT);
+                    jsonObject.SetField("motions", motions_obj);
+                }
+
+                var relativeFolderPath = PathHelper.GetRelativePath(JsonPath, FolderPath);
+                foreach (var relativeFile in relativeFiles)
+                {
+                    var fixedName = GetFixedName(relativeFile.Replace(relativeFolderPath, ""));
+                    var motion_arrobj = new JSONObject(JSONObject.Type.ARRAY);
+                    var motion_obj = new JSONObject(JSONObject.Type.OBJECT);
+                    motion_obj.SetField("file", JSONObject.StringObject(relativeFile));
+                    motion_arrobj.Add(motion_obj);
+                    motions_obj.SetField(namePrefix + fixedName, motion_arrobj);
+                }
             }
         }
 
         if (isExp)
         {
-            var files = GetExpFiles(FolderPath);
-            var relativeFiles = files.Select(file => PathHelper.GetRelativePath(JsonPath, file)).ToList();
-
-            var exps_obj = jsonObject.GetField("expressions");
-            if (exps_obj == null)
+            if (isRemove)
             {
-                exps_obj = new JSONObject(JSONObject.Type.ARRAY);
-                jsonObject.SetField("expressions", exps_obj);
+                jsonObject.SetField("expressions", new JSONObject(JSONObject.Type.ARRAY));
             }
-
-            foreach (var relativeFile in relativeFiles)
+            else
             {
-                var fixedName = GetFixedName(relativeFile.Replace(relativeFolderPath, ""));
-                var exp_obj = new JSONObject(JSONObject.Type.OBJECT);
-                exp_obj["name"] = JSONObject.StringObject(namePrefix + fixedName);
-                exp_obj["file"] = JSONObject.StringObject(relativeFile);
-                exps_obj.Add(exp_obj);
+                var files = GetExpFiles(FolderPath);
+                var relativeFiles = files.Select(file => PathHelper.GetRelativePath(JsonPath, file)).ToList();
+
+                var exps_obj = jsonObject.GetField("expressions");
+                if (exps_obj == null)
+                {
+                    exps_obj = new JSONObject(JSONObject.Type.ARRAY);
+                    jsonObject.SetField("expressions", exps_obj);
+                }
+
+                var relativeFolderPath = PathHelper.GetRelativePath(JsonPath, FolderPath);
+                foreach (var relativeFile in relativeFiles)
+                {
+                    var fixedName = GetFixedName(relativeFile.Replace(relativeFolderPath, ""));
+                    var exp_obj = new JSONObject(JSONObject.Type.OBJECT);
+                    exp_obj["name"] = JSONObject.StringObject(namePrefix + fixedName);
+                    exp_obj["file"] = JSONObject.StringObject(relativeFile);
+                    exps_obj.Add(exp_obj);
+                }
             }
         }
 
         GUIUtility.systemCopyBuffer = jsonObject.ToString(true);
+        File.WriteAllText(JsonPath, jsonObject.ToString(true));
     }
 
     private bool IsJsonPathValid()
