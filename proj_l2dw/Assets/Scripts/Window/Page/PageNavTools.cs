@@ -73,14 +73,14 @@ public class PageNavTools_Param : UIPageWidget<PageNavTools_Param>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_iptPath = transform.Find("LabelValueH/Value/InputField/m_iptPath").GetComponent<InputField>();
-        m_iptName = transform.Find("LabelValueH (1)/Value/InputField/m_iptName").GetComponent<InputField>();
-        m_btnSetInputParam = transform.Find("LabelValueH (1)/m_btnSetInputParam").GetComponent<Button>();
-        m_lblInputParamName = transform.Find("LabelValueH (1)/m_btnSetInputParam/m_lblInputParamName").GetComponent<Text>();
-        m_iptValue = transform.Find("LabelValueH (2)/Value/InputField/m_iptValue").GetComponent<InputField>();
-        m_toggleIncludeChildren = transform.Find("LabelValueH (2)/m_toggleIncludeChildren").GetComponent<Toggle>();
-        m_btnSetParam = transform.Find("LabelValueH (2)/m_btnSetParam").GetComponent<Button>();
-        m_btnRemoveParam = transform.Find("LabelValueH (2)/m_btnRemoveParam").GetComponent<Button>();
+        m_iptPath = transform.Find("Controls/LabelValueH/Value/InputField/m_iptPath").GetComponent<InputField>();
+        m_iptName = transform.Find("Controls/LabelValueH (1)/Value/InputField/m_iptName").GetComponent<InputField>();
+        m_btnSetInputParam = transform.Find("Controls/LabelValueH (1)/m_btnSetInputParam").GetComponent<Button>();
+        m_lblInputParamName = transform.Find("Controls/LabelValueH (1)/m_btnSetInputParam/m_lblInputParamName").GetComponent<Text>();
+        m_iptValue = transform.Find("Controls/LabelValueH (2)/Value/InputField/m_iptValue").GetComponent<InputField>();
+        m_toggleIncludeChildren = transform.Find("Controls/LabelValueH (2)/m_toggleIncludeChildren").GetComponent<Toggle>();
+        m_btnSetParam = transform.Find("Controls/LabelValueH (2)/m_btnSetParam").GetComponent<Button>();
+        m_btnRemoveParam = transform.Find("Controls/LabelValueH (2)/m_btnRemoveParam").GetComponent<Button>();
 
         m_iptPath.onValueChanged.AddListener(OnInputFieldPathChange);
         m_iptPath.onEndEdit.AddListener(OnInputFieldPathEndEdit);
@@ -94,8 +94,6 @@ public class PageNavTools_Param : UIPageWidget<PageNavTools_Param>
         m_btnRemoveParam.onClick.AddListener(OnButtonRemoveParamClick);
     }
     #endregion
-
-
 
     #region auto generated events
     private void OnInputFieldPathChange(string value)
@@ -254,13 +252,13 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
 {
     #region auto generated members
     private InputField m_iptJsonPath;
-    private InputField m_iptFolder;
     private InputField m_iptPrefix;
+    private Button m_btnSelectAddAll;
+    private InputField m_iptFolder;
     private Toggle m_toggleIncludeChildren;
     private Button m_btnAddMotion;
     private Button m_btnAddExp;
     private Button m_btnAddAll;
-    private Button m_btnSelectAddAll;
     private Button m_btnRemoveMotion;
     private Button m_btnRemoveExp;
     private Button m_btnRemoveAll;
@@ -269,29 +267,29 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_iptJsonPath = transform.Find("LabelValueH/Value/InputField/m_iptJsonPath").GetComponent<InputField>();
-        m_iptFolder = transform.Find("LabelValueH (1)/Value/InputField/m_iptFolder").GetComponent<InputField>();
-        m_iptPrefix = transform.Find("LabelValueH (2)/Value/InputField/m_iptPrefix").GetComponent<InputField>();
-        m_toggleIncludeChildren = transform.Find("GameObject/m_toggleIncludeChildren").GetComponent<Toggle>();
-        m_btnAddMotion = transform.Find("GameObject/m_btnAddMotion").GetComponent<Button>();
-        m_btnAddExp = transform.Find("GameObject/m_btnAddExp").GetComponent<Button>();
-        m_btnAddAll = transform.Find("GameObject/m_btnAddAll").GetComponent<Button>();
-        m_btnSelectAddAll = transform.Find("GameObject (2)/m_btnSelectAddAll").GetComponent<Button>();
-        m_btnRemoveMotion = transform.Find("GameObject (1)/m_btnRemoveMotion").GetComponent<Button>();
-        m_btnRemoveExp = transform.Find("GameObject (1)/m_btnRemoveExp").GetComponent<Button>();
-        m_btnRemoveAll = transform.Find("GameObject (1)/m_btnRemoveAll").GetComponent<Button>();
+        m_iptJsonPath = transform.Find("Controls/json文件路径/Value/InputField/m_iptJsonPath").GetComponent<InputField>();
+        m_iptPrefix = transform.Find("Controls/前缀/Value/InputField/m_iptPrefix").GetComponent<InputField>();
+        m_btnSelectAddAll = transform.Find("Controls/GameObject (2)/m_btnSelectAddAll").GetComponent<Button>();
+        m_iptFolder = transform.Find("Controls/批量操作/Container/LabelValueH (1)/Value/InputField/m_iptFolder").GetComponent<InputField>();
+        m_toggleIncludeChildren = transform.Find("Controls/批量操作/Container/GameObject/m_toggleIncludeChildren").GetComponent<Toggle>();
+        m_btnAddMotion = transform.Find("Controls/批量操作/Container/GameObject/m_btnAddMotion").GetComponent<Button>();
+        m_btnAddExp = transform.Find("Controls/批量操作/Container/GameObject/m_btnAddExp").GetComponent<Button>();
+        m_btnAddAll = transform.Find("Controls/批量操作/Container/GameObject/m_btnAddAll").GetComponent<Button>();
+        m_btnRemoveMotion = transform.Find("Controls/危险操作/Container/GameObject (1)/m_btnRemoveMotion").GetComponent<Button>();
+        m_btnRemoveExp = transform.Find("Controls/危险操作/Container/GameObject (1)/m_btnRemoveExp").GetComponent<Button>();
+        m_btnRemoveAll = transform.Find("Controls/危险操作/Container/GameObject (1)/m_btnRemoveAll").GetComponent<Button>();
 
         m_iptJsonPath.onValueChanged.AddListener(OnInputFieldJsonPathChange);
         m_iptJsonPath.onEndEdit.AddListener(OnInputFieldJsonPathEndEdit);
-        m_iptFolder.onValueChanged.AddListener(OnInputFieldFolderChange);
-        m_iptFolder.onEndEdit.AddListener(OnInputFieldFolderEndEdit);
         m_iptPrefix.onValueChanged.AddListener(OnInputFieldPrefixChange);
         m_iptPrefix.onEndEdit.AddListener(OnInputFieldPrefixEndEdit);
+        m_btnSelectAddAll.onClick.AddListener(OnButtonSelectAddAllClick);
+        m_iptFolder.onValueChanged.AddListener(OnInputFieldFolderChange);
+        m_iptFolder.onEndEdit.AddListener(OnInputFieldFolderEndEdit);
         m_toggleIncludeChildren.onValueChanged.AddListener(OnToggleIncludeChildrenChange);
         m_btnAddMotion.onClick.AddListener(OnButtonAddMotionClick);
         m_btnAddExp.onClick.AddListener(OnButtonAddExpClick);
         m_btnAddAll.onClick.AddListener(OnButtonAddAllClick);
-        m_btnSelectAddAll.onClick.AddListener(OnButtonSelectAddAllClick);
         m_btnRemoveMotion.onClick.AddListener(OnButtonRemoveMotionClick);
         m_btnRemoveExp.onClick.AddListener(OnButtonRemoveExpClick);
         m_btnRemoveAll.onClick.AddListener(OnButtonRemoveAllClick);
