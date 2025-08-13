@@ -112,10 +112,6 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
     }
 }
 
-internal class PageNavInstructions : UIPageWidget<PageNavInstructions>
-{
-}
-
 public class PageNavPreview : UIPageWidget<PageNavPreview>
 {
 

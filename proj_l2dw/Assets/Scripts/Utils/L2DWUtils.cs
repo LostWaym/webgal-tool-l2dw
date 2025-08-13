@@ -7,6 +7,8 @@ using UnityEngine;
 
 public static class L2DWUtils
 {
+    public static string CopyBoard => GUIUtility.systemCopyBuffer;
+
     public static bool IsSubFolderOf(string subFolder, string folder)
     {
         if (string.IsNullOrEmpty(folder))
@@ -223,5 +225,15 @@ public static class L2DWUtils
 
         // 达到最大迭代次数后返回最后一次计算的y值
         return Bezier4(p0, p1, p2, p3, t).y;
+    }
+
+    public static string[] GetLines(string text, bool removeEmpty = true)
+    {
+        var lines = text.Replace("\r", "").Split('\n');
+        if (removeEmpty)
+        {
+            lines = lines.Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
+        }
+        return lines;
     }
 }

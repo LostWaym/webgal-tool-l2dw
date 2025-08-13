@@ -358,6 +358,20 @@ public class MainControl : MonoBehaviour
 
     #region 立绘
 
+    public ModelAdjusterBase FindTarget(string id)
+    {
+        foreach (var model in models)
+        {
+            if (model is ModelAdjuster modelAdjuster)
+            {
+                if (modelAdjuster.meta.name == id)
+                    return model;
+            }
+        }
+
+        return null;
+    }
+
     public void CopyAllSpilt(bool motion = true, bool transform = true)
     {
         if (curTarget == null)
