@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 public static class Experiment
 {
@@ -168,6 +169,26 @@ public static class Experiment
             }
         }
         return jsonObject;
+    }
+
+    // chinese regex
+    private static readonly Regex chineseRegex = new Regex("[\u4e00-\u9fa5]");
+    public static int GetSayDuration(string content, int chineseDuration = 250, int otherDuration = 100)
+    {
+        int totalDuration = 0;
+        foreach (var c in content)
+        {
+            if (chineseRegex.IsMatch(c.ToString()))
+            {
+                totalDuration += chineseDuration;
+            }
+            else
+            {
+                totalDuration += otherDuration;
+            }
+        }
+        
+        return totalDuration;
     }
 }
 

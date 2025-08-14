@@ -339,31 +339,41 @@ public class Live2DParamInfoList
         }
     }
 
-    public void ApplyInitParams(MygoConfig config)
+    // public void ApplyInitParams(MygoConfig config)
+    // {
+    //     foreach (var item in config.init_params)
+    //     {
+    //         paramDefDict[item.Key] = item.Value;
+    //     }
+    // }
+
+    private Dictionary<string, float> initParamsDict = new Dictionary<string, float>();
+    public void CombineInitParams(IEnumerable<MygoConfig> configs)
     {
-        foreach (var item in config.init_params)
+        initParamsDict.Clear();
+        foreach (var config in configs)
+        {
+            foreach (var item in config.init_params)
+            {
+                if (initParamsDict.ContainsKey(item.Key))
+                    continue;
+
+                initParamsDict[item.Key] = item.Value;
+            }
+        }
+
+        foreach (var item in initParamsDict)
         {
             paramDefDict[item.Key] = item.Value;
         }
     }
 
-    public void CombineInitParams(IEnumerable<MygoConfig> configs)
+    public void ApplyInitParamsToModel(MyGOLive2DEx myGOLive2DEx)
     {
-        Dictionary<string, float> dict = new Dictionary<string, float>();
-        foreach (var config in configs)
+        foreach (var item in initParamsDict)
         {
-            foreach (var item in config.init_params)
-            {
-                if (dict.ContainsKey(item.Key))
-                    continue;
-
-                dict[item.Key] = item.Value;
-            }
-        }
-
-        foreach (var item in dict)
-        {
-            paramDefDict[item.Key] = item.Value;
+            myGOLive2DEx.Live2DModel.setParamFloat(item.Key, item.Value);
+            myGOLive2DEx.Live2DModel.saveParam();
         }
     }
 

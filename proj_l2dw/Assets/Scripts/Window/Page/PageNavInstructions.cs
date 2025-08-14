@@ -96,6 +96,7 @@ internal class PageNavInstructions : UIPageWidget<PageNavInstructions>
             switch (info.command.ToLower())
             {
                 case "setfigure":
+                {
                     var target = MainControl.Instance.FindTarget(info.commandParam);
                     var motion = info.GetParameter("motion");
                     var exp = info.GetParameter("expression");
@@ -112,12 +113,24 @@ internal class PageNavInstructions : UIPageWidget<PageNavInstructions>
                     }
                     nextActionTime = Time.unscaledTime;
                     Debug.Log($"setfigure: {info.commandParam}, motion: {motion}, expression: {exp}");
-                break;
+                    break;
+                }
                 case "wait":
                     int.TryParse(info.commandParam, out var waitTime);
                     nextActionTime = Time.unscaledTime + waitTime * 0.001f;
                     Debug.Log($"wait: {waitTime}");
                 break;
+                case "say":
+                {
+                    var content = info.commandParam;
+                    var targetId = info.GetParameter("target");
+                    var target = MainControl.Instance.FindTarget(targetId);
+                    if (target != null)
+                    {
+                        // target.Say(content);
+                    }
+                    break;
+                }
             }
             UpdateBeat();
         }

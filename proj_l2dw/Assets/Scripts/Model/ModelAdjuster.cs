@@ -264,15 +264,20 @@ public class ModelAdjuster : ModelAdjusterBase
         var motionName = curMotionName;
         CreateModel();
         Adjust();
+        InitParamInfoList();
         PlayExp(expName);
         PlayMotion(motionName);
-        InitParamInfoList();
     }
 
     private void InitParamInfoList()
     {
         emotionEditor.list.CombineParamInfoList(webgalPoses.Select(pos => pos.model.Live2DModel));
         emotionEditor.list.CombineInitParams(webgalPoses.Select(pos => pos.model.myGOConfig));
+
+        foreach (var pos in webgalPoses)
+        {
+            emotionEditor.list.ApplyInitParamsToModel(pos.model);
+        }
     }
 
     public override string GetMotionExpressionParamsText()
