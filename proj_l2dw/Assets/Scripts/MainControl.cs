@@ -426,10 +426,14 @@ public class MainControl : MonoBehaviour
         }
 
         var format = curTarget.MotionTemplate;
-        var output = format.Replace("%me%", curTarget.GetMotionExpressionParamsText() + $" -transform={GetTransformTextTarget(curTarget, 0)}");
+        var motionExpressionString = curTarget.GetMotionExpressionParamsText();
+        var transformString = $" -transform={GetTransformTextTarget(curTarget)}";
+        var boundsString = curTarget.GetBoundsText() != "" ? $" -bounds={curTarget.GetBoundsText()}" : "";
+        var output = format.Replace("%me%", motionExpressionString + transformString + boundsString);
         for (int i = 0; i < curTarget.ModelCount; i++)
         {
-            output = output.Replace($"%me_{i}%", curTarget.GetMotionExpressionParamsText() + $" -transform={GetTransformTextTarget(curTarget, i)}");
+            var subModelTransformString = $" -transform={GetTransformTextTarget(curTarget, i)}";
+            output = output.Replace($"%me_{i}%", motionExpressionString + subModelTransformString + boundsString);
         }
         L2DWUtils.CopyInstructionToCopyBoard(output);
         ShowDebugText("复制成功！");
@@ -631,10 +635,14 @@ public class MainControl : MonoBehaviour
             }
             
             var format = model.MotionTemplate;
-            var output = format.Replace("%me%", model.GetMotionExpressionParamsText() + $" -transform={GetTransformTextTarget(model)}");
+            var motionExpressionString = model.GetMotionExpressionParamsText();
+            var transformString = $" -transform={GetTransformTextTarget(model)}";
+            var boundsString = model.GetBoundsText() != "" ? $" -bounds={curTarget.GetBoundsText()}" : "";
+            var output = format.Replace("%me%", motionExpressionString + transformString + boundsString);
             for (int i = 0; i < model.ModelCount; i++)
             {
-                output = output.Replace($"%me_{i}%", model.GetMotionExpressionParamsText() + $" -transform={GetTransformTextTarget(model, i)}");
+                var subModelTransformString = $" -transform={GetTransformTextTarget(model, i)}";
+                output = output.Replace($"%me_{i}%", motionExpressionString + subModelTransformString + boundsString);
             }
             commands.AppendLine(output);
         }

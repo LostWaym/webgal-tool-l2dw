@@ -14,10 +14,12 @@ public class MyGOLive2DExMeta
     //index 5: modelFilePaths
     //index 6: modelOffsetX,modelOffsetY|modelOffsetX,modelOffsetY...
     //index 7: reverseX
+    //index 8: boundsLeft,boundsTop,boundsRight,boundsBottom
     public string name;
     public string formatText;
     public string modelFilePath;
     public string transformFormatText;
+    public float[] live2dBounds = new float[] { 0, 0, 0, 0 }; // left, top, right, bottom
 
     public float x,y,scale,rotation;
     public List<string> modelFilePaths = new List<string>();
@@ -78,6 +80,22 @@ public class MyGOLive2DExMeta
         {
             meta.reverseX = int.TryParse(lines[7], out var result) && result == 1;
         }
+        
+        if (lines.Length > 8)
+        {
+            var boundsParts = lines[8].Split(',');
+            if (boundsParts.Length == 4)
+            {
+                meta.live2dBounds[0] = SafeParseFloat(boundsParts[0]); // left
+                meta.live2dBounds[1] = SafeParseFloat(boundsParts[1]); // top
+                meta.live2dBounds[2] = SafeParseFloat(boundsParts[2]); // right
+                meta.live2dBounds[3] = SafeParseFloat(boundsParts[3]); // bottom
+            }
+            else 
+            {
+                Debug.LogWarning($"无法加载 {filePath} 的 bounds 参数，需要 4 个参数, 而文件中只有 {boundsParts.Length} 个.");
+            }
+        }
 
         return meta;
     }
@@ -120,6 +138,7 @@ public class MyGOLive2DExMeta
         sb.AppendLine(string.Join("\\n", modelFilePaths));
         sb.AppendLine(string.Join(",", modelOffset));
         sb.AppendLine(reverseX ? "1" : "0");
+        sb.AppendLine($"{live2dBounds[0]:F3},{live2dBounds[1]:F3},{live2dBounds[2]:F3},{live2dBounds[3]:F3}");
         File.WriteAllText(filePath, sb.ToString());
     }
 

@@ -169,6 +169,11 @@ public class ModelAdjusterBase : MonoBehaviour
     {
         return "";
     }
+    
+    public virtual string GetBoundsText()
+    {
+        return "";
+    }
 
     public virtual void CreateModel()
     {

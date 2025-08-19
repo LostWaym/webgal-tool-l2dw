@@ -10,6 +10,10 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>
     private InputField m_iptModelFilePath;
     private InputField m_iptFormatText;
     private InputField m_iptTransformFormatText;
+    private InputField m_iptBoundsLeft;
+    private InputField m_iptBoundsTop;
+    private InputField m_iptBoundsRight;
+    private InputField m_iptBoundsBottom;
     private Transform m_tfSubModelRoot;
     private Transform m_itemSubModel;
     private Button m_btnAddSubModelPath;
@@ -24,6 +28,12 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>
         m_iptModelFilePath = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/主模型路径/Value/InputField/m_iptModelFilePath").GetComponent<InputField>();
         m_iptFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/立绘指令模板/Value/InputField/m_iptFormatText").GetComponent<InputField>();
         m_iptTransformFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/变换指令模板/Value/InputField/m_iptTransformFormatText").GetComponent<InputField>();
+        
+        m_iptBoundsLeft = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/显示范围/Value/Left/m_iptBoundsLeft").GetComponent<InputField>();
+        m_iptBoundsTop = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/显示范围/Value/Top/m_iptBoundsTop").GetComponent<InputField>();
+        m_iptBoundsRight = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/显示范围/Value/Right/m_iptBoundsRight").GetComponent<InputField>();
+        m_iptBoundsBottom = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/显示范围/Value/Bottom/m_iptBoundsBottom").GetComponent<InputField>();
+        
         m_tfSubModelRoot = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/子立绘路径/m_tfSubModelRoot").GetComponent<Transform>();
         m_itemSubModel = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/子立绘路径/m_tfSubModelRoot/m_itemSubModel").GetComponent<Transform>();
         m_btnAddSubModelPath = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/子立绘路径/GameObject/m_btnAddSubModelPath").GetComponent<Button>();
@@ -38,6 +48,16 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>
         m_iptFormatText.onEndEdit.AddListener(OnInputFieldFormatTextEndEdit);
         m_iptTransformFormatText.onValueChanged.AddListener(OnInputFieldTransformFormatTextChange);
         m_iptTransformFormatText.onEndEdit.AddListener(OnInputFieldTransformFormatTextEndEdit);
+        
+        m_iptBoundsLeft.onValueChange.AddListener(OnInputFieldBoundsLeftChange);
+        m_iptBoundsLeft.onEndEdit.AddListener(OnInputFieldBoundsLeftEndEdit);
+        m_iptBoundsTop.onValueChange.AddListener(OnInputFieldBoundsTopChange);
+        m_iptBoundsTop.onEndEdit.AddListener(OnInputFieldBoundsTopEndEdit);
+        m_iptBoundsRight.onValueChange.AddListener(OnInputFieldBoundsRightChange);
+        m_iptBoundsRight.onEndEdit.AddListener(OnInputFieldBoundsRightEndEdit);
+        m_iptBoundsBottom.onValueChange.AddListener(OnInputFieldBoundsBottomChange);
+        m_iptBoundsBottom.onEndEdit.AddListener(OnInputFieldBoundsBottomEndEdit);
+        
         m_btnAddSubModelPath.onClick.AddListener(OnButtonAddSubModelPathClick);
         m_btnSave.onClick.AddListener(OnButtonSaveClick);
         m_btnCancel.onClick.AddListener(OnButtonCancelClick);
@@ -72,6 +92,31 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>
     private void OnInputFieldTransformFormatTextEndEdit(string value)
     {
     }
+    private void OnInputFieldBoundsLeftChange(string value)
+    {
+    }
+
+    private void OnInputFieldBoundsLeftEndEdit(string value)
+    {
+    }
+    private void OnInputFieldBoundsTopChange(string value)
+    {
+    }
+    private void OnInputFieldBoundsTopEndEdit(string value)
+    {
+    }
+    private void OnInputFieldBoundsRightChange(string value)
+    {
+    }
+    private void OnInputFieldBoundsRightEndEdit(string value)
+    {
+    }
+    private void OnInputFieldBoundsBottomChange(string value)
+    {
+    }
+    private void OnInputFieldBoundsBottomEndEdit(string value)
+    {
+    }
     private void OnButtonAddSubModelPathClick()
     {
         AddSubModel("0.0");
@@ -104,6 +149,10 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>
         m_iptFormatText.text = meta.formatText;
         m_iptModelFilePath.text = meta.modelFilePath;
         m_iptTransformFormatText.text = meta.transformFormatText;
+        m_iptBoundsLeft.text = meta.live2dBounds[0].ToString();
+        m_iptBoundsTop.text = meta.live2dBounds[1].ToString();
+        m_iptBoundsRight.text = meta.live2dBounds[2].ToString();
+        m_iptBoundsBottom.text = meta.live2dBounds[3].ToString();
         LoadSubModels();
     }
 
@@ -113,6 +162,10 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>
         meta.formatText = m_iptFormatText.text;
         meta.modelFilePath = m_iptModelFilePath.text;
         meta.transformFormatText = m_iptTransformFormatText.text;
+        meta.live2dBounds[0] = float.TryParse(m_iptBoundsLeft.text, out var left) ? left : 0.0f;
+        meta.live2dBounds[1] = float.TryParse(m_iptBoundsTop.text, out var top) ? top : 0.0f;
+        meta.live2dBounds[2] = float.TryParse(m_iptBoundsRight.text, out var right) ? right : 0.0f;
+        meta.live2dBounds[3] = float.TryParse(m_iptBoundsBottom.text, out var bottom) ? bottom : 0.0f;
         SaveSubModels();
     }
 

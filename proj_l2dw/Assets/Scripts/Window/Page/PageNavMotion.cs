@@ -808,7 +808,12 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         m_listMotionData = curTarget.motionDataList;
         SelectOrCreateDefaultMotionData();
         paramKeys = curTarget.GetEmotionEditorList().list;
-        m_rawChara.texture = curTarget.GetCharaTexture();
+        var characterTexture = curTarget.GetCharaTexture();
+        m_rawChara.texture = characterTexture;
+        // Todo: 更正确的做法是拿到预览窗口的大小
+        const float previewWindowWidth = 400.0f;
+        var scaleFactor = previewWindowWidth / characterTexture.width;
+        m_rawChara.rectTransform.sizeDelta = new Vector2(characterTexture.width, characterTexture.height) * scaleFactor;
         RefreshAll();
     }
 

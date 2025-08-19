@@ -18,8 +18,7 @@ public class ModelAdjuster : ModelAdjusterBase
     private float rootScale = 1;
     private float rootRotation = 0;
 
-    [SerializeField]
-    private Transform root;
+    [SerializeField] private Transform root;
 
     public override Vector3 RootPosition
     {
@@ -54,13 +53,11 @@ public class ModelAdjuster : ModelAdjusterBase
 
     public override MygoExp CurExp => MainModel.expMgr.curExp;
     public override MygoConfig MyGOConfig => MainModel.myGOConfig;
-    [SerializeField]
-    private Transform pivot;
-    [SerializeField]
-    private WebGalModelPos webgalPosPrefab;
+    [SerializeField] private Transform pivot;
+    [SerializeField] private WebGalModelPos webgalPosPrefab;
     public MyGOLive2DEx MainModel => webgalPoses.Count > 0 ? webgalPoses[0].model : null;
     private List<WebGalModelPos> webgalPoses = new List<WebGalModelPos>();
-    
+
     private RenderTexture rt;
     private float canvasResolutionScale = 1.0f;
     private Matrix4x4 modelMatrix;
@@ -70,9 +67,10 @@ public class ModelAdjuster : ModelAdjusterBase
 
     private void Start()
     {
-        this.canvasHackField = typeof(Canvas).GetField("willRenderCanvases", BindingFlags.NonPublic | BindingFlags.Static);
+        this.canvasHackField =
+            typeof(Canvas).GetField("willRenderCanvases", BindingFlags.NonPublic | BindingFlags.Static);
     }
-    
+
     public override Live2DParamInfoList GetEmotionEditorList()
     {
         return emotionEditor.list;
@@ -211,6 +209,7 @@ public class ModelAdjuster : ModelAdjusterBase
                 {
                     model.PlayMotion(curMotionName);
                 }
+
                 if (!string.IsNullOrEmpty(curExpName))
                 {
                     model.PlayExp(curExpName);
@@ -234,7 +233,7 @@ public class ModelAdjuster : ModelAdjusterBase
         foreach (var pos in webgalPoses)
         {
             var model = pos.model;
-            foreach(var part in model.m_partsDataList)
+            foreach (var part in model.m_partsDataList)
             {
                 var partKey = part.getPartsDataID().ToString();
                 if (model.myGOConfig.init_opacities.TryGetValue(partKey, out var opacity))
@@ -284,6 +283,26 @@ public class ModelAdjuster : ModelAdjusterBase
     {
         return MainModel.GetOutputText();
     }
+    
+    public override string GetBoundsText()
+    {
+        if (meta == null)
+        {
+            Debug.LogError("Meta 为空，无法获取 Bounds 文本");
+            return "";
+        }
+        // 检查 live2dBounds 是否全为 0
+        if (
+            meta.live2dBounds[0] == 0
+            && meta.live2dBounds[1] == 0
+            && meta.live2dBounds[2] == 0
+            && meta.live2dBounds[3] == 0
+            )
+        {
+            return "";
+        }
+        return $"{meta.live2dBounds[0]},{meta.live2dBounds[1]},{meta.live2dBounds[2]},{meta.live2dBounds[3]}";
+    }
 
     public override void CreateModel()
     {
@@ -291,6 +310,7 @@ public class ModelAdjuster : ModelAdjusterBase
         {
             Destroy(pos.gameObject);
         }
+
         webgalPoses.Clear();
 
         WebGalModelPos CreateWebGalModelPos(string modelFilePath)
@@ -306,8 +326,10 @@ public class ModelAdjuster : ModelAdjusterBase
             {
                 return null;
             }
+
             var pos = Instantiate(webgalPosPrefab);
             var model = pos.model;
+            model.live2dBounds = this.meta.live2dBounds; // 必须立即设置 bounds, 因为 LoadConfig 要用
             model.LoadConfig(config);
             model.transform.localScale = Vector3.one;
             model.transform.localPosition = Vector3.zero;
@@ -324,6 +346,7 @@ public class ModelAdjuster : ModelAdjusterBase
         {
             return;
         }
+
         webgalPoses.Add(mainModel);
         for (int i = 0; i < meta.modelFilePaths.Count; i++)
         {
@@ -337,18 +360,19 @@ public class ModelAdjuster : ModelAdjusterBase
         {
             rt.Release();
         }
+
         this.rt = new RenderTexture(
-            (int)(MainModel.Live2DModel.getCanvasWidth() * canvasResolutionScale),
-            (int)(MainModel.Live2DModel.getCanvasHeight() * canvasResolutionScale),
+            (int)(MainModel.getModifiedWidth() * canvasResolutionScale),
+            (int)(MainModel.getModifiedHeight() * canvasResolutionScale),
             0
         );
         MainModel.meshRenderer.material.mainTexture = this.rt;
         MainModel.meshRenderer.gameObject.SetActive(true);
         this.modelMatrix = Matrix4x4.Ortho(
-            0,
-            MainModel.Live2DModel.getCanvasWidth(),
-            MainModel.Live2DModel.getCanvasHeight(),
-            0,
+            meta.live2dBounds[0],
+            MainModel.Live2DModel.getCanvasWidth() + meta.live2dBounds[2],
+            MainModel.Live2DModel.getCanvasHeight() + meta.live2dBounds[3],
+            meta.live2dBounds[1],
             -500.0f,
             500.0f
         );
@@ -377,11 +401,13 @@ public class ModelAdjuster : ModelAdjusterBase
                 WebGalModelPos pos = webgalPoses[i];
                 pos.transform.localPosition -= mainPos;
             }
+
             pivot.transform.localPosition = mainPos;
         }
-        
+
         transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
-        transform.position = new Vector3(Constants.WebGalWidth * 0.01f * 0.5f * -1f, Constants.WebGalHeight * 0.01f * 0.5f * 1f, 0);
+        transform.position = new Vector3(Constants.WebGalWidth * 0.01f * 0.5f * -1f,
+            Constants.WebGalHeight * 0.01f * 0.5f * 1f, 0);
     }
 
     public override void SetPosition(float x, float y)
@@ -405,7 +431,7 @@ public class ModelAdjuster : ModelAdjusterBase
 
         reverseXScale = reverse;
         pivot.localScale = new Vector3(reverseXScale ? -rootScale : rootScale, rootScale, 1);
-        
+
         SetCharacterWorldPosition(oldPos.x, oldPos.y);
     }
 
@@ -481,32 +507,35 @@ public class ModelAdjuster : ModelAdjusterBase
             Debug.LogError("Camera.main is null");
             return;
         }
+
         if (MainModel == null)
         {
             return;
         }
+
         foreach (var pos in webgalPoses)
         {
             pos.model.UpdateLive2D();
             pos.model.isMainRenderLoop = false;
         }
+
         var camPreLayer = camera.cullingMask;
         var goPreLayer = gameObject.layer;
         camera.cullingMask = LayerMask.NameToLayer("Isolate");
         gameObject.layer = LayerMask.NameToLayer("Isolate");
         camera.targetTexture = rt;
         camera.projectionMatrix = this.modelMatrix;
-        
+
         var canvasHackObject = canvasHackField.GetValue(null);
         canvasHackField.SetValue(null, null);
         camera.Render();
         canvasHackField.SetValue(null, canvasHackObject);
-        
+
         camera.cullingMask = camPreLayer;
         gameObject.layer = goPreLayer;
         camera.targetTexture = null;
         camera.ResetProjectionMatrix();
-        
+
         foreach (var pos in webgalPoses)
         {
             pos.model.isMainRenderLoop = true;
@@ -546,12 +575,12 @@ public class ModelAdjuster : ModelAdjusterBase
             }
         }
     }
-    
+
     // 更新屏幕尺寸相关参数
     private void UpdateScreenParams()
     {
         var mat = MainModel.meshRenderer.material;
-        var modelAspect = MainModel.Live2DModel.getCanvasWidth() / MainModel.Live2DModel.getCanvasHeight();
+        var modelAspect = MainModel.getModifiedWidth() / MainModel.getModifiedHeight();
         var pivotScale = 1.0f;
         switch (Global.PivotMode)
         {
@@ -571,6 +600,7 @@ public class ModelAdjuster : ModelAdjusterBase
                 break;
             }
         }
+
         FilterUtils.UpdateScreenParams(mat, modelAspect, RootScaleValue, pivotScale, false);
     }
 
@@ -579,7 +609,7 @@ public class ModelAdjuster : ModelAdjusterBase
         var mat = MainModel.meshRenderer.material;
         FilterUtils.UpdateAlphaFilter(mat, filterSetData);
     }
-    
+
     private void UpdateBlurFilter()
     {
         var mat = MainModel.meshRenderer.material;
@@ -591,13 +621,13 @@ public class ModelAdjuster : ModelAdjusterBase
         var mat = MainModel.meshRenderer.material;
         FilterUtils.UpdateAdjustmentFilter(mat, filterSetData);
     }
-    
+
     private void UpdateBloomFilter()
     {
         var mat = MainModel.meshRenderer.material;
         FilterUtils.UpdateBloomFilter(mat, filterSetData);
     }
-    
+
     private void UpdateBevelFilter()
     {
         var mat = MainModel.meshRenderer.material;
@@ -632,6 +662,7 @@ public class ModelAdjuster : ModelAdjusterBase
         {
             Directory.CreateDirectory(dir);
         }
+
         File.WriteAllBytes(path, bytes);
         Debug.Log($"Save image to {path}");
     }

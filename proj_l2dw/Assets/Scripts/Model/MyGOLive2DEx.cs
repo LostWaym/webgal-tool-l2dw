@@ -37,6 +37,10 @@ public class MyGOLive2DEx : MonoBehaviour
 
     public List<PartsData> m_partsDataList = new List<PartsData>();
     
+    // Live2D模型的边界框
+    // Todo：应当找一个更合理的方式来获取模型的边界框
+    public float[] live2dBounds = new float[] { 0, 0, 0, 0 }; // left, top, right, bottom
+    
     public void LoadConfig(MygoConfig config)
     {
         myGOConfig = config;
@@ -58,15 +62,15 @@ public class MyGOLive2DEx : MonoBehaviour
 
         var plane = meshRenderer.transform;
         plane.localPosition = new Vector3(
-            live2DModel.getCanvasWidth(),
-            live2DModel.getCanvasHeight() * -1.0f,
+            getModifiedWidth(),
+            getModifiedHeight() * -1.0f,
             0.0f
         );
         plane.localRotation = Quaternion.Euler(90.0f, 0.0f, 180.0f);
         plane.localScale = new Vector3(
-            live2DModel.getCanvasWidth() * 0.2f,
+            getModifiedWidth() * 0.2f,
             1.0f,
-            live2DModel.getCanvasHeight() * 0.2f
+            getModifiedHeight() * 0.2f
         );
 
         InitPartsDataList();
@@ -230,6 +234,30 @@ public class MyGOLive2DEx : MonoBehaviour
             return;
         }
         expMgr.startExp(pair.exp, live2DModel);
+    }
+    
+    // 获取 Live2D 模型更改边界后的宽度
+    public float getModifiedWidth()
+    {
+        if (live2DModel == null)
+        {
+            Debug.LogError("模型不存在，无法获取宽度");
+            return 0.0f;
+        }
+
+        return live2DModel.getCanvasWidth() - live2dBounds[0] + live2dBounds[2];
+    }
+    
+    // 获取 Live2D 模型更改边界后的高度
+    public float getModifiedHeight()
+    {
+        if (live2DModel == null)
+        {
+            Debug.LogError("模型不存在，无法获取高度");
+            return 0.0f;
+        }
+
+        return live2DModel.getCanvasHeight() - live2dBounds[1] + live2dBounds[3];
     }
 }
 

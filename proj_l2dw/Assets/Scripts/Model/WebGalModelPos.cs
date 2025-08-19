@@ -41,8 +41,8 @@ public class WebGalModelPos : MonoBehaviour
     private void Adjust2_1___2_3(float offsetX, float offsetY)
     {
         anchor.localScale = Vector3.one * 0.5f;
-        float modelWidth = model.Live2DModel.getCanvasWidth();
-        float modelHeight = model.Live2DModel.getCanvasHeight();
+        float modelWidth = model.getModifiedWidth();
+        float modelHeight = model.getModifiedHeight();
 
         float scaleX = Constants.WebGalWidth / modelWidth;
         float scaleY = Constants.WebGalHeight / modelHeight;
@@ -61,8 +61,8 @@ public class WebGalModelPos : MonoBehaviour
 
     private void Adjust2_4(float offsetX, float offsetY)
     {
-        float modelWidth = model.Live2DModel.getCanvasWidth();
-        float modelHeight = model.Live2DModel.getCanvasHeight();
+        float modelWidth = model.getModifiedWidth();
+        float modelHeight = model.getModifiedHeight();
         
         anchor.localScale = Vector3.one * 0.5f;
         anchor.transform.localPosition = new Vector3(-modelWidth * 0.5f, modelHeight * 0.5f);
@@ -94,8 +94,8 @@ public class WebGalModelPos : MonoBehaviour
     
     private void AdjustBC_1_0(float offsetX, float offsetY)
     {
-        float modelWidth = model.Live2DModel.getCanvasWidth();
-        float modelHeight = model.Live2DModel.getCanvasHeight();
+        float modelWidth = model.getModifiedWidth();
+        float modelHeight = model.getModifiedHeight();
         
         anchor.localScale = Vector3.one * 0.5f;
         anchor.transform.localPosition = new Vector3(-modelWidth * 0.5f, modelHeight / 2.2f);
