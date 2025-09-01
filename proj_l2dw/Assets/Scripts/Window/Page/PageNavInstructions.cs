@@ -10,6 +10,8 @@ internal class PageNavInstructions : UIPageWidget<PageNavInstructions>
     private GameObject m_goLeft;
     private Transform m_tfTrackHeaderRoot;
     private Button m_btnPlay;
+    private Button m_btnPlay2;
+    private InputField m_iptField;
     #endregion
 
     #region auto generated binders
@@ -18,10 +20,16 @@ internal class PageNavInstructions : UIPageWidget<PageNavInstructions>
         m_goLeft = transform.Find("m_goLeft").gameObject;
         m_tfTrackHeaderRoot = transform.Find("m_goLeft/m_tfTrackHeaderRoot").GetComponent<Transform>();
         m_btnPlay = transform.Find("m_goLeft/m_tfTrackHeaderRoot/m_btnPlay").GetComponent<Button>();
+        m_btnPlay2 = transform.Find("m_goLeft/m_tfTrackHeaderRoot/m_btnPlay2").GetComponent<Button>();
+        m_iptField = transform.Find("m_goLeft/m_tfTrackHeaderRoot/InputField/m_iptField").GetComponent<InputField>();
 
         m_btnPlay.onClick.AddListener(OnButtonPlayClick);
+        m_btnPlay2.onClick.AddListener(OnButtonPlay2Click);
+        m_iptField.onValueChanged.AddListener(OnInputFieldFieldChange);
+        m_iptField.onEndEdit.AddListener(OnInputFieldFieldEndEdit);
     }
     #endregion
+
 
     #region auto generated events
     private void OnButtonPlayClick()
@@ -29,6 +37,20 @@ internal class PageNavInstructions : UIPageWidget<PageNavInstructions>
         Parse(L2DWUtils.CopyBoard);
         Play();
     }
+    private void OnButtonPlay2Click()
+    {
+        Parse(m_iptField.text);
+        Play();
+    }
+    private void OnInputFieldFieldChange(string value)
+    {
+        
+    }
+    private void OnInputFieldFieldEndEdit(string value)
+    {
+        
+    }
+
     #endregion
 
     private List<CommandInfo> commandInfoes = new ();
@@ -67,12 +89,25 @@ internal class PageNavInstructions : UIPageWidget<PageNavInstructions>
         index = 0;
         playing = true;
         nextActionTime = startTime;
+        ShutAllUp();
         UpdateBeat();
+    }
+
+    private void ShutAllUp()
+    {
+        foreach (var target in MainControl.Instance.models)
+        {
+            if (target is ModelAdjuster modelAdjuster)
+            {
+                modelAdjuster.ShutUp();
+            }
+        }
     }
 
     private void Stop()
     {
         playing = false;
+        ShutAllUp();
     }
 
     private void Update()
@@ -125,9 +160,36 @@ internal class PageNavInstructions : UIPageWidget<PageNavInstructions>
                     var content = info.commandParam;
                     var targetId = info.GetParameter("target");
                     var target = MainControl.Instance.FindTarget(targetId);
-                    if (target != null)
+                    var duration = (Experiment.GetSayDuration(content) + 500) * 0.001f;
+                    if (target != null && target is ModelAdjuster modelAdjuster)
                     {
-                        // target.Say(content);
+                        modelAdjuster.Speak(Time.time + duration);
+                        Debug.Log($"say: {content}, target: {targetId}");
+                    }
+                    else
+                    {
+                        Debug.Log($"say: {content}, target: {targetId} not found");
+                    }
+
+                    if (info.HasParameter("wait"))
+                    {
+                        nextActionTime = Time.unscaledTime + duration;
+                    }
+
+                    break;
+                }
+                case "shutup":
+                {
+                    var targetId = info.GetParameter("target");
+                    var target = MainControl.Instance.FindTarget(targetId);
+                    if (target != null && target is ModelAdjuster modelAdjuster)
+                    {
+                        modelAdjuster.ShutUp();
+                        Debug.Log($"shutup: {targetId}");
+                    }
+                    else
+                    {
+                        Debug.Log($"shutup: {targetId} not found");
                     }
                     break;
                 }

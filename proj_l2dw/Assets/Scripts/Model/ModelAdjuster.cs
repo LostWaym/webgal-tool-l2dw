@@ -104,6 +104,24 @@ public class ModelAdjuster : ModelAdjusterBase
         }
     }
 
+    public void Speak(float expiredTime)
+    {
+        foreach (var pos in webgalPoses)
+        {
+            var model = pos.model;
+            model.Speak(expiredTime);
+        }
+    }
+
+    public void ShutUp()
+    {
+        foreach (var pos in webgalPoses)
+        {
+            var model = pos.model;
+            model.speakTween.expiredTime = Time.time;
+        }
+    }
+
     public override bool IsMotionParamSetContains(string name)
     {
         return emotionEditor.paramSet.Contains(name);

@@ -30,13 +30,14 @@ public class MyGOLive2DEx : MonoBehaviour
     public float left, up;
     
     public MygoConfig myGOConfig;
+    public SpeakTween speakTween = new SpeakTween();
     
     // 是否为主渲染循环
     public bool isMainRenderLoop = true;
     public MeshRenderer meshRenderer;
 
     public List<PartsData> m_partsDataList = new List<PartsData>();
-    
+
     // Live2D模型的边界框
     // Todo：应当找一个更合理的方式来获取模型的边界框
     public float[] live2dBounds = new float[] { 0, 0, 0, 0 }; // left, top, right, bottom
@@ -147,6 +148,11 @@ public class MyGOLive2DEx : MonoBehaviour
     {
     }
 
+    public void Speak(float expiredTime)
+    {
+        speakTween.expiredTime = expiredTime;
+    }
+
     public void UpdateLive2D()
     {
         if (live2DModel == null)
@@ -190,6 +196,7 @@ public class MyGOLive2DEx : MonoBehaviour
         double timeSec = UtSystem.getUserTimeMSec() / 1000.0;
         double t = timeSec * 2 * Math.PI;
         live2DModel.setParamFloat("PARAM_BREATH", (float)(0.5f + 0.5f * Math.Sin(t / 3.0)));
+        speakTween.Update(live2DModel);
 
         live2DModel.update();
     }
@@ -566,4 +573,36 @@ public enum ModelDisplayMode
     Normal,
     EmotionEditor,
     MotionEditor,
+}
+
+public class SpeakTween
+{
+    public const string PARAM = "PARAM_MOUTH_OPEN_Y";
+    public const float tInTime = 0.33f;
+    public const float tOutTime = 0.33f;
+    public bool IsSpeaking => Time.time < expiredTime;
+    public float t;
+    public float expiredTime;
+
+    public void Update(ALive2DModel model)
+    {
+        if (IsSpeaking)
+        {
+            t += Time.deltaTime / tInTime;
+            t = Mathf.Clamp01(t);
+        }
+        else
+        {
+            t -= Time.deltaTime / tOutTime;
+            t = Mathf.Clamp01(t);
+        }
+
+        
+        var value = model.getParamFloat(PARAM);
+        // linear ping-pong between 0-1
+        var time = Time.time;
+        var tarValue = Mathf.PingPong(time * 4, 1);
+        var finalValue = Mathf.Lerp(value, tarValue, t);
+        model.setParamFloat(PARAM, finalValue);
+    }
 }

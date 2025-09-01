@@ -158,7 +158,7 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>
 
     public void Save()
     {
-        meta.name = m_iptName.text;
+        meta.name = m_iptName.text.Trim();
         meta.formatText = m_iptFormatText.text;
         meta.modelFilePath = m_iptModelFilePath.text;
         meta.transformFormatText = m_iptTransformFormatText.text;

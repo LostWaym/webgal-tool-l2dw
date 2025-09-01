@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -107,8 +108,44 @@ public class PageNavModification : UIPageWidget<PageNavModification>
         jsonObj.AddField("init_params", initParamsObj);
         jsonObj.AddField("init_opacities", initOpacitiesObj);
 
-        GUIUtility.systemCopyBuffer = jsonObj.ToString(true);
-        MessageTipWindow.Instance.Show("配置", "已复制到剪贴板！");
+        TargetSelectUI.Instance.SetData(m_btnMotion.transform.GetComponent<RectTransform>(), m_rectSelectMotionArea.GetComponent<RectTransform>(), m_listSaveOpt);
+        TargetSelectUI.Instance._OnTargetItemClick = (operationName) =>
+        {
+            TargetSelectUI.Instance.Close();
+            switch (operationName)
+            {
+                case OPT_SAVE_TO_CLIPBOARD:
+                {
+                    GUIUtility.systemCopyBuffer = jsonObj.ToString(true);
+                    MessageTipWindow.Instance.Show("配置", "已复制到剪贴板！");
+                    break;
+                }
+                case OPT_SAVE_MAIN_MODEL_JSON:
+                {
+                    JSONObject json = new JSONObject(File.ReadAllText(m_curModel.MyGOConfig.json.filename));
+                    json.RemoveField("init_params");
+                    json.RemoveField("init_opacities");
+                    json.AddField("init_params", initParamsObj);
+                    json.AddField("init_opacities", initOpacitiesObj);
+                    GUIUtility.systemCopyBuffer = json.ToString(true);
+                    File.WriteAllText(m_curModel.MyGOConfig.json.filename, json.ToString(true));
+                    MessageTipWindow.Instance.Show("配置", "已保存到主模型json！");
+                    break;
+                }
+                case OPT_COPY_JSON_TO_CLIPBOARD:
+                {
+                    JSONObject json = new JSONObject(File.ReadAllText(m_curModel.MyGOConfig.json.filename));
+                    json.RemoveField("init_params");
+                    json.RemoveField("init_opacities");
+                    json.AddField("init_params", initParamsObj);
+                    json.AddField("init_opacities", initOpacitiesObj);
+                    json.Absorb(jsonObj);
+                    GUIUtility.systemCopyBuffer = json.ToString(true);
+                    MessageTipWindow.Instance.Show("配置", "已复制到剪贴板！");
+                    break;
+                }
+            }
+        };
     }
     private void OnTogglePartsChange(bool value)
     {
@@ -123,6 +160,17 @@ public class PageNavModification : UIPageWidget<PageNavModification>
     {
     }
     #endregion
+
+    private const string OPT_SAVE_TO_CLIPBOARD = "保存到剪贴板";
+    private const string OPT_SAVE_MAIN_MODEL_JSON = "保存到主模型json";
+    private const string OPT_COPY_JSON_TO_CLIPBOARD = "复制json到剪贴板";
+
+    private List<string> m_listSaveOpt = new List<string>()
+    {
+        OPT_SAVE_TO_CLIPBOARD,
+        OPT_SAVE_MAIN_MODEL_JSON,
+        OPT_COPY_JSON_TO_CLIPBOARD,
+    };
 
     private PageNavModificationParts m_pageNavModificationParts;
     private PageNavModificationInitParams m_pageNavModificationInitParams;
