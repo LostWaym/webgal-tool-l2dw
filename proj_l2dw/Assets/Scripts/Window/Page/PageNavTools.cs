@@ -11,9 +11,11 @@ public class PageNavTools : UIPageWidget<PageNavTools>
     private Transform m_tfTrackHeaderRoot;
     private Toggle m_toggleMotions;
     private Toggle m_toggleParam;
+    private Toggle m_toggleExpParam;
     private GameObject m_goRight;
     private Transform m_itemPageTools_Motions;
     private Transform m_itemPageTools_Param;
+    private Transform m_itemPageTools_ExpParam;
     #endregion
 
     #region auto generated binders
@@ -23,14 +25,18 @@ public class PageNavTools : UIPageWidget<PageNavTools>
         m_tfTrackHeaderRoot = transform.Find("m_goLeft/m_tfTrackHeaderRoot").GetComponent<Transform>();
         m_toggleMotions = transform.Find("m_goLeft/m_tfTrackHeaderRoot/m_toggleMotions").GetComponent<Toggle>();
         m_toggleParam = transform.Find("m_goLeft/m_tfTrackHeaderRoot/m_toggleParam").GetComponent<Toggle>();
+        m_toggleExpParam = transform.Find("m_goLeft/m_tfTrackHeaderRoot/m_toggleExpParam").GetComponent<Toggle>();
         m_goRight = transform.Find("m_goRight").gameObject;
         m_itemPageTools_Motions = transform.Find("m_goRight/m_itemPageTools_Motions").GetComponent<Transform>();
         m_itemPageTools_Param = transform.Find("m_goRight/m_itemPageTools_Param").GetComponent<Transform>();
+        m_itemPageTools_ExpParam = transform.Find("m_goRight/m_itemPageTools_ExpParam").GetComponent<Transform>();
 
         m_toggleMotions.onValueChanged.AddListener(OnToggleMotionsChange);
         m_toggleParam.onValueChanged.AddListener(OnToggleParamChange);
+        m_toggleExpParam.onValueChanged.AddListener(OnToggleExpParamChange);
     }
     #endregion
+
 
     #region auto generated events
     private void OnToggleMotionsChange(bool value)
@@ -41,19 +47,25 @@ public class PageNavTools : UIPageWidget<PageNavTools>
     {
         Debug.Log("OnToggleParamChange");
     }
+    private void OnToggleExpParamChange(bool value)
+    {
+        Debug.Log("OnToggleExpParamChange");
+    }
     #endregion
 
     private PageNavTools_Motions m_pageNavTools_Motions;
     private PageNavTools_Param m_pageNavTools_Param;
-
+    private PageNavTools_ExpParam m_pageNavTools_ExpParam;
     protected override void OnInit()
     {
         base.OnInit();
         m_pageNavTools_Motions = PageNavTools_Motions.CreateWidget(m_itemPageTools_Motions.gameObject);
         m_pageNavTools_Param = PageNavTools_Param.CreateWidget(m_itemPageTools_Param.gameObject);
+        m_pageNavTools_ExpParam = PageNavTools_ExpParam.CreateWidget(m_itemPageTools_ExpParam.gameObject);
 
         m_pageNavTools_Motions.BindToToggle(m_toggleMotions);
         m_pageNavTools_Param.BindToToggle(m_toggleParam);
+        m_pageNavTools_ExpParam.BindToToggle(m_toggleExpParam);
     }
 }
 
@@ -244,6 +256,338 @@ public class PageNavTools_Param : UIPageWidget<PageNavTools_Param>
         foreach (var file in files)
         {
             RemoveMtnFileValue(file, param);
+        }
+    }
+}
+
+public class PageNavTools_ExpParam : UIPageWidget<PageNavTools_ExpParam>
+{
+    #region auto generated members
+    private InputField m_iptPath;
+    private InputField m_iptName;
+    private Button m_btnSetInputParam;
+    private Text m_lblInputParamName;
+    private InputField m_iptValue;
+    private Toggle m_toggleIncludeChildren;
+    private Button m_btnSetParam;
+    private Button m_btnRemoveParam;
+    private Toggle m_toggleSetCalc;
+    private Toggle m_toggleCalcAdd;
+    private Toggle m_toggleCalcMult;
+    private Toggle m_toggleCalcSet;
+    private Button m_btnApplySingle;
+    private Button m_btnApplyAll;
+    #endregion
+
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_iptPath = transform.Find("Controls/LabelValueH/Value/InputField/m_iptPath").GetComponent<InputField>();
+        m_iptName = transform.Find("Controls/LabelValueH (1)/Value/InputField/m_iptName").GetComponent<InputField>();
+        m_btnSetInputParam = transform.Find("Controls/LabelValueH (1)/m_btnSetInputParam").GetComponent<Button>();
+        m_lblInputParamName = transform.Find("Controls/LabelValueH (1)/m_btnSetInputParam/m_lblInputParamName").GetComponent<Text>();
+        m_iptValue = transform.Find("Controls/LabelValueH (2)/Value/InputField/m_iptValue").GetComponent<InputField>();
+        m_toggleIncludeChildren = transform.Find("Controls/LabelValueH (2)/m_toggleIncludeChildren").GetComponent<Toggle>();
+        m_btnSetParam = transform.Find("Controls/LabelValueH (2)/m_btnSetParam").GetComponent<Button>();
+        m_btnRemoveParam = transform.Find("Controls/LabelValueH (2)/m_btnRemoveParam").GetComponent<Button>();
+        m_toggleSetCalc = transform.Find("Controls/m_toggleSetCalc").GetComponent<Toggle>();
+        m_toggleCalcAdd = transform.Find("Controls/GameObject/m_toggleCalcAdd").GetComponent<Toggle>();
+        m_toggleCalcMult = transform.Find("Controls/GameObject/m_toggleCalcMult").GetComponent<Toggle>();
+        m_toggleCalcSet = transform.Find("Controls/GameObject/m_toggleCalcSet").GetComponent<Toggle>();
+        m_btnApplySingle = transform.Find("Controls/GameObject (1)/m_btnApplySingle").GetComponent<Button>();
+        m_btnApplyAll = transform.Find("Controls/GameObject (1)/m_btnApplyAll").GetComponent<Button>();
+
+        m_iptPath.onValueChanged.AddListener(OnInputFieldPathChange);
+        m_iptPath.onEndEdit.AddListener(OnInputFieldPathEndEdit);
+        m_iptName.onValueChanged.AddListener(OnInputFieldNameChange);
+        m_iptName.onEndEdit.AddListener(OnInputFieldNameEndEdit);
+        m_btnSetInputParam.onClick.AddListener(OnButtonSetInputParamClick);
+        m_iptValue.onValueChanged.AddListener(OnInputFieldValueChange);
+        m_iptValue.onEndEdit.AddListener(OnInputFieldValueEndEdit);
+        m_toggleIncludeChildren.onValueChanged.AddListener(OnToggleIncludeChildrenChange);
+        m_btnSetParam.onClick.AddListener(OnButtonSetParamClick);
+        m_btnRemoveParam.onClick.AddListener(OnButtonRemoveParamClick);
+        m_toggleSetCalc.onValueChanged.AddListener(OnToggleSetCalcChange);
+        m_toggleCalcAdd.onValueChanged.AddListener(OnToggleCalcAddChange);
+        m_toggleCalcMult.onValueChanged.AddListener(OnToggleCalcMultChange);
+        m_toggleCalcSet.onValueChanged.AddListener(OnToggleCalcSetChange);
+        m_btnApplySingle.onClick.AddListener(OnButtonApplySingleClick);
+        m_btnApplyAll.onClick.AddListener(OnButtonApplyAllClick);
+    }
+    #endregion
+
+    #region auto generated events
+    private void OnInputFieldPathChange(string value)
+    {
+    }
+    private void OnInputFieldPathEndEdit(string value)
+    {
+    }
+    private void OnInputFieldNameChange(string value)
+    {
+    }
+    private void OnInputFieldNameEndEdit(string value)
+    {
+    }
+    private void OnButtonSetInputParamClick()
+    {
+        m_iptName.text = m_lblInputParamName.text;
+    }
+    private void OnInputFieldValueChange(string value)
+    {
+    }
+    private void OnInputFieldValueEndEdit(string value)
+    {
+    }
+    private void OnToggleIncludeChildrenChange(bool value)
+    {
+    }
+    private void OnButtonSetParamClick()
+    {
+        if (!CheckFolderValid(FolderPath))
+        {
+            MessageTipWindow.Instance.Show("提示", "请输入正确的路径");
+            return;
+        }
+        SetFilesValue(GetFiles(FolderPath), ParamName, float.Parse(ParamValue));
+        MessageTipWindow.Instance.Show("提示", "设置成功");
+    }
+    private void OnButtonRemoveParamClick()
+    {
+        if (!CheckFolderValid(FolderPath))
+        {
+            MessageTipWindow.Instance.Show("提示", "请输入正确的路径");
+            return;
+        }
+        RemoveFilesValue(GetFiles(FolderPath), ParamName);
+        MessageTipWindow.Instance.Show("提示", "删除成功");
+    }
+
+    private void OnToggleSetCalcChange(bool value)
+    {
+        Debug.Log("OnToggleSetMultChange");
+    }
+    private void OnToggleCalcAddChange(bool value)
+    {
+        Debug.Log("OnToggleCalcAddChange");
+    }
+    private void OnToggleCalcMultChange(bool value)
+    {
+        Debug.Log("OnToggleCalcMultChange");
+    }
+    private void OnToggleCalcSetChange(bool value)
+    {
+        Debug.Log("OnToggleCalcSetChange");
+    }
+    private void OnButtonApplySingleClick()
+    {
+        Debug.Log("OnButtonApplySingleClick");
+        var calc = GetCalc();
+        if (calc == null)
+        {
+            MessageTipWindow.Instance.Show("提示", "请选择计算类型");
+            return;
+        }
+        ApplyFilesSingleParamCalc(GetFiles(FolderPath), ParamName, calc);
+        MessageTipWindow.Instance.Show("提示", "应用成功");
+    }
+    private void OnButtonApplyAllClick()
+    {
+        Debug.Log("OnButtonApplyAllClick");
+        var calc = GetCalc();
+        if (calc == null)
+        {
+            MessageTipWindow.Instance.Show("提示", "请选择计算类型");
+            return;
+        }
+        ApplyFilesCalc(GetFiles(FolderPath), calc);
+        MessageTipWindow.Instance.Show("提示", "应用成功");
+    }
+
+    #endregion
+
+    private string FolderPath => m_iptPath.text;
+    private string ParamName => m_iptName.text;
+    private string ParamValue => m_iptValue.text;
+    private bool IncludeChildren => m_toggleIncludeChildren.isOn;
+
+    private bool CheckFolderValid(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return false;
+        }
+        if (!Directory.Exists(path))
+        {
+            return false;
+        }
+        return true;
+    }
+
+    private const string EXTENSION = "*.json";
+    private string[] GetFiles(string path)
+    {
+        if (!CheckFolderValid(path))
+        {
+            return new string[0];
+        }
+        if (IncludeChildren)
+            return Directory.GetFiles(path, EXTENSION, SearchOption.AllDirectories);
+        else
+            return Directory.GetFiles(path, EXTENSION);
+    }
+
+    private void WriteFile(string filePath, JSONObject jsonObj)
+    {
+        File.WriteAllText(filePath, jsonObj.ToString(true));
+    }
+
+    private string GetCalc()
+    {
+        if (m_toggleCalcAdd.isOn)
+            return MygoExp.CALC_TYPE_ADD;
+        if (m_toggleCalcMult.isOn)
+            return MygoExp.CALC_TYPE_MULT;
+        if (m_toggleCalcSet.isOn)
+            return MygoExp.CALC_TYPE_SET;
+        return null;
+    }
+
+    private void TrySetCalc(JSONObject paramObj)
+    {
+        if (m_toggleSetCalc.isOn)
+        {
+            var calc = GetCalc();
+            if (calc != null)
+                paramObj.SetField("calc", JSONObject.StringObject(calc));
+        }
+    }
+
+    private void SetFileValue(string filePath, string param, float value)
+    {
+        var jsonObj = GetJsonObject(filePath);
+        var paramsArray = jsonObj.GetField("params");
+
+        if (paramsArray == null)
+        {
+            paramsArray = new JSONObject(JSONObject.Type.ARRAY);
+            jsonObj.SetField("params", paramsArray);
+        }
+        
+        bool found = false;
+        for (int i = 0; i < paramsArray.Count; i++)
+        {
+            var paramObj = paramsArray[i];
+            if (paramObj.GetField("id")?.str == param)
+            {
+                paramObj.SetField("val", value);
+                TrySetCalc(paramObj);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+        {
+            var paramObj = new JSONObject(JSONObject.Type.OBJECT);
+            paramObj.SetField("id", JSONObject.StringObject(param));
+            paramObj.SetField("val", value);
+            TrySetCalc(paramObj);
+            paramsArray.Add(paramObj);
+        }
+
+        WriteFile(filePath, jsonObj);
+    }
+    private JSONObject GetJsonObject(string filePath)
+    {
+        var text = File.ReadAllText(filePath);
+        return new JSONObject(text);
+    }
+
+    private void RemoveFileValue(string filePath, string param)
+    {
+        var jsonObj = GetJsonObject(filePath);
+        var paramsArray = jsonObj.GetField("params");
+
+        if (paramsArray == null)
+            return;
+
+        for (int i = 0; i < paramsArray.Count; i++)
+        {
+            var paramObj = paramsArray[i];
+            if (paramObj.GetField("id")?.str == param)
+            {
+                paramsArray.list.RemoveAt(i);
+                break;
+            }
+        }
+        WriteFile(filePath, jsonObj);
+    }
+
+    private void ApplyFileCalc(string filePath, string calc)
+    {
+        var jsonObj = GetJsonObject(filePath);
+        var paramsArray = jsonObj.GetField("params");
+
+        if (paramsArray == null)
+            return;
+
+        for (int i = 0; i < paramsArray.Count; i++)
+        {
+            var paramObj = paramsArray[i];
+            paramObj.SetField("calc", JSONObject.StringObject(calc));
+        }
+        WriteFile(filePath, jsonObj);
+    }
+
+    private void ApplyFileSingleParamCalc(string filePath, string param, string calc)
+    {
+        var jsonObj = GetJsonObject(filePath);
+        var paramsArray = jsonObj.GetField("params");
+        if (paramsArray == null)
+            return;
+        
+        for (int i = 0; i < paramsArray.Count; i++)
+        {
+            var paramObj = paramsArray[i];
+            if (paramObj.GetField("id")?.str == param)
+            {
+                paramObj.SetField("calc", JSONObject.StringObject(calc));
+            }
+        }
+
+        WriteFile(filePath, jsonObj);
+    }
+
+    private void SetFilesValue(string[] files, string param, float value)
+    {
+        foreach (var file in files)
+        {
+            SetFileValue(file, param, value);
+        }
+    }
+
+    private void RemoveFilesValue(string[] files, string param)
+    {
+        foreach (var file in files)
+        {
+            RemoveFileValue(file, param);
+        }
+    }
+
+    private void ApplyFilesCalc(string[] files, string calc)
+    {
+        foreach (var file in files)
+        {
+            ApplyFileCalc(file, calc);
+        }
+    }
+
+    private void ApplyFilesSingleParamCalc(string[] files, string param, string calc)
+    {
+        foreach (var file in files)
+        {
+            ApplyFileSingleParamCalc(file, param, calc);
         }
     }
 }
