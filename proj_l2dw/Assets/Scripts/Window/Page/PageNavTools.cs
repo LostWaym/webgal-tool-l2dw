@@ -290,7 +290,7 @@ public class PageNavTools_ExpParam : UIPageWidget<PageNavTools_ExpParam>
         m_toggleIncludeChildren = transform.Find("Controls/LabelValueH (2)/m_toggleIncludeChildren").GetComponent<Toggle>();
         m_btnSetParam = transform.Find("Controls/LabelValueH (2)/m_btnSetParam").GetComponent<Button>();
         m_btnRemoveParam = transform.Find("Controls/LabelValueH (2)/m_btnRemoveParam").GetComponent<Button>();
-        m_toggleSetCalc = transform.Find("Controls/m_toggleSetCalc").GetComponent<Toggle>();
+        m_toggleSetCalc = transform.Find("Controls/GameObject/m_toggleSetCalc").GetComponent<Toggle>();
         m_toggleCalcAdd = transform.Find("Controls/GameObject/m_toggleCalcAdd").GetComponent<Toggle>();
         m_toggleCalcMult = transform.Find("Controls/GameObject/m_toggleCalcMult").GetComponent<Toggle>();
         m_toggleCalcSet = transform.Find("Controls/GameObject/m_toggleCalcSet").GetComponent<Toggle>();
