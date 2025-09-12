@@ -49,11 +49,19 @@ public class WebGalModelPos : MonoBehaviour
 
         float scale = Mathf.Min(scaleX, scaleY);
         scale *= 1.5f;
+        
+        float snapBottomOffset = 0.0f;
+        float modelAspect = modelWidth / modelHeight;
+        float screenAspect = (float)Constants.WebGalWidth / (float)Constants.WebGalHeight;
+        if (modelAspect > screenAspect)
+        {
+            snapBottomOffset = (Constants.WebGalHeight * screenAspect / modelAspect - Constants.WebGalHeight) / 2.0f;
+        }
 
         transform.localScale = Vector3.one;
         transform.localEulerAngles = Vector3.zero;
         pivot.localScale = new Vector3(scale, scale, scale);
-        transform.localPosition = new Vector3(Constants.WebGalWidth / 2 + offsetX, -Constants.WebGalHeight / 1.2f - offsetY, 0);
+        transform.localPosition = new Vector3(Constants.WebGalWidth / 2.0f + offsetX, -Constants.WebGalHeight / 1.2f - offsetY + snapBottomOffset, 0);
         // 需要根据除以缩放比例来让偏移正确
         model.left = offsetX / scale;
         model.up = offsetY / scale;
@@ -75,18 +83,26 @@ public class WebGalModelPos : MonoBehaviour
         float targetWidth = modelWidth * scale;
         float targetHeight = modelHeight * scale;
 
-        float localY = Constants.WebGalHeight / 2;
-        float localX = Constants.WebGalWidth / 2;
+        float localY = Constants.WebGalHeight / 2.0f;
+        float localX = Constants.WebGalWidth / 2.0f;
         // if (targetHeight < Constants.WebGalHeight)
         // {
         //     localY = Constants.WebGalHeight / 2 + Constants.WebGalHeight - targetHeight / 2;
         // }
 
+        float snapBottomOffset = 0.0f;
+        float modelAspect = modelWidth / modelHeight;
+        float screenAspect = (float)Constants.WebGalWidth / (float)Constants.WebGalHeight;
+        if (modelAspect > screenAspect)
+        {
+            snapBottomOffset = (Constants.WebGalHeight * screenAspect / modelAspect - Constants.WebGalHeight) / 2.0f;
+        }
+
         transform.localScale = Vector3.one;
         transform.localEulerAngles = Vector3.zero;
         pivot.localScale = new Vector3(scale, scale, scale);
         // pivot.transform.localPosition = new Vector3(0, Constants.WebGalHeight / 2, 0);
-        transform.localPosition = new Vector3(localX + offsetX, -localY - offsetY, 0);
+        transform.localPosition = new Vector3(localX + offsetX, -localY - offsetY + snapBottomOffset, 0);
         // 需要根据除以缩放比例来让偏移正确
         model.left = offsetX / scale;
         model.up = offsetY / scale;
@@ -106,13 +122,21 @@ public class WebGalModelPos : MonoBehaviour
         float scale = Mathf.Min(scaleX, scaleY);
         scale *= 1.25f;
 
-        float localY = Constants.WebGalHeight / 2;
-        float localX = Constants.WebGalWidth / 2;
+        float localY = Constants.WebGalHeight / 2.0f;
+        float localX = Constants.WebGalWidth / 2.0f;
+        
+        float snapBottomOffset = 0.0f;
+        float modelAspect = modelWidth / modelHeight;
+        float screenAspect = (float)Constants.WebGalWidth / (float)Constants.WebGalHeight;
+        if (modelAspect > screenAspect)
+        {
+            snapBottomOffset = (Constants.WebGalHeight * screenAspect / modelAspect - Constants.WebGalHeight) / 2.0f;
+        }
 
         transform.localScale = Vector3.one;
         transform.localEulerAngles = Vector3.zero;
         pivot.localScale = new Vector3(scale, scale, scale);
-        transform.localPosition = new Vector3(localX + offsetX, -localY - offsetY, 0);
+        transform.localPosition = new Vector3(localX + offsetX, -localY - offsetY + snapBottomOffset, 0);
         // 需要根据除以缩放比例来让偏移正确
         model.left = offsetX / scale;
         model.up = offsetY / scale;
