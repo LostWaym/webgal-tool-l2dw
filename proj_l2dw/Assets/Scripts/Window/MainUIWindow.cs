@@ -383,6 +383,17 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
                     {
                         target.ReloadTextures();
                     }
+                    else if (Input.GetKeyDown(KeyCode.Q))
+                    {
+                        if (MotionSelectUI.Instance.IsShown)
+                        {
+                            MotionSelectUI.Instance.Close();
+                        }
+                        else
+                        {
+                            MotionSelectUI.Instance.Show();
+                        }
+                    }
                 }
             }
 

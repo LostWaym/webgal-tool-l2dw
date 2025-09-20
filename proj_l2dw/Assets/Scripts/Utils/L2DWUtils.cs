@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using SFB;
 using UnityEngine;
+using UnityEngine.UI;
 
 public static class L2DWUtils
 {
@@ -235,5 +236,12 @@ public static class L2DWUtils
             lines = lines.Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
         }
         return lines;
+    }
+
+    public static void AutoSizeRawImage(RawImage rawImage, Texture texture)
+    {
+        const float previewWindowWidth = 400.0f;
+        var scaleFactor = previewWindowWidth / texture.width;
+        rawImage.rectTransform.sizeDelta = new Vector2(texture.width, texture.height) * scaleFactor;
     }
 }

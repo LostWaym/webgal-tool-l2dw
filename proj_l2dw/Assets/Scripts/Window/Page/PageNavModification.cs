@@ -258,6 +258,7 @@ public class PageNavModification : UIPageWidget<PageNavModification>
             return;
         }
         m_rawChara.texture = model.MainModel.meshRenderer.material.mainTexture;
+        L2DWUtils.AutoSizeRawImage(m_rawChara, model.MainModel.meshRenderer.material.mainTexture);
         m_curModel = model;
     }
 }
