@@ -2301,6 +2301,27 @@ public class PageCharacterPreview : UIPageWidget<PageCharacterPreview>
     private List<MotionEntryWidget> m_listMotion = new List<MotionEntryWidget>();
     private List<MotionEntryWidget> m_listExpression = new List<MotionEntryWidget>();
 
+    protected override void OnInit()
+    {
+        base.OnInit();
+
+        SetSimpleHideVertical(m_tfMotionItems, m_itemMotion, 4, new Vector2(0, 0), OnMotionItemStatusChanged);
+        SetSimpleHideVertical(m_tfExpressionItems, m_itemExpression, 4, new Vector2(0, 0), OnExpressionItemStatusChanged);
+    }
+
+    private void OnExpressionItemStatusChanged(int arg1, bool arg2, Vector2 vector)
+    {
+        var item = m_listExpression[arg1];
+        item.transform.GetComponent<RectTransform>().anchoredPosition = vector;
+        item.gameObject.SetActive(arg2);
+    }
+
+    private void OnMotionItemStatusChanged(int arg1, bool arg2, Vector2 vector)
+    {
+        var item = m_listMotion[arg1];
+        item.transform.GetComponent<RectTransform>().anchoredPosition = vector;
+        item.gameObject.SetActive(arg2);
+    }
 
     protected override void OnPageShown()
     {
@@ -2324,7 +2345,7 @@ public class PageCharacterPreview : UIPageWidget<PageCharacterPreview>
         var model = MainControl.Instance.curTarget;
         if (model == null || !model.HasMotions)
         {
-            SetListItem(m_listMotion, m_itemMotion.gameObject, m_tfMotionItems, 0, OnMotionItemCreate);
+            SetSimpleHideVerticalListItem(m_listMotion, m_itemMotion.gameObject, m_tfMotionItems, 0, OnMotionItemCreate, null);
             return;
         }
 
@@ -2336,9 +2357,8 @@ public class PageCharacterPreview : UIPageWidget<PageCharacterPreview>
             pairs = pairs.Where(x => filters.All(f => x.name.ToLower().Contains(f))).ToList();
         }
 
-        SetListItem(m_listMotion, m_itemMotion.gameObject, m_tfMotionItems, pairs.Count, OnMotionItemCreate);
         var selectedMotion = model.curMotionName;
-        for (int i = 0; i < pairs.Count; i++)
+        SetSimpleHideVerticalListItem(m_listMotion, m_itemMotion.gameObject, m_tfMotionItems, pairs.Count, OnMotionItemCreate, (i)=>
         {
             var item = m_listMotion[i];
             var pair = pairs[i];
@@ -2351,7 +2371,7 @@ public class PageCharacterPreview : UIPageWidget<PageCharacterPreview>
             {
                 item.SetStateStyle(UIStateStyle.UIState.Normal);
             }
-        }
+        });
     }
 
     public void RefreshAll()
@@ -2377,7 +2397,7 @@ public class PageCharacterPreview : UIPageWidget<PageCharacterPreview>
         var model = MainControl.Instance.curTarget;
         if (model == null || !model.HasMotions)
         {
-            SetListItem(m_listExpression, m_itemExpression.gameObject, m_tfExpressionItems, 0, OnExpressionItemCreate);
+            SetSimpleHideVerticalListItem(m_listExpression, m_itemExpression.gameObject, m_tfExpressionItems, 0, OnExpressionItemCreate, null);
             return;
         }
 
@@ -2389,9 +2409,8 @@ public class PageCharacterPreview : UIPageWidget<PageCharacterPreview>
             pairs = pairs.Where(x => filters.All(f => x.name.ToLower().Contains(f))).ToList();
         }
 
-        SetListItem(m_listExpression, m_itemExpression.gameObject, m_tfExpressionItems, pairs.Count, OnExpressionItemCreate);
         var selectedExpression = model.curExpName;
-        for (int i = 0; i < pairs.Count; i++)
+        SetSimpleHideVerticalListItem(m_listExpression, m_itemExpression.gameObject, m_tfExpressionItems, pairs.Count, OnExpressionItemCreate, (i)=>
         {
             var item = m_listExpression[i];
             var pair = pairs[i];
@@ -2404,7 +2423,7 @@ public class PageCharacterPreview : UIPageWidget<PageCharacterPreview>
             {
                 item.SetStateStyle(UIStateStyle.UIState.Normal);
             }
-        }
+        });
     }
 
     private void OnExpressionItemCreate(MotionEntryWidget widget)
