@@ -122,8 +122,10 @@ public class MygoConfig
         }
     }
 
+    private long m_textureFileTimeHash = 0;
     public void ReloadTextures()
     {
+        m_textureFileTimeHash = 0;
         string basePath = Path.GetDirectoryName(json.filename);
         for (int i = 0; i < json.textures.Count; i++)
         {
@@ -135,7 +137,21 @@ public class MygoConfig
                 continue;
             }
             texture.LoadImage(bytes);
+            m_textureFileTimeHash = GetFileTimeHash(Path.Combine(basePath, path));
         }
+    }
+
+    public bool IsFileTimeHashDirty()
+    {
+        long nowHash = 0;
+        string basePath = Path.GetDirectoryName(json.filename);
+        for (int i = 0; i < json.textures.Count; i++)
+        {
+            var path = json.textures[i];
+            nowHash = GetFileTimeHash(Path.Combine(basePath, path));
+        }
+        
+        return nowHash != m_textureFileTimeHash;
     }
 
     public byte[] ReadBytes(string path)
@@ -160,6 +176,15 @@ public class MygoConfig
         }
         bytes = null;
         return false;
+    }
+
+    public long GetFileTimeHash(string path)
+    {
+        if (File.Exists(path))
+            return new FileInfo(path).LastWriteTime.Ticks;
+        if (File.Exists(path + ".bytes"))
+            return new FileInfo(path + ".bytes").LastWriteTime.Ticks;
+        return 0;
     }
 
     public string ReadAllText(string path)

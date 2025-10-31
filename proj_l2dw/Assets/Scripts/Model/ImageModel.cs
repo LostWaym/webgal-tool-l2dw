@@ -77,6 +77,7 @@ public class ImageModel : ModelAdjusterBase
     public override void ReloadModels()
     {
         ReloadTextures();
+        UIEventBus.SendEvent(UIEventType.OnModelChanged);
     }
 
     public override void Adjust()

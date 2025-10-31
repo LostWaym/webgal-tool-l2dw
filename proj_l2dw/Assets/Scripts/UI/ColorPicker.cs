@@ -1,9 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using Unity.VisualScripting;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -85,6 +88,8 @@ public class ColorPicker : MonoBehaviour
     [SerializeField] private InputField inputFieldHue;
     [SerializeField] private InputField inputFieldSaturation;
     [SerializeField] private InputField inputFieldValue;
+    [Header("Button")]
+    [SerializeField] private Button m_btnInput;
 
     private Material svRectImageMaterial;
     private Material svRectDraggerMaterial;
@@ -127,9 +132,56 @@ public class ColorPicker : MonoBehaviour
         inputFieldSaturation.onEndEdit.AddListener(OnInputFieldSaturationEndEdit);
         inputFieldValue.onEndEdit.AddListener(OnInputFieldValueEndEdit);
 
+        m_btnInput.onClick.AddListener(OnColorInputClicked);
+
         UpdateSvRectDragger();
         UpdateSvRectImage();
         UpdateHueBarDragger();
+    }
+
+    private void OnColorInputClicked()
+    {
+        bool Submit(string content)
+        {
+            try
+            {
+                var result = content.Split(',').Select(c => int.Parse(c)).ToArray();
+                int r = result[0], g = result[1], b = result[2];
+                color = new Color(r / 255.0f, g / 255.0f, b / 255.0f);
+                return true;
+            }
+            catch{}
+
+            try
+            {
+                Assert.IsTrue(content.StartsWith("#"));
+                // parse hex color code to rgb, such as #ffffff
+                string hex = content.TrimStart('#');
+                if (hex.Length == 6)
+                {
+                    int r = Convert.ToInt32(hex.Substring(0, 2), 16);
+                    int g = Convert.ToInt32(hex.Substring(2, 2), 16);
+                    int b = Convert.ToInt32(hex.Substring(4, 2), 16);
+                    color = new Color(r / 255.0f, g / 255.0f, b / 255.0f);
+                    return true;
+                }
+                else if (hex.Length == 3)
+                {
+                    // handle shorthand hex #fff (expand to #ffffff)
+                    int r = Convert.ToInt32(new string(hex[0], 2), 16);
+                    int g = Convert.ToInt32(new string(hex[1], 2), 16);
+                    int b = Convert.ToInt32(new string(hex[2], 2), 16);
+                    color = new Color(r / 255.0f, g / 255.0f, b / 255.0f);
+                    return true;
+                }
+            }
+            catch{}
+
+            MessageTipWindow.Instance.Show("提示", "格式错误！");
+            return false;
+        }
+
+        ColorParseWindow.SetColorParser(Submit);
     }
 
     private void ConvertSvRectTouch(Vector2 vector)

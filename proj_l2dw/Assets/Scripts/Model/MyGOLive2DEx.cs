@@ -107,6 +107,14 @@ public class MyGOLive2DEx : MonoBehaviour
         }
     }
 
+    public void ReloadTexturesIfDirty()
+    {
+        if (myGOConfig.IsFileTimeHashDirty())
+        {
+            ReloadTextures();
+        }
+    }
+
     private void LoadMotionPairs(MygoConfig config)
     {
         motionPairs.Clear();

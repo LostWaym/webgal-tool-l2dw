@@ -15,6 +15,8 @@ public class ModelAdjuster : ModelAdjusterBase
     public override string MotionTemplate => meta.formatText;
     public override string TransformTemplate => meta.transformFormatText;
 
+    public bool isAutoRefreshTextures = false;
+
     private float rootScale = 1;
     private float rootRotation = 0;
 
@@ -69,6 +71,21 @@ public class ModelAdjuster : ModelAdjusterBase
     {
         this.canvasHackField =
             typeof(Canvas).GetField("willRenderCanvases", BindingFlags.NonPublic | BindingFlags.Static);
+    }
+
+    private float m_nextRefreshTime = 0;
+    private const float REFRESH_INTERVAL = 0.5f;
+    void Update()
+    {
+        if (isAutoRefreshTextures && Time.time >= m_nextRefreshTime)
+        {
+            m_nextRefreshTime = Time.time + REFRESH_INTERVAL;
+            foreach (var pos in webgalPoses)
+            {
+                var model = pos.model;
+                model.ReloadTexturesIfDirty();
+            }
+        }
     }
 
     public override Live2DParamInfoList GetEmotionEditorList()
@@ -284,6 +301,8 @@ public class ModelAdjuster : ModelAdjusterBase
         InitParamInfoList();
         PlayExp(expName);
         PlayMotion(motionName);
+
+        UIEventBus.SendEvent(UIEventType.OnModelChanged);
     }
 
     private void InitParamInfoList()

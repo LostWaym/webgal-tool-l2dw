@@ -132,19 +132,34 @@ internal class PageNavInstructions : UIPageWidget<PageNavInstructions>
             {
                 case "setfigure":
                 {
-                    var target = MainControl.Instance.FindTarget(info.commandParam);
                     var motion = info.GetParameter("motion");
                     var exp = info.GetParameter("expression");
-                    if (target != null)
+
+                    void SetFigureContent(ModelAdjusterBase target)
                     {
-                        if (!string.IsNullOrEmpty(motion))
+                        if (target != null)
                         {
-                            target.PlayMotion(motion);
+                            if (!string.IsNullOrEmpty(motion))
+                            {
+                                target.PlayMotion(motion);
+                            }
+                            if (!string.IsNullOrEmpty(exp))
+                            {
+                                target.PlayExp(exp);
+                            }
                         }
-                        if (!string.IsNullOrEmpty(exp))
+                    }
+                    if (info.commandParam == "all")
+                    {
+                        foreach (var target in MainControl.Instance.models)
                         {
-                            target.PlayExp(exp);
+                            SetFigureContent(target);
                         }
+                    }
+                    else
+                    {
+                        var target = MainControl.Instance.FindTarget(info.commandParam);
+                        SetFigureContent(target);
                     }
                     nextActionTime = Time.unscaledTime;
                     Debug.Log($"setfigure: {info.commandParam}, motion: {motion}, expression: {exp}");

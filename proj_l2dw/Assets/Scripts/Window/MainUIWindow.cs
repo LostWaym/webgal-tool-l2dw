@@ -1083,6 +1083,7 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
     private Button m_btnReloadModel;
     private Button m_btnReloadTexture;
     private Button m_btnOpenModelPath;
+    private Toggle m_toggleAutoReloadTexture;
     #endregion
 
     #region auto generated binders
@@ -1110,6 +1111,7 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         m_btnReloadModel = transform.Find("Properties/Container/GameObject/m_btnReloadModel").GetComponent<Button>();
         m_btnReloadTexture = transform.Find("Properties/Container/GameObject/m_btnReloadTexture").GetComponent<Button>();
         m_btnOpenModelPath = transform.Find("Properties/Container/GameObject/m_btnOpenModelPath").GetComponent<Button>();
+        m_toggleAutoReloadTexture = transform.Find("Properties/Container/m_toggleAutoReloadTexture").GetComponent<Toggle>();
 
         m_btnLoadConf.onClick.AddListener(OnButtonLoadConfClick);
         m_btnLoadJson.onClick.AddListener(OnButtonLoadJsonClick);
@@ -1126,8 +1128,10 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         m_btnReloadModel.onClick.AddListener(OnButtonReloadModelClick);
         m_btnReloadTexture.onClick.AddListener(OnButtonReloadTextureClick);
         m_btnOpenModelPath.onClick.AddListener(OnButtonOpenModelPathClick);
+        m_toggleAutoReloadTexture.onValueChanged.AddListener(OnToggleAutoReloadTextureChange);
     }
     #endregion
+
 
     #region auto-generated code event
     public void OnButtonLoadConfClick()
@@ -1218,6 +1222,18 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         if (meta != null)
         {
             System.Diagnostics.Process.Start("explorer.exe", Path.GetDirectoryName(meta.GetValidModelFilePath(0)));
+        }
+    }
+
+    public void OnToggleAutoReloadTextureChange(bool value)
+    {
+        if (MainControl.Instance.curTarget is ModelAdjuster modelAdjuster)
+        {
+            modelAdjuster.isAutoRefreshTextures = value;
+        }
+        else if (value)
+        {
+            m_toggleAutoReloadTexture.isOn = false;
         }
     }
     #endregion
@@ -1535,8 +1551,17 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         m_liptScale.SetToggleValue(model.ReverseXScale);
 
         m_liptRotation.SetData(model.RootRotation.ToString("F3"));
-    }
 
+        if (model is ModelAdjuster modelAdjuster)
+        {
+            m_toggleAutoReloadTexture.gameObject.SetActive(true);
+            m_toggleAutoReloadTexture.isOn = modelAdjuster.isAutoRefreshTextures;
+        }
+        else
+        {
+            m_toggleAutoReloadTexture.gameObject.SetActive(false);
+        }
+    }
 }
 
 public class PageCharaFunctions : UIPageWidget<PageCharaFunctions>
