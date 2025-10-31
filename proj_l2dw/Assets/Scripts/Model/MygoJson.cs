@@ -137,7 +137,7 @@ public class MygoConfig
                 continue;
             }
             texture.LoadImage(bytes);
-            m_textureFileTimeHash = GetFileTimeHash(Path.Combine(basePath, path));
+            m_textureFileTimeHash += GetFileTimeHash(Path.Combine(basePath, path));
         }
     }
 
@@ -148,9 +148,9 @@ public class MygoConfig
         for (int i = 0; i < json.textures.Count; i++)
         {
             var path = json.textures[i];
-            nowHash = GetFileTimeHash(Path.Combine(basePath, path));
+            nowHash += GetFileTimeHash(Path.Combine(basePath, path));
         }
-        
+
         return nowHash != m_textureFileTimeHash;
     }
 
