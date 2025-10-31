@@ -45,7 +45,7 @@ public class SimpleHideUI : MonoBehaviour
     private int lastTopIndex = 0, lastBottomIndex = 0;
     public void UpdateVisible(bool force = false, bool allSet = false)
     {
-        if (itemCount == 0)
+        if (capacity == 0)
             return;
 
         int topIndex;

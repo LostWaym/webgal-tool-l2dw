@@ -51,17 +51,6 @@ public class UIItemWidget
         comp.UpdateVisible(true, true);
     }
 
-    private void UpdateSimpleHideVertical(Transform root, int count)
-    {
-        var comp = root.GetComponent<SimpleHideUI>();
-        if (comp != null)
-        {
-            comp.itemCount = count;
-            comp.CalcSize();
-            comp.UpdateVisible(true, true);
-        }
-    }
-
     public void SetSimpleHideVerticalListItem<ListItem>(List<ListItem> list, GameObject prefab, Transform root, int count, Action<ListItem> onItemCreate, Action<int> itemRenderer) where ListItem : UIItemWidget<ListItem>, new()
     {
         prefab.gameObject.SetActive(false);
