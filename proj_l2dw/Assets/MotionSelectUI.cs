@@ -2,14 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class MotionSelectUI : BaseWindow<MotionSelectUI>
 {
     #region auto generated members
+    private Transform m_tfCharaRoot;
+    private RawImage m_rawChara;
+    private TouchArea m_touchChara;
     private InputField m_iptFieldW;
     private InputField m_iptFieldH;
-    private RawImage m_rawChara;
+    private Button m_btnResetCharaPos;
     private InputField m_iptFilterMotion;
     private ScrollRect m_scrollMotion;
     private Transform m_tfMotionItems;
@@ -23,9 +27,12 @@ public class MotionSelectUI : BaseWindow<MotionSelectUI>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
+        m_tfCharaRoot = transform.Find("mask/m_tfCharaRoot").GetComponent<Transform>();
+        m_rawChara = transform.Find("mask/m_tfCharaRoot/m_rawChara").GetComponent<RawImage>();
+        m_touchChara = transform.Find("mask/m_touchChara").GetComponent<TouchArea>();
         m_iptFieldW = transform.Find("mask/项宽/Value/InputField/m_iptFieldW").GetComponent<InputField>();
         m_iptFieldH = transform.Find("mask/项高/Value/InputField/m_iptFieldH").GetComponent<InputField>();
-        m_rawChara = transform.Find("mask/m_rawChara").GetComponent<RawImage>();
+        m_btnResetCharaPos = transform.Find("mask/m_btnResetCharaPos").GetComponent<Button>();
         m_iptFilterMotion = transform.Find("mask/GameObject/Motion/Title/InputField/m_iptFilterMotion").GetComponent<InputField>();
         m_scrollMotion = transform.Find("mask/GameObject/Motion/Container/m_scrollMotion").GetComponent<ScrollRect>();
         m_tfMotionItems = transform.Find("mask/GameObject/Motion/Container/m_scrollMotion/Viewport/m_tfMotionItems").GetComponent<Transform>();
@@ -39,12 +46,14 @@ public class MotionSelectUI : BaseWindow<MotionSelectUI>
         m_iptFieldW.onEndEdit.AddListener(OnInputFieldFieldWEndEdit);
         m_iptFieldH.onValueChanged.AddListener(OnInputFieldFieldHChange);
         m_iptFieldH.onEndEdit.AddListener(OnInputFieldFieldHEndEdit);
+        m_btnResetCharaPos.onClick.AddListener(OnButtonResetCharaPosClick);
         m_iptFilterMotion.onValueChanged.AddListener(OnInputFieldFilterMotionChange);
         m_iptFilterMotion.onEndEdit.AddListener(OnInputFieldFilterMotionEndEdit);
         m_iptFilterExpression.onValueChanged.AddListener(OnInputFieldFilterExpressionChange);
         m_iptFilterExpression.onEndEdit.AddListener(OnInputFieldFilterExpressionEndEdit);
     }
     #endregion
+
 
     #region auto generated events
     private void OnInputFieldFieldWChange(string value)
@@ -60,6 +69,11 @@ public class MotionSelectUI : BaseWindow<MotionSelectUI>
     private void OnInputFieldFieldHEndEdit(string value)
     {
         RefreshItemSize();
+    }
+    private void OnButtonResetCharaPosClick()
+    {
+        m_rawChara.rectTransform.localPosition = Vector3.zero;
+        m_tfCharaRoot.localScale = Vector3.one;
     }
     private void OnInputFieldFilterMotionChange(string value)
     {
@@ -118,6 +132,42 @@ public class MotionSelectUI : BaseWindow<MotionSelectUI>
     {
         base.OnClose();
         PlayerPrefs.SetString("MotionSelectUI_ExpressionSize", JsonUtility.ToJson(m_tfExpressionItems.GetComponent<GridLayoutGroup>().cellSize));
+    }
+
+    protected override void OnInit()
+    {
+        base.OnInit();
+        
+        m_touchChara._OnPointerDown += OnTouchCharaPointerDown;
+        m_touchChara._OnPointerMove += OnTouchCharaPointerMove;
+        m_touchChara._OnScroll += OnTouchCharaScroll;
+    }
+
+    private Vector2 m_charaStartPosition;
+    private void OnTouchCharaPointerDown(PointerEventData eventData)
+    {
+        m_charaStartPosition = eventData.position;
+    }
+    private void OnTouchCharaPointerMove(Vector2 vector)
+    {
+        var delta = vector - m_charaStartPosition;
+        m_charaStartPosition = vector;
+        var pos = m_rawChara.rectTransform.position;
+        pos += new Vector3(delta.x, delta.y, 0);
+        m_rawChara.rectTransform.position = pos;
+    }
+
+    private void OnTouchCharaScroll(PointerEventData eventData)
+    {
+        var ctrlPressed = Input.GetKey(KeyCode.LeftControl);
+        var scaleFactor = ctrlPressed ? Global.CameraZoomBoostFactor : Global.CameraZoomFactor;
+        if (eventData.scrollDelta.y < 0)
+            scaleFactor = 1.0f / scaleFactor;
+        m_tfCharaRoot.localScale = new Vector3(
+            m_tfCharaRoot.localScale.x * scaleFactor,
+            m_tfCharaRoot.localScale.y * scaleFactor,
+            m_tfCharaRoot.localScale.z
+        );
     }
 
     private void UpdateFilterText()

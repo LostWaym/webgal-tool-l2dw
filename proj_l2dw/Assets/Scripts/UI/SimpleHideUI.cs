@@ -21,7 +21,7 @@ public class SimpleHideUI : MonoBehaviour
     public Action<int, bool, Vector2> OnWillingSetItemStatus;
     public Action<int> OnWillingRenderItem;
 
-    void Awake()
+    public void Init()
     {
         rect = GetComponent<RectTransform>();
     }

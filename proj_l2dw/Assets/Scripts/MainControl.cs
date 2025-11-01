@@ -226,7 +226,7 @@ public class MainControl : MonoBehaviour
             return;
         }
         curGroup = group;
-        group.RemoveInvalidModel();
+        group.RemoveInvalidModelAndSubGroup();
     }
 
     public void ReloadModel(ModelAdjusterBase target = null)
@@ -562,11 +562,11 @@ public class MainControl : MonoBehaviour
         if (curGroup == null)
             return;
 
-        curGroup.RemoveInvalidModel();
+        var tempModels = curGroup.TempModelIncludingSubGroup;
 
         if (motion)
         {
-            foreach (var model in curGroup.modelAdjusters)
+            foreach (var model in tempModels)
             {
                 var shouldMotion = model.HasMotions;
                 if (shouldMotion && (string.IsNullOrEmpty(model.curExpName) || string.IsNullOrEmpty(model.curMotionName)))
@@ -578,7 +578,7 @@ public class MainControl : MonoBehaviour
         }
 
         StringBuilder commands = new StringBuilder();
-        foreach (var model in curGroup.modelAdjusters)
+        foreach (var model in tempModels)
         {
             if (motion)
             {
@@ -624,8 +624,8 @@ public class MainControl : MonoBehaviour
             return;
 
         StringBuilder commands = new StringBuilder();
-        curGroup.RemoveInvalidModel();
-        foreach (var model in curGroup.modelAdjusters)
+        var tempModels = curGroup.TempModelIncludingSubGroup;
+        foreach (var model in tempModels)
         {
             var shouldMotion = model.HasMotions;
             if (shouldMotion && (string.IsNullOrEmpty(model.curExpName) || string.IsNullOrEmpty(model.curMotionName)))

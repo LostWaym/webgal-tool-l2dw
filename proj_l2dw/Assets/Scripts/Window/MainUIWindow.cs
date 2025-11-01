@@ -2868,7 +2868,7 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
             return;
         }
         
-        group.RemoveInvalidModel();
+        group.RemoveInvalidModelAndSubGroup();
         if (group.modelAdjusters.Count == 0)
             return;
 
@@ -3189,6 +3189,9 @@ public class PageGroupFunctions : UIPageWidget<PageGroupFunctions>
     private ScrollRect m_scrollChara;
     private Transform m_tfCharas;
     private Transform m_itemSelectedChara;
+    private ScrollRect m_scrollGroup;
+    private Transform m_tfGroups;
+    private Transform m_itemSelectedGroup;
     #endregion
 
     #region auto generated binders
@@ -3203,6 +3206,9 @@ public class PageGroupFunctions : UIPageWidget<PageGroupFunctions>
         m_scrollChara = transform.Find("CharacterList/Container/m_scrollChara").GetComponent<ScrollRect>();
         m_tfCharas = transform.Find("CharacterList/Container/m_scrollChara/Viewport/m_tfCharas").GetComponent<Transform>();
         m_itemSelectedChara = transform.Find("CharacterList/Container/m_scrollChara/Viewport/m_tfCharas/m_itemSelectedChara").GetComponent<Transform>();
+        m_scrollGroup = transform.Find("GroupList/Container/m_scrollGroup").GetComponent<ScrollRect>();
+        m_tfGroups = transform.Find("GroupList/Container/m_scrollGroup/Viewport/m_tfGroups").GetComponent<Transform>();
+        m_itemSelectedGroup = transform.Find("GroupList/Container/m_scrollGroup/Viewport/m_tfGroups/m_itemSelectedGroup").GetComponent<Transform>();
 
         m_btnCopyMotionExp.onClick.AddListener(OnButtonCopyMotionExpClick);
         m_btnCopyTransform.onClick.AddListener(OnButtonCopyTransformClick);
@@ -3210,7 +3216,6 @@ public class PageGroupFunctions : UIPageWidget<PageGroupFunctions>
         m_btnCopyAllSpilt.onClick.AddListener(OnButtonCopyAllSpiltClick);
     }
     #endregion
-
 
     #region auto-generated code event
     public void OnButtonCopyMotionExpClick()
@@ -3234,6 +3239,7 @@ public class PageGroupFunctions : UIPageWidget<PageGroupFunctions>
 
     
     private List<GroupSelectedItemWidget> m_listGroupItem = new List<GroupSelectedItemWidget>();
+    private List<GroupSelectedItemWidget> m_listSubGroupItem = new List<GroupSelectedItemWidget>();
     private GroupSelectedItemWidget m_itemBackground;
     private GroupSelectedItemWidget m_itemBackgroundCopy;
 
@@ -3254,13 +3260,46 @@ public class PageGroupFunctions : UIPageWidget<PageGroupFunctions>
 
     public void RefreshAll()
     {
+        RefreshSubGroupItem();
+        RefreshGroupItem();
+        RefreshBackgroundItem();
+    }
+
+    private void RefreshSubGroupItem()
+    {
+        ModelGroup curGroup = MainControl.Instance.curGroup;
+        if (curGroup == null)
+        {
+            SetListItem(m_listSubGroupItem, m_itemSelectedGroup.gameObject, m_tfGroups, 0, OnSubGroupItemCreate);
+            return;
+        }
+
+        var allSubGroups = MainControl.Instance.modelGroups;
+        SetListItem(m_listSubGroupItem, m_itemSelectedGroup.gameObject, m_tfGroups, allSubGroups.Count, OnSubGroupItemCreate);
+        for (int i = 0; i < allSubGroups.Count; i++)
+        {
+            var subGroup = allSubGroups[i];
+            var groupItem = m_listSubGroupItem[i];
+            groupItem.SetData(subGroup.groupName);
+            bool modelInGroup = curGroup.subGroups.Contains(subGroup);
+            groupItem.SetStateStyle(modelInGroup ? UIStateStyle.UIState.Selected : UIStateStyle.UIState.Normal);
+
+            if (subGroup == curGroup)
+            {
+                groupItem.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    private void RefreshGroupItem()
+    {
         ModelGroup group = MainControl.Instance.curGroup;
         if (group == null)
         {
             SetListItem(m_listGroupItem, m_itemSelectedChara.gameObject, m_tfCharas, 0, OnGroupItemCreate);
             return;
         }
-        
+
         var allModels = MainControl.Instance.models;
         SetListItem(m_listGroupItem, m_itemSelectedChara.gameObject, m_tfCharas, allModels.Count, OnGroupItemCreate);
         for (int i = 0; i < allModels.Count; i++)
@@ -3271,6 +3310,13 @@ public class PageGroupFunctions : UIPageWidget<PageGroupFunctions>
             bool modelInGroup = group.modelAdjusters.Contains(model);
             groupItem.SetStateStyle(modelInGroup ? UIStateStyle.UIState.Selected : UIStateStyle.UIState.Normal);
         }
+    }
+
+    private void RefreshBackgroundItem()
+    {
+        ModelGroup group = MainControl.Instance.curGroup;
+        if (group == null)
+            return;
 
         m_itemBackground.SetStateStyle(group.containBackground ? UIStateStyle.UIState.Selected : UIStateStyle.UIState.Normal);
         m_itemBackgroundCopy.SetStateStyle(group.containBackgroundCopy ? UIStateStyle.UIState.Selected : UIStateStyle.UIState.Normal);
@@ -3297,6 +3343,31 @@ public class PageGroupFunctions : UIPageWidget<PageGroupFunctions>
         else
         {
             MainControl.Instance.AddModelToGroup(group, model);
+        }
+        RefreshAll();
+    }
+
+    private void OnSubGroupItemCreate(GroupSelectedItemWidget widget)
+    {
+        widget._OnTitleClick = OnSubGroupItemClicked;
+    }
+
+    private void OnSubGroupItemClicked(GroupSelectedItemWidget widget)
+    {
+        ModelGroup group = MainControl.Instance.curGroup;
+        if (group == null)
+        {
+            return;
+        }
+        var subGroup = MainControl.Instance.modelGroups[GetListItemIndex(m_listSubGroupItem, widget)];
+        bool contain = group.subGroups.Contains(subGroup);
+        if (contain)
+        {
+            group.subGroups.Remove(subGroup);
+        }
+        else
+        {
+            group.subGroups.Add(subGroup);
         }
         RefreshAll();
     }

@@ -47,6 +47,7 @@ public class UIItemWidget
         comp.itemSpacing = itemSpacing;
         comp.verticalPadding = verticalPadding;
         comp.OnWillingSetItemStatus = onItemStatusChanged;
+        comp.Init();
         comp.CalcSize();
         comp.UpdateVisible(true, true);
     }

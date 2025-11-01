@@ -2,6 +2,7 @@
 
 
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ModelGroup : MonoBehaviour
@@ -9,6 +10,7 @@ public class ModelGroup : MonoBehaviour
     public string groupName;
     public Transform root;
     public List<ModelAdjusterBase> modelAdjusters;
+    public List<ModelGroup> subGroups;
     public Vector3 WorldPosition => root.position;
     public Vector3 LocalPosition => root.localPosition;
 
@@ -19,15 +21,52 @@ public class ModelGroup : MonoBehaviour
     public float RotationDeg => root.transform.rotation.eulerAngles.z;
     public float Scale => root.transform.localScale.x;
 
-    public void RemoveInvalidModel()
+    public void RemoveInvalidModelAndSubGroup()
     {
         modelAdjusters.RemoveAll(model => model == null);
+        subGroups.RemoveAll(group => group == null);
+
+        m_tempModelsHashSet.Clear();
+        m_tempGroupsHashSet.Clear();
+        AddGroupRecursive(this);
+        m_tempGroupsHashSet.RemoveWhere(group => group == null);
+
+        foreach (var group in m_tempGroupsHashSet)
+        {
+            foreach (var model in group.modelAdjusters)
+            {
+                m_tempModelsHashSet.Add(model);
+            }
+        } 
+
+        void AddGroupRecursive(ModelGroup group)
+        {
+            if (!m_tempGroupsHashSet.Add(group))
+                return;
+
+            foreach (var group1 in group.subGroups)
+            {
+                AddGroupRecursive(group1);
+            }
+        }
     }
 
+    public HashSet<ModelAdjusterBase> TempModelIncludingSubGroup
+    {
+        get
+        {
+            RemoveInvalidModelAndSubGroup();
+            return m_tempModelsHashSet;
+        }
+    }
+
+    private static readonly HashSet<ModelAdjusterBase> m_tempModelsHashSet = new HashSet<ModelAdjusterBase>();
+    private static readonly HashSet<ModelGroup> m_tempGroupsHashSet = new HashSet<ModelGroup>();
     private void MoveModelRootToRoot()
     {
-        RemoveInvalidModel();
-        foreach (var model in modelAdjusters)
+        RemoveInvalidModelAndSubGroup();
+
+        foreach (var model in m_tempModelsHashSet)
         {
             model.BeforeGroupTransform(root);
         }
@@ -40,8 +79,8 @@ public class ModelGroup : MonoBehaviour
 
     private void MoveModelRootToModel(float rotationDelta = 0)
     {
-        RemoveInvalidModel();
-        foreach (var model in modelAdjusters)
+        RemoveInvalidModelAndSubGroup();
+        foreach (var model in m_tempModelsHashSet)
         {
             model.AfterGroupTransform(rotationDelta);
         }
@@ -69,7 +108,7 @@ public class ModelGroup : MonoBehaviour
 
     public void SetPosition(Vector3 position)
     {
-        RemoveInvalidModel();
+        RemoveInvalidModelAndSubGroup();
         MoveModelRootToRoot();
 
         root.transform.position = position;
@@ -79,7 +118,7 @@ public class ModelGroup : MonoBehaviour
 
     public void SetLocalPosition(Vector3 localPosition)
     {
-        RemoveInvalidModel();
+        RemoveInvalidModelAndSubGroup();
         MoveModelRootToRoot();
 
         root.localPosition = localPosition;
@@ -91,7 +130,7 @@ public class ModelGroup : MonoBehaviour
 
     public void SetRotation(float rotation)
     {
-        RemoveInvalidModel();
+        RemoveInvalidModelAndSubGroup();
         MoveModelRootToRoot();
 
         float delta = rotation - RotationDeg;
@@ -109,7 +148,7 @@ public class ModelGroup : MonoBehaviour
 
     public void SetScale(float scale)
     {
-        RemoveInvalidModel();
+        RemoveInvalidModelAndSubGroup();
         MoveModelRootToRoot();
         root.transform.localScale = new Vector3(scale, scale, scale);
 
