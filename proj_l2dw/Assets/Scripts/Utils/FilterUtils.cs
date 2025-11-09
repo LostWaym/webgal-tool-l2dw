@@ -130,18 +130,31 @@ public static class FilterUtils
     {
         var folderPath = System.IO.Path.Combine(Application.dataPath, "..");
         var path = System.IO.Path.Combine(folderPath, "FilterSetPreset.json");
-        if (File.Exists(path))
+
+        if (!TryLoad(path))
         {
-            var json = File.ReadAllText(path);
-            var arrayObj = new JSONObject(json);
-            for (int i = 0; i < arrayObj.Count; i++)
+            var path2 = System.IO.Path.Combine(Application.streamingAssetsPath, "DefaultFilterSetPreset.json");
+            TryLoad(path2);
+        }
+
+        bool TryLoad(string path)
+        {
+            if (File.Exists(path))
             {
-                var presetObj = arrayObj[i];
-                var preset = new FilterSetPresetData();
-                preset.name = presetObj["name"].str;
-                preset.jsonObject = presetObj["jsonObject"];
-                filterSetPresets.Add(preset);
+                var json = File.ReadAllText(path);
+                var arrayObj = new JSONObject(json);
+                for (int i = 0; i < arrayObj.Count; i++)
+                {
+                    var presetObj = arrayObj[i];
+                    var preset = new FilterSetPresetData();
+                    preset.name = presetObj["name"].str;
+                    preset.jsonObject = presetObj["jsonObject"];
+                    filterSetPresets.Add(preset);
+                }
+                return true;
             }
+
+            return false;
         }
     }
 }

@@ -429,16 +429,17 @@ public class MainControl : MonoBehaviour
         var motionExpressionString = curTarget.GetMotionExpressionParamsText();
         var transformString = $" -transform={GetTransformTextTarget(curTarget)}";
         var boundsString = curTarget.GetBoundsText() != "" ? $" -bounds={curTarget.GetBoundsText()}" : "";
-        var output = format.Replace("%me%", motionExpressionString + transformString + boundsString);
+        var meText = motionExpressionString + transformString + boundsString;
+        var output = format.Replace("%me%", meText.Trim());
         for (int i = 0; i < curTarget.ModelCount; i++)
         {
             var subModelTransformString = $" -transform={GetTransformTextTarget(curTarget, i)}";
-            output = output.Replace($"%me_{i}%", motionExpressionString + subModelTransformString + boundsString);
+            var subMeText = motionExpressionString + subModelTransformString + boundsString;
+            output = output.Replace($"%me_{i}%", subMeText.Trim());
         }
         L2DWUtils.CopyInstructionToCopyBoard(output);
         ShowDebugText("复制成功！");
     }
-    
 
     public void CopyMotion()
     {
@@ -638,11 +639,13 @@ public class MainControl : MonoBehaviour
             var motionExpressionString = model.GetMotionExpressionParamsText();
             var transformString = $" -transform={GetTransformTextTarget(model)}";
             var boundsString = model.GetBoundsText() != "" ? $" -bounds={curTarget.GetBoundsText()}" : "";
-            var output = format.Replace("%me%", motionExpressionString + transformString + boundsString);
+            var meText = motionExpressionString + transformString + boundsString;
+            var output = format.Replace("%me%", meText.Trim());
             for (int i = 0; i < model.ModelCount; i++)
             {
                 var subModelTransformString = $" -transform={GetTransformTextTarget(model, i)}";
-                output = output.Replace($"%me_{i}%", motionExpressionString + subModelTransformString + boundsString);
+                var subMeText = motionExpressionString + subModelTransformString + boundsString;
+                output = output.Replace($"%me_{i}%", subMeText.Trim());
             }
             commands.AppendLine(output);
         }

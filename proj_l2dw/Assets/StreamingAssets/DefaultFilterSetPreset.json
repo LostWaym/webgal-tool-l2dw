@@ -1,0 +1,33 @@
+[
+	{
+		"name":"清晨",
+		"jsonObject":{
+			"brightness":1.1,
+			"colorRed":201.875,
+			"colorGreen":231.758,
+			"bloomBlur":1,
+			"bevel":1,
+			"bevelThickness":30,
+			"bevelRotation":30,
+			"bevelSoftness":1,
+			"bevelRed":211.172,
+			"bevelGreen":242.673
+		}
+	},
+	{
+		"name":"黄昏",
+		"jsonObject":{
+			"saturation":1.2,
+			"gamma":1.2,
+			"colorGreen":245.413,
+			"colorBlue":211.172,
+			"bloomBlur":1,
+			"bevel":1,
+			"bevelThickness":30,
+			"bevelRotation":30,
+			"bevelSoftness":1,
+			"bevelGreen":241.304,
+			"bevelBlue":211.172
+		}
+	}
+]
