@@ -805,12 +805,8 @@ public class MainControl : MonoBehaviour
         target.meta = meta;
         meta.modelFilePath = L2DWUtils.TryParseModelRelativePath(path);
         meta.name = Path.GetFileNameWithoutExtension(path);
-        meta.formatText = "";
-        if (L2DWUtils.IsSubFolderOf(path, Global.ModelPath))
-        {
-            meta.formatText = $"changeFigure:{meta.modelFilePath} -id={meta.name} %me%;";
-        }
-        meta.transformFormatText = $"setTransform:%me% -target={meta.name} -duration=750;";
+        meta.formatText = L2DWUtils.GenerateFormatText(meta);
+        meta.transformFormatText = L2DWUtils.GenerateTransformFormatText(meta);
         
         target.CreateModel();
         if (target.MainModel == null)
