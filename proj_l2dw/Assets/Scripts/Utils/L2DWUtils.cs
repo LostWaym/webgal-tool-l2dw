@@ -1,5 +1,6 @@
 
 
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using SFB;
@@ -243,5 +244,78 @@ public static class L2DWUtils
         const float previewWindowWidth = 400.0f;
         var scaleFactor = previewWindowWidth / texture.width;
         rawImage.rectTransform.sizeDelta = new Vector2(texture.width, texture.height) * scaleFactor;
+    }
+
+    /// <summary>
+    /// 尝试生成单行 changeFigure 模板
+    /// <param name= "name" >模型名称/id</param>
+    /// <param name= "modelPath" >模型路径</param>
+    /// <param name= "index" >模型索引</param>
+    /// </summary>
+    public static string GenerateFormatText(string name, string modelPath, int index)
+    {
+        if (IsSubFolderOf(modelPath, Global.ModelPath))
+        {
+            modelPath = GetRelativePath(modelPath, Global.ModelPath);
+        }
+        else
+        {
+            // 如果不在全局设置的 figure 目录下,则尝试截取 figure 目录后面的路径
+            modelPath = modelPath.Replace('\\', '/');
+            const string figureDir = "figure/";
+            var figureDirIndex = modelPath.IndexOf(figureDir);
+            if (figureDirIndex >= 0)
+            {
+                modelPath = modelPath.Substring(figureDirIndex + figureDir.Length);
+            }
+        }
+        
+        return $"changeFigure:{modelPath} -id={name}_{index} -zIndex={index} %me_{index}%;";
+    }
+    
+    /// <summary>
+    /// 尝试生成 changeFigure 模板
+    /// <param name="name">模型名称</param>
+    /// <param name="mainModelPath">主模型路径</param>
+    /// <param name="subModelPaths">子模型路径</param>
+    /// </summary>
+    public static string GenerateFormatText(string name, string mainModelPath, string[] subModelPaths)
+    {
+        var outputTextLines = new List<string>();
+        var modelCount = subModelPaths.Length + 1;
+        for (int i = 0; i < modelCount; i++)
+        {
+            outputTextLines.Add(GenerateFormatText(name, i == 0 ? mainModelPath : subModelPaths[i - 1], i));
+        }
+        return string.Join("\n", outputTextLines);
+    }
+    
+    /// <summary>
+    /// 尝试生成 changeFigure 模板
+    /// </summary>
+    public static string GenerateFormatText(MyGOLive2DExMeta meta)
+    {
+        return GenerateFormatText(meta.name, meta.modelFilePath, meta.modelFilePaths.ToArray());
+    }
+
+    /// <summary>
+    /// 尝试生成 setTransfrom 模板
+    /// </summary>
+    public static string GenerateTransformFormatText(string name, int modelCount)
+    {
+        var outputTextLines = new List<string>();
+        for (int i = 0; i < modelCount; i++)
+        {
+            outputTextLines.Add($"setTransform:%me_{i}% -target={name}_{i} -duration=750 -writeDefault;");
+        }
+        return string.Join("\n", outputTextLines);
+    }
+    
+    /// <summary>
+    /// 尝试生成 setTransfrom 模板
+    /// </summary>
+    public static string GenerateTransformFormatText(MyGOLive2DExMeta meta)
+    {
+        return GenerateTransformFormatText(meta.name, meta.modelFilePaths.Count + 1);
     }
 }
