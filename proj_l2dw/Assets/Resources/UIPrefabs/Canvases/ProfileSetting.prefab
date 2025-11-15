@@ -3362,7 +3362,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4127466188099082054, guid: 1eef29915b7cb1145a06364aaea69956, type: 3}
       propertyPath: m_Size
-      value: 0.6207386
+      value: 0.625
       objectReference: {fileID: 0}
     - target: {fileID: 4127466188099082054, guid: 1eef29915b7cb1145a06364aaea69956, type: 3}
       propertyPath: m_Value
@@ -4183,6 +4183,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1949582643305701419, guid: 57de4c3714aa1c14ca020048357135ef, type: 3}
+      propertyPath: m_LineType
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 2048223715539676033, guid: 57de4c3714aa1c14ca020048357135ef, type: 3}
       propertyPath: m_Text
       value: "\u53D8\u6362\u6307\u4EE4\u6A21\u677F"
@@ -4445,7 +4449,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 200277005667110615, guid: 57de4c3714aa1c14ca020048357135ef, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 4919994012584903824, guid: 57de4c3714aa1c14ca020048357135ef, type: 3}
@@ -5509,6 +5514,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1949582643305701419, guid: 57de4c3714aa1c14ca020048357135ef, type: 3}
+      propertyPath: m_LineType
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 2048223715539676033, guid: 57de4c3714aa1c14ca020048357135ef, type: 3}
       propertyPath: m_Text
       value: "\u7ACB\u7ED8\u6307\u4EE4\u6A21\u677F"
@@ -5771,7 +5780,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 200277005667110615, guid: 57de4c3714aa1c14ca020048357135ef, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 4919994012584903824, guid: 57de4c3714aa1c14ca020048357135ef, type: 3}
