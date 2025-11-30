@@ -158,9 +158,10 @@ public class L2DWModelConfig : IJSonSerializable
     public void DeserializeFromJson(JSONObject json)
     {
         name = json.GetField(nameof(name))?.str ?? "";
-        modelRelativePath = json.GetField(nameof(modelRelativePath))?.str ?? "";
-        figureTemplate = json.GetField(nameof(figureTemplate))?.str ?? "";
-        transformTemplate = json.GetField(nameof(transformTemplate))?.str ?? "";
+        modelRelativePath = (json.GetField(nameof(modelRelativePath))?.str ?? "").Replace("/", "\\");
+        // 处理换行符的问题
+        figureTemplate = (json.GetField(nameof(figureTemplate))?.str ?? "").Replace("\\n", "\n");
+        transformTemplate = (json.GetField(nameof(transformTemplate))?.str ?? "").Replace("\\n", "\n");
         x = json.GetField(nameof(x))?.f ?? 0;
         y = json.GetField(nameof(y))?.f ?? 0;
         scale = json.GetField(nameof(scale))?.f ?? 0;
@@ -176,9 +177,11 @@ public class L2DWModelConfig : IJSonSerializable
     public void SerializeToJson(JSONObject json)
     {
         json.AddField(nameof(name), name);
-        json.AddField(nameof(modelRelativePath), modelRelativePath);
-        json.AddField(nameof(figureTemplate), figureTemplate);
-        json.AddField(nameof(transformTemplate), transformTemplate);
+        // 路径统一使用 /，避免Json字符串的问题
+        json.AddField(nameof(modelRelativePath), modelRelativePath.Replace("\\", "/"));
+        // 处理换行符
+        json.AddField(nameof(figureTemplate), figureTemplate.Replace("\r\n", "\\n").Replace("\n", "\\n"));
+        json.AddField(nameof(transformTemplate), transformTemplate.Replace("\r\n", "\\n").Replace("\n", "\\n"));
         JsonSerializeUtils.SerializeToJsonFieldArray(subModels, json, nameof(subModels));
         json.AddField(nameof(x), x);
         json.AddField(nameof(y), y);
@@ -246,14 +249,15 @@ public class SubModelData : IJSonSerializable
 
     public void DeserializeFromJson(JSONObject json)
     {
-        modelRelativePath = json.GetField(nameof(modelRelativePath))?.str ?? "";
+        modelRelativePath = (json.GetField(nameof(modelRelativePath))?.str ?? "").Replace("/", "\\");
         offsetX = json.GetField(nameof(offsetX))?.f ?? 0;
         offsetY = json.GetField(nameof(offsetY))?.f ?? 0;
     }
 
     public void SerializeToJson(JSONObject json)
     {
-        json.AddField(nameof(modelRelativePath), modelRelativePath);
+        // 路径统一使用 /，避免Json字符串的问题
+        json.AddField(nameof(modelRelativePath), modelRelativePath.Replace("\\", "/"));
         json.AddField(nameof(offsetX), offsetX);
         json.AddField(nameof(offsetY), offsetY);
     }

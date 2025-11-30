@@ -85,8 +85,6 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>, IOpenFolde
     }
     private void OnInputFieldModelFilePathEndEdit(string value)
     {
-        var folder = Path.GetDirectoryName(config.temp_filePath);
-        m_iptModelFilePath.SetTextWithoutNotify(Path.GetRelativePath(folder, value));
     }
     private void OnButtonGenFormatTextClick()
     {
@@ -383,8 +381,6 @@ public class ProfileSettingSubModelWidget : UIItemWidget<ProfileSettingSubModelW
     }
     private void OnInputFieldModelFilePathsEndEdit(string value)
     {
-        var folder = Path.GetDirectoryName(config.temp_filePath);
-        m_iptModelFilePaths.SetTextWithoutNotify(Path.GetRelativePath(folder, value));
         _OnModelFilePathChange?.Invoke(this);
     }
     private void OnInputFieldXChange(string value)
