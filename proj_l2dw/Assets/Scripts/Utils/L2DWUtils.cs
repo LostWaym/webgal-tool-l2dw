@@ -302,7 +302,13 @@ public static class L2DWUtils
     /// </summary>
     public static string GenerateFormatText(L2DWModelConfig meta)
     {
-        return GenerateFormatText(meta.name, meta.modelRelativePath, meta.subModels.Select(subModel => subModel.modelRelativePath).ToArray());
+        var modelAbsolutePath = meta.GetValidModelFilePath(0);
+        var subModelAbsolutePaths = new string[meta.subModels.Count()];
+        for (int i = 0; i < meta.subModels.Count; i++)
+        {
+            subModelAbsolutePaths[i] = meta.GetValidModelFilePath(i + 1);
+        }
+        return GenerateFormatText(meta.name, modelAbsolutePath, subModelAbsolutePaths);
     }
     
     /// <summary>
