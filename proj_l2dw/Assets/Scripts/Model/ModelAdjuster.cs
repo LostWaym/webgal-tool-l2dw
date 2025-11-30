@@ -12,8 +12,8 @@ public class ModelAdjuster : ModelAdjusterBase
     public override bool SupportExpressionMode => true;
     public override bool HasMotions => true;
     public override string Name => meta.name;
-    public override string MotionTemplate => meta.formatText;
-    public override string TransformTemplate => meta.transformFormatText;
+    public override string MotionTemplate => meta.figureTemplate;
+    public override string TransformTemplate => meta.transformTemplate;
 
     public bool isAutoRefreshTextures = false;
 
@@ -385,7 +385,7 @@ public class ModelAdjuster : ModelAdjusterBase
         }
 
         webgalPoses.Add(mainModel);
-        for (int i = 0; i < meta.modelFilePaths.Count; i++)
+        for (int i = 0; i < meta.subModels.Count; i++)
         {
             webgalPoses.Add(CreateWebGalModelPos(meta.GetValidModelFilePath(i + 1)));
         }

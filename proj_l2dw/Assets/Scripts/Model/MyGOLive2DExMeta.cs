@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 
-public class MyGOLive2DExMeta
+public class MyGOLive2DExMetaOld
 {
     //index 0: name
     //index 1: formatText
@@ -29,10 +29,10 @@ public class MyGOLive2DExMeta
 
     public string m_filterMotion, m_filterExp;
 
-    public static MyGOLive2DExMeta Load(string filePath)
+    public static MyGOLive2DExMetaOld Load(string filePath)
     {
         var lines = File.ReadAllLines(filePath);
-        var meta = new MyGOLive2DExMeta();
+        var meta = new MyGOLive2DExMetaOld();
         meta.name = lines.Length > 0 ? lines[0] : "";
         meta.formatText = lines.Length > 1 ? lines[1].Replace("\\n", "\n") : "";
         meta.modelFilePath = lines.Length > 2 ? lines[2] : "";

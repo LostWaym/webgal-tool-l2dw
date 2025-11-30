@@ -27,7 +27,7 @@ public class MainControl : MonoBehaviour
     public ImageModel imgPrefab;
     public List<ModelAdjusterBase> models = new List<ModelAdjusterBase>();
     public ModelAdjusterBase curTarget;
-    public MyGOLive2DExMeta curMeta => curTarget.meta;
+    public L2DWModelConfig curMeta => curTarget.meta;
     
     public Text debugText;
 
@@ -156,7 +156,7 @@ public class MainControl : MonoBehaviour
         FilterUtils.SaveFilterSetPreset();
     }
 
-    private void OnSaveSetting(MyGOLive2DExMeta meta)
+    private void OnSaveSetting(L2DWModelConfig config)
     {
         if(curTarget == null)
             return;
@@ -733,7 +733,7 @@ public class MainControl : MonoBehaviour
     #region  配置加载相关
 
     private SFB.ExtensionFilter[] modelFilters = new SFB.ExtensionFilter[] {
-         new SFB.ExtensionFilter("模型文件", "json", "conf"),
+         new SFB.ExtensionFilter("配置文件", "json", "conf", L2DWModelConfig.EXTENSION),
     };
     public void LoadModelConfig()
     {
@@ -768,7 +768,18 @@ public class MainControl : MonoBehaviour
             if (string.IsNullOrEmpty(path))
                 continue;
 
-            var meta = MyGOLive2DExMeta.Load(path);
+            L2DWModelConfig meta = null;
+            if (Path.GetExtension(path).ToLower() == ".conf")
+            {
+                meta = L2DWModelConfig.LoadFromMyGOLive2DExMeta(path);
+                meta.temp_filePath = path;
+            }
+            else
+            {
+                meta = L2DWModelConfig.Load(path);
+                meta.temp_filePath = path;
+            }
+
             var target = CreateModelAdjuster();
             target.meta = meta;
             target.CreateModel();
@@ -781,10 +792,7 @@ public class MainControl : MonoBehaviour
             success = true;
             validPath = path;
             target.Adjust();
-            if (meta.hasTransform)
-            {
-                target.InitTransform(new Vector3(meta.x, meta.y, 0), meta.scale, meta.rotation, meta.reverseX);
-            }
+            target.InitTransform(new Vector3(meta.x, meta.y, 0), meta.scale, meta.rotation, meta.reverseX);
             TryPlayDefaultMotion(target);
             finalTarget = target;
         }
@@ -801,12 +809,13 @@ public class MainControl : MonoBehaviour
     private void LoadJsonModel(string path)
     {
         var target = CreateModelAdjuster();
-        var meta = new MyGOLive2DExMeta();
+        var meta = new L2DWModelConfig();
         target.meta = meta;
-        meta.modelFilePath = L2DWUtils.TryParseModelRelativePath(path);
+        meta.temp_filePath = path;
+        meta.modelRelativePath = L2DWUtils.TryParseModelRelativePath(path);
         meta.name = Path.GetFileNameWithoutExtension(path);
-        meta.formatText = L2DWUtils.GenerateFormatText(meta);
-        meta.transformFormatText = L2DWUtils.GenerateTransformFormatText(meta);
+        meta.figureTemplate = L2DWUtils.GenerateFormatText(meta);
+        meta.transformTemplate = L2DWUtils.GenerateTransformFormatText(meta);
         
         target.CreateModel();
         if (target.MainModel == null)
@@ -910,7 +919,10 @@ public class MainControl : MonoBehaviour
 
     public void LoadConf()
     {
-        var paths = SFB.StandaloneFileBrowser.OpenFilePanel("选择配置", PlayerPrefs.GetString("conf_path", "."), "conf", true);
+        var extensions = new SFB.ExtensionFilter[] {
+            new SFB.ExtensionFilter("配置文件", "conf", L2DWModelConfig.EXTENSION),
+        };
+        var paths = SFB.StandaloneFileBrowser.OpenFilePanel("选择配置", PlayerPrefs.GetString("conf_path", "."), extensions, true);
         if (paths == null || paths.Length == 0)
             return;
             
@@ -930,7 +942,7 @@ public class MainControl : MonoBehaviour
         if (curTarget == null)
             return;
 
-        var path = SFB.StandaloneFileBrowser.SaveFilePanel("保存配置", PlayerPrefs.GetString("conf_path", "."), $"{curMeta.name}.conf", "conf");
+        var path = SFB.StandaloneFileBrowser.SaveFilePanel("保存配置", PlayerPrefs.GetString("conf_path", "."), $"{curMeta.name}.{L2DWModelConfig.EXTENSION}", L2DWModelConfig.EXTENSION);
         if (string.IsNullOrEmpty(path))
             return;
         

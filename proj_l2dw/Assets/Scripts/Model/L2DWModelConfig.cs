@@ -1,10 +1,22 @@
 
 
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEngine;
 
 public class L2DWModelConfig : IJSonSerializable
 {
-    public const string EXTENSION = ".wmdl";
+    public const string EXTENSION = "wmdl";
+
+    #region Temp
+    public string temp_filePath;
+    public string m_filterMotion;
+    public string m_filterExp;
+    #endregion
+
+    #region Data
     public string name;
     public string modelRelativePath;
     public List<SubModelData> subModels = new List<SubModelData>();
@@ -13,6 +25,132 @@ public class L2DWModelConfig : IJSonSerializable
     public float x, y, scale, rotation;
     public bool reverseX;
     public float[] live2dBounds = new float[] { 0, 0, 0, 0 }; // left, top, right, bottom
+    #endregion
+
+    public static L2DWModelConfig Load(string filePath)
+    {
+        var jsonText = File.ReadAllText(filePath);
+        var json = new JSONObject(jsonText);
+        var config = new L2DWModelConfig();
+        config.DeserializeFromJson(json);
+        return config;
+    }
+
+    public static L2DWModelConfig LoadFromMyGOLive2DExMeta(string path)
+    {
+        var meta = MyGOLive2DExMetaOld.Load(path);
+        var config = new L2DWModelConfig();
+        config.temp_filePath = path;
+        config.m_filterMotion = meta.m_filterMotion;
+        config.m_filterExp = meta.m_filterExp;
+        config.name = meta.name;
+        config.modelRelativePath = meta.modelFilePath;
+        config.figureTemplate = meta.formatText;
+        config.transformTemplate = meta.transformFormatText;
+        config.x = meta.x;
+        config.y = meta.y;
+        config.scale = meta.scale;
+        config.rotation = meta.rotation;
+        config.reverseX = meta.reverseX;
+
+        for (int i = 0; i < meta.modelFilePaths.Count; i++)
+        {
+            var offsetX = SafeGetFloatFromList(meta.modelOffset, i * 2);
+            var offsetY = SafeGetFloatFromList(meta.modelOffset, i * 2 + 1);
+            config.subModels.Add(new SubModelData() { modelRelativePath = meta.modelFilePaths[i], offsetX = offsetX, offsetY = offsetY });
+        }
+
+        config.live2dBounds[0] = SafeGetFloatFromArray(meta.live2dBounds, 0);
+        config.live2dBounds[1] = SafeGetFloatFromArray(meta.live2dBounds, 1);
+        config.live2dBounds[2] = SafeGetFloatFromArray(meta.live2dBounds, 2);
+        config.live2dBounds[3] = SafeGetFloatFromArray(meta.live2dBounds, 3);
+
+        config.modelRelativePath = L2DWUtils.TryParseModelAbsolutePath(config.modelRelativePath);
+        for (int i = 0; i < config.subModels.Count; i++)
+        {
+            config.subModels[i].modelRelativePath = L2DWUtils.TryParseModelAbsolutePath(config.subModels[i].modelRelativePath);
+        }
+
+        return config;
+    }
+
+    private static float SafeGetFloatFromList(List<float> list, int index, float defaultValue = 0)
+    {
+        if (list == null || index < 0 || index >= list.Count)
+        {
+            return defaultValue;
+        }
+        return list[index];
+    }
+
+    private static float SafeGetFloatFromArray(float[] array, int index, float defaultValue = 0)
+    {
+        if (array == null || index < 0 || index >= array.Length)
+        {
+            return defaultValue;
+        }
+        return array[index];
+    }
+
+    private void ConvertPathToRelative(string filePath, out Action snapShot)
+    {
+        string originalModelRelativePath = modelRelativePath;
+        string[] originalSubModelRelativePaths = subModels.Select(subModel => subModel.modelRelativePath).ToArray();
+        snapShot = ()=>
+        {
+            modelRelativePath = originalModelRelativePath;
+            for (int i = 0; i < subModels.Count; i++)
+            {
+                subModels[i].modelRelativePath = originalSubModelRelativePaths[i];
+            }
+        };
+
+        modelRelativePath = ToAbsolutePath(modelRelativePath);
+        for (int i = 0; i < subModels.Count; i++)
+        {
+            subModels[i].modelRelativePath = ToAbsolutePath(subModels[i].modelRelativePath);
+        }
+
+        temp_filePath = filePath;
+        var folder = Path.GetDirectoryName(filePath);
+        modelRelativePath = Path.GetRelativePath(folder, modelRelativePath);
+        for (int i = 0; i < subModels.Count; i++)
+        {
+            subModels[i].modelRelativePath = Path.GetRelativePath(folder, subModels[i].modelRelativePath);
+        }
+    }
+
+    private string ToAbsolutePath(string path)
+    {
+        // 可能是相对路径，也可能是绝对路径
+        if (Path.IsPathRooted(path))
+        {
+            return path;
+        }
+        else
+        {
+            return Path.Combine(Path.GetDirectoryName(temp_filePath), path);
+        }
+    }
+
+    public bool Save(string filePath)
+    {
+        Action snapShot = null;
+        try
+        {
+            ConvertPathToRelative(filePath, out snapShot);
+            var json = new JSONObject();
+            SerializeToJson(json);
+            File.WriteAllText(filePath, json.ToString(true));
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"保存配置失败: {ex}");
+            snapShot?.Invoke();
+            return false;
+        }
+        return true;
+    }
 
     #region IJSonSerializable
     public void DeserializeFromJson(JSONObject json)
@@ -93,7 +231,7 @@ public class L2DWModelConfig : IJSonSerializable
     public string GetValidModelFilePath(int modelIndex)
     {
         var originalFilePath = InternalGetOriginalModelFilePath(modelIndex);
-        var path = L2DWUtils.TryParseModelAbsolutePath(originalFilePath);
+        var path = ToAbsolutePath(originalFilePath);
         return path;
     }
 }

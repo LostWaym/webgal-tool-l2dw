@@ -300,9 +300,9 @@ public static class L2DWUtils
     /// <summary>
     /// 尝试生成 changeFigure 模板
     /// </summary>
-    public static string GenerateFormatText(MyGOLive2DExMeta meta)
+    public static string GenerateFormatText(L2DWModelConfig meta)
     {
-        return GenerateFormatText(meta.name, meta.modelFilePath, meta.modelFilePaths.ToArray());
+        return GenerateFormatText(meta.name, meta.modelRelativePath, meta.subModels.Select(subModel => subModel.modelRelativePath).ToArray());
     }
     
     /// <summary>
@@ -335,9 +335,9 @@ public static class L2DWUtils
     /// <summary>
     /// 尝试生成 setTransfrom 模板
     /// </summary>
-    public static string GenerateTransformFormatText(MyGOLive2DExMeta meta)
+    public static string GenerateTransformFormatText(L2DWModelConfig meta)
     {
-        return GenerateTransformFormatText(meta.name, meta.modelFilePaths.Count + 1);
+        return GenerateTransformFormatText(meta.name, meta.subModels.Count + 1);
     }
     
     /// <summary>

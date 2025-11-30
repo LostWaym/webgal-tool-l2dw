@@ -151,7 +151,7 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>
     private void OnButtonSaveClick()
     {
         Save();
-        onSaveAction?.Invoke(meta);
+        onSaveAction?.Invoke(config);
         Close();    
     }
     private void OnButtonCancelClick()
@@ -159,39 +159,39 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>
         Close();
     }
     #endregion
-    private MyGOLive2DExMeta meta;
+    private L2DWModelConfig config;
 
-    public static Action<MyGOLive2DExMeta> onSaveAction;
+    public static Action<L2DWModelConfig> onSaveAction;
 
     protected override void OnInit()
     {
         base.OnInit();
     }
 
-    public void Load(MyGOLive2DExMeta meta)
+    public void Load(L2DWModelConfig config)
     {
-        this.meta = meta;
-        m_iptName.text = meta.name;
-        m_iptFormatText.text = meta.formatText;
-        m_iptModelFilePath.text = meta.modelFilePath;
-        m_iptTransformFormatText.text = meta.transformFormatText;
-        m_iptBoundsLeft.text = meta.live2dBounds[0].ToString();
-        m_iptBoundsTop.text = meta.live2dBounds[1].ToString();
-        m_iptBoundsRight.text = meta.live2dBounds[2].ToString();
-        m_iptBoundsBottom.text = meta.live2dBounds[3].ToString();
+        this.config = config;
+        m_iptName.text = config.name;
+        m_iptFormatText.text = config.figureTemplate;
+        m_iptModelFilePath.text = config.modelRelativePath;
+        m_iptTransformFormatText.text = config.transformTemplate;
+        m_iptBoundsLeft.text = config.live2dBounds[0].ToString();
+        m_iptBoundsTop.text = config.live2dBounds[1].ToString();
+        m_iptBoundsRight.text = config.live2dBounds[2].ToString();
+        m_iptBoundsBottom.text = config.live2dBounds[3].ToString();
         LoadSubModels();
     }
 
     public void Save()
     {
-        meta.name = m_iptName.text.Trim();
-        meta.formatText = m_iptFormatText.text;
-        meta.modelFilePath = m_iptModelFilePath.text;
-        meta.transformFormatText = m_iptTransformFormatText.text;
-        meta.live2dBounds[0] = float.TryParse(m_iptBoundsLeft.text, out var left) ? left : 0.0f;
-        meta.live2dBounds[1] = float.TryParse(m_iptBoundsTop.text, out var top) ? top : 0.0f;
-        meta.live2dBounds[2] = float.TryParse(m_iptBoundsRight.text, out var right) ? right : 0.0f;
-        meta.live2dBounds[3] = float.TryParse(m_iptBoundsBottom.text, out var bottom) ? bottom : 0.0f;
+        config.name = m_iptName.text.Trim();
+        config.figureTemplate = m_iptFormatText.text;
+        config.modelRelativePath = m_iptModelFilePath.text;
+        config.transformTemplate = m_iptTransformFormatText.text;
+        config.live2dBounds[0] = float.TryParse(m_iptBoundsLeft.text, out var left) ? left : 0.0f;
+        config.live2dBounds[1] = float.TryParse(m_iptBoundsTop.text, out var top) ? top : 0.0f;
+        config.live2dBounds[2] = float.TryParse(m_iptBoundsRight.text, out var right) ? right : 0.0f;
+        config.live2dBounds[3] = float.TryParse(m_iptBoundsBottom.text, out var bottom) ? bottom : 0.0f;
         SaveSubModels();
     }
 
@@ -203,10 +203,10 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>
     {
         // m_iptModelFilePaths.text = string.Join("\n", meta.modelFilePaths);
         subModelInfos.Clear();
-        for (int i = 0; i < meta.modelFilePaths.Count; i++)
+        for (int i = 0; i < config.subModels.Count; i++)
         {
-            string filePath = meta.modelFilePaths[i];
-            meta.GetModelOffset(i + 1, out var offsetX, out var offsetY);
+            string filePath = config.subModels[i].modelRelativePath;
+            config.GetModelOffset(i + 1, out var offsetX, out var offsetY);
             subModelInfos.Add(new ProfileSettingSubModelInfo() { filePath = filePath, offsetX = offsetX, offsetY = offsetY });
         }
         RefreshSubModelWidgets();
@@ -248,19 +248,17 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>
 
     public void SaveSubModels()
     {
-        meta.modelFilePaths.Clear();
+        config.subModels.Clear();
         foreach (var info in subModelInfos)
         {
             if (!string.IsNullOrEmpty(info.filePath))
             {
-                meta.modelFilePaths.Add(info.filePath);
+                var subModelData = new SubModelData();
+                subModelData.modelRelativePath = info.filePath;
+                subModelData.offsetX = info.offsetX;
+                subModelData.offsetY = info.offsetY;
+                config.subModels.Add(subModelData);
             }
-        }
-        meta.modelOffset.Clear();
-        foreach (var info in subModelInfos)
-        {
-            meta.modelOffset.Add(info.offsetX);
-            meta.modelOffset.Add(info.offsetY);
         }
     }
 
