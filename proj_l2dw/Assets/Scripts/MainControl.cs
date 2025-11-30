@@ -812,7 +812,8 @@ public class MainControl : MonoBehaviour
         var meta = new L2DWModelConfig();
         target.meta = meta;
         meta.temp_filePath = path;
-        meta.modelRelativePath = L2DWUtils.TryParseModelRelativePath(path);
+        var folder = Path.GetDirectoryName(path);
+        meta.modelRelativePath = Path.GetRelativePath(folder, path);
         meta.name = Path.GetFileNameWithoutExtension(path);
         meta.figureTemplate = L2DWUtils.GenerateFormatText(meta);
         meta.transformTemplate = L2DWUtils.GenerateTransformFormatText(meta);

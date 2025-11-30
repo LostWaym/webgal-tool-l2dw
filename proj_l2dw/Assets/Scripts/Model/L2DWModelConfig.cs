@@ -65,6 +65,8 @@ public class L2DWModelConfig : IJSonSerializable
         config.live2dBounds[2] = SafeGetFloatFromArray(meta.live2dBounds, 2);
         config.live2dBounds[3] = SafeGetFloatFromArray(meta.live2dBounds, 3);
 
+        // convert to absolute paths
+        // 旧逻辑，之前是相对立绘文件夹的，所以用 TryParseModelAbsolutePath 没有问题
         config.modelRelativePath = L2DWUtils.TryParseModelAbsolutePath(config.modelRelativePath);
         for (int i = 0; i < config.subModels.Count; i++)
         {

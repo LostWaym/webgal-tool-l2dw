@@ -85,7 +85,8 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>, IOpenFolde
     }
     private void OnInputFieldModelFilePathEndEdit(string value)
     {
-        m_iptModelFilePath.SetTextWithoutNotify(L2DWUtils.TryParseModelRelativePath(value));
+        var folder = Path.GetDirectoryName(config.temp_filePath);
+        m_iptModelFilePath.SetTextWithoutNotify(Path.GetRelativePath(folder, value));
     }
     private void OnButtonGenFormatTextClick()
     {
@@ -218,7 +219,7 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>, IOpenFolde
         SetListItem(subModelWidgets, m_itemSubModel.gameObject, m_tfSubModelRoot, subModelInfos.Count, OnSubModelItemCreate);
         for (int i = 0; i < subModelInfos.Count; i++)
         {
-            subModelWidgets[i].SetData(i, subModelInfos[i]);
+            subModelWidgets[i].SetData(i, subModelInfos[i], config);
         }
     }
 
@@ -365,7 +366,8 @@ public class ProfileSettingSubModelWidget : UIItemWidget<ProfileSettingSubModelW
     }
     private void OnInputFieldModelFilePathsEndEdit(string value)
     {
-        m_iptModelFilePaths.SetTextWithoutNotify(L2DWUtils.TryParseModelRelativePath(value));
+        var folder = Path.GetDirectoryName(config.temp_filePath);
+        m_iptModelFilePaths.SetTextWithoutNotify(Path.GetRelativePath(folder, value));
         _OnModelFilePathChange?.Invoke(this);
     }
     private void OnInputFieldXChange(string value)
@@ -417,10 +419,12 @@ public class ProfileSettingSubModelWidget : UIItemWidget<ProfileSettingSubModelW
     public int index;
     public string Text => m_iptModelFilePaths.text;
     private ProfileSettingSubModelInfo info;
-    public void SetData(int index, ProfileSettingSubModelInfo info)
+    private L2DWModelConfig config;
+    public void SetData(int index, ProfileSettingSubModelInfo info, L2DWModelConfig config)
     {
         this.index = index;
         this.info = info;
+        this.config = config;
         m_iptModelFilePaths.SetTextWithoutNotify(info.filePath);
         m_iptX.SetTextWithoutNotify(info.offsetX.ToString());
         m_iptY.SetTextWithoutNotify(info.offsetY.ToString());
