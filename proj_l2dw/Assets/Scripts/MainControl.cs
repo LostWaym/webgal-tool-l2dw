@@ -281,6 +281,7 @@ public class MainControl : MonoBehaviour
     
 
     public List<string> backgroundPaths = new List<string>();
+    public Dictionary<string, Sprite> backgroundThumbnailSprites = new Dictionary<string, Sprite>();// size 100x100 the texture is the same as the original texture
     public void LoadBackground(string path)
     {
         if(string.IsNullOrEmpty(path) || !File.Exists(path))
@@ -296,11 +297,76 @@ public class MainControl : MonoBehaviour
         backgroundPaths.Remove(path);
         backgroundPaths.Insert(0, path);
         texture.LoadImage(File.ReadAllBytes(path));
+        var thumbnailSprite = CreateThumbnail(texture, 100, 100);
+        backgroundThumbnailSprites[path] = thumbnailSprite;
         CurrentBGPath = path;
         bgContainer.LoadTexture(texture);
         UIEventBus.SendEvent(UIEventType.BGChanged);
 
         Resources.UnloadUnusedAssets();
+    }
+
+    private Sprite CreateThumbnail(Texture2D texture, int width, int height)
+    {
+        // 输入有效性检查
+        if (texture == null)
+        {
+            Debug.LogError("原始纹理不能为空！");
+            return null;
+        }
+
+        if (width <= 0 || height <= 0)
+        {
+            Debug.LogError("目标宽高必须大于0！");
+            return null;
+        }
+
+        // 保存当前的RenderTexture
+        RenderTexture originalRT = RenderTexture.active;
+
+        // 创建临时的RenderTexture用于缩放
+        RenderTexture scaledRT = new RenderTexture(width, height, 0);
+        scaledRT.filterMode = FilterMode.Bilinear; // 使用双线性过滤让缩放更平滑
+
+        try
+        {
+            // 设置当前RenderTexture为缩放后的RT
+            RenderTexture.active = scaledRT;
+
+            // 将原纹理绘制到缩放后的RT（自动完成缩放）
+            Graphics.Blit(texture, scaledRT);
+
+            // 创建新的Texture2D来读取像素数据
+            Texture2D thumbnailTexture = new Texture2D(width, height, texture.format, false);
+            thumbnailTexture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+            thumbnailTexture.Apply(); // 应用像素更改
+
+            // 使用新纹理创建Sprite
+            Sprite thumbnailSprite = Sprite.Create(
+                thumbnailTexture,
+                new Rect(0, 0, width, height),
+                new Vector2(0.5f, 0.5f) // 中心点在Sprite中心
+            );
+
+            return thumbnailSprite;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"创建缩略图失败：{e.Message}");
+            return null;
+        }
+        finally
+        {
+            // 恢复原来的RenderTexture
+            RenderTexture.active = originalRT;
+            
+            // 释放临时RenderTexture
+            if (scaledRT != null)
+            {
+                scaledRT.Release();
+                UnityEngine.Object.Destroy(scaledRT);
+            }
+        }
     }
 
     #region 快捷键，更新相关

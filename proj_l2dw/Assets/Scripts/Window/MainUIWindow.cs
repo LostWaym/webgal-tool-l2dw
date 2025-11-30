@@ -3639,10 +3639,38 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
 
 public class PageBackgroundItem : UIItemWidget<PageBackgroundItem>
 {
+    #region auto generated members
+    private Image m_imgBG;
+    private Text m_lblTitle;
+    #endregion
+
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_imgBG = transform.Find("m_imgBG").GetComponent<Image>();
+        m_lblTitle = transform.Find("m_lblTitle").GetComponent<Text>();
+
+    }
+    #endregion
+
+    #region auto generated events
+    #endregion
+
+
     public void SetData(string path)
     {
         var fileName = Path.GetFileName(path);
-        gameObject.GetComponentInChildren<Text>().text = fileName;
+        if (MainControl.Instance.backgroundThumbnailSprites.TryGetValue(path, out var sprite))
+        {
+            m_imgBG.sprite = sprite;
+            m_imgBG.color = new Color(1, 1, 1, 0.5f);
+        }
+        else
+        {
+            m_imgBG.sprite = null;
+            m_imgBG.color = new Color(1, 1, 1, 0f);
+        }
+        m_lblTitle.text = fileName;
     }
 }
 
