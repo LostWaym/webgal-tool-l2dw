@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>
+public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>, IOpenFolderMsgHandler
 {
     #region auto generated members
     private InputField m_iptName;
@@ -295,6 +296,21 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>
             subModelInfos[index] = subModelInfos[index + 1];
             subModelInfos[index + 1] = temp;
             RefreshSubModelWidgets();
+        }
+    }
+
+    public void Handle(OpenFolderCom com, string path, string originalPath, out string newPath)
+    {
+        newPath = null;
+        if (com.data == "model_path")
+        {
+            if (Path.IsPathRooted(originalPath))
+            {
+                return;
+            }
+            var filePath = config.temp_filePath;
+            var folder = Path.GetDirectoryName(filePath);
+            newPath = Path.Combine(folder, originalPath);
         }
     }
 

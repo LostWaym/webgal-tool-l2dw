@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class OpenFolderCom : MonoBehaviour
 {
+    public GameObject msgHandler;
+    public string data;
     public InputField pathSource;
     public bool isFile = false;
 
@@ -28,6 +30,15 @@ public class OpenFolderCom : MonoBehaviour
             path = L2DWUtils.TryParseModelAbsolutePath(path);
         }
 
+        if (msgHandler != null && msgHandler.TryGetComponent<IOpenFolderMsgHandler>(out var msgHandlerComponent))
+        {
+            msgHandlerComponent.Handle(this, path, pathSource.text, out var newPath);
+            if (newPath != null)
+            {
+                path = newPath;
+            }
+        }
+
         string dir = Path.GetDirectoryName(path);
         if (string.IsNullOrEmpty(dir))
             return;
@@ -40,4 +51,9 @@ public class OpenFolderCom : MonoBehaviour
         else
             System.Diagnostics.Process.Start(dir);
     }
+}
+
+public interface IOpenFolderMsgHandler
+{
+    public void Handle(OpenFolderCom com, string path, string originalPath, out string newPath);
 }

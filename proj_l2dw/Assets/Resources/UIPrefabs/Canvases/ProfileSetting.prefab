@@ -2730,9 +2730,17 @@ PrefabInstance:
       value: OpenFolder
       objectReference: {fileID: 0}
     - target: {fileID: 2568185060041548231, guid: 7dff99a979d8fb44caaf0690425e26ab, type: 3}
+      propertyPath: data
+      value: model_path
+      objectReference: {fileID: 0}
+    - target: {fileID: 2568185060041548231, guid: 7dff99a979d8fb44caaf0690425e26ab, type: 3}
       propertyPath: isFile
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2568185060041548231, guid: 7dff99a979d8fb44caaf0690425e26ab, type: 3}
+      propertyPath: msgHandler
+      value: 
+      objectReference: {fileID: 2065646527125965188}
     - target: {fileID: 2568185060041548231, guid: 7dff99a979d8fb44caaf0690425e26ab, type: 3}
       propertyPath: pathSource
       value: 
@@ -3362,7 +3370,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4127466188099082054, guid: 1eef29915b7cb1145a06364aaea69956, type: 3}
       propertyPath: m_Size
-      value: 0.625
+      value: 0.6136364
       objectReference: {fileID: 0}
     - target: {fileID: 4127466188099082054, guid: 1eef29915b7cb1145a06364aaea69956, type: 3}
       propertyPath: m_Value
