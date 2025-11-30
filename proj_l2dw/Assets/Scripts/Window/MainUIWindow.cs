@@ -3439,6 +3439,8 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
 {
     #region auto generated members
     private Button m_btnChange;
+    private Transform m_tfContents;
+    private Transform m_itemBackgroundItem;
     private Transform m_itemPosX;
     private Transform m_itemPosY;
     private Transform m_itemScale;
@@ -3449,6 +3451,8 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
     protected override void CodeGenBindMembers()
     {
         m_btnChange = transform.Find("m_btnChange").GetComponent<Button>();
+        m_tfContents = transform.Find("Flex/Scroll View/Viewport/m_tfContents").GetComponent<Transform>();
+        m_itemBackgroundItem = transform.Find("Flex/Scroll View/Viewport/m_tfContents/m_itemBackgroundItem").GetComponent<Transform>();
         m_itemPosX = transform.Find("Properties/Container/m_itemPosX").GetComponent<Transform>();
         m_itemPosY = transform.Find("Properties/Container/m_itemPosY").GetComponent<Transform>();
         m_itemScale = transform.Find("Properties/Container/m_itemScale").GetComponent<Transform>();
@@ -3475,6 +3479,7 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
     }
     #endregion
 
+    private List<PageBackgroundItem> m_listBackgroundItem = new List<PageBackgroundItem>();
     private PageBackgroundFunctions m_pageBackgroundFunctions;
     public void Inject(PageBackgroundFunctions pageBackgroundFunctions)
     {
@@ -3507,6 +3512,7 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
         base.OnPageShown();
 
         UIEventBus.AddListener(UIEventType.BGTransformChanged, RefreshAll);
+        UIEventBus.AddListener(UIEventType.BGChanged, RefreshAll);
         UIEventBus.AddListener(UIEventType.LockXChanged, OnLockXChange);
         UIEventBus.AddListener(UIEventType.LockYChanged, OnLockYChange);
 
@@ -3533,6 +3539,21 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
 
         m_liptPosX.SetToggleValue(MainControl.Instance.LockX);
         m_liptPosY.SetToggleValue(MainControl.Instance.LockY);
+
+        SetListItem(m_listBackgroundItem, m_itemBackgroundItem.gameObject, m_tfContents, MainControl.Instance.backgroundPaths.Count, OnBackgroundItemCreate);
+        for (int i = 0; i < MainControl.Instance.backgroundPaths.Count; i++)
+        {
+            var item = m_listBackgroundItem[i];
+            item.SetData(MainControl.Instance.backgroundPaths[i]);
+        }
+    }
+
+    private void OnBackgroundItemCreate(PageBackgroundItem widget)
+    {
+        widget.AddClickEvent(()=>
+        {
+            MainControl.Instance.LoadBackground(MainControl.Instance.backgroundPaths[GetListItemIndex(m_listBackgroundItem, widget)]);
+        });
     }
 
     private void OnLockXChange()
@@ -3613,6 +3634,15 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
         {
             m_liptRotation.SetData(MainControl.Instance.bgContainer.rootRotation.ToString());
         }
+    }
+}
+
+public class PageBackgroundItem : UIItemWidget<PageBackgroundItem>
+{
+    public void SetData(string path)
+    {
+        var fileName = Path.GetFileName(path);
+        gameObject.GetComponentInChildren<Text>().text = fileName;
     }
 }
 

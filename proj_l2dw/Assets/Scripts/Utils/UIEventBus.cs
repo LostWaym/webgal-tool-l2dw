@@ -58,6 +58,7 @@ public enum UIEventType
     CameraTransformChanged,
     ModelTransformChanged,
     BGTransformChanged,
+    BGChanged,
     OnModelChanged,
     OnModelDeleted,
 }

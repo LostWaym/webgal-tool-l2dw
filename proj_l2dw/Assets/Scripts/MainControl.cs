@@ -280,6 +280,7 @@ public class MainControl : MonoBehaviour
     }
     
 
+    public List<string> backgroundPaths = new List<string>();
     public void LoadBackground(string path)
     {
         if(string.IsNullOrEmpty(path) || !File.Exists(path))
@@ -292,9 +293,12 @@ public class MainControl : MonoBehaviour
         }
 
         var texture = new Texture2D(2, 2);
+        backgroundPaths.Remove(path);
+        backgroundPaths.Insert(0, path);
         texture.LoadImage(File.ReadAllBytes(path));
         CurrentBGPath = path;
         bgContainer.LoadTexture(texture);
+        UIEventBus.SendEvent(UIEventType.BGChanged);
 
         Resources.UnloadUnusedAssets();
     }
