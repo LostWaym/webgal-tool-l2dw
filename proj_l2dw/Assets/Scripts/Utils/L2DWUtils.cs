@@ -1,5 +1,6 @@
 
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -285,7 +286,13 @@ public static class L2DWUtils
         var modelCount = subModelPaths.Length + 1;
         for (int i = 0; i < modelCount; i++)
         {
-            outputTextLines.Add(GenerateFormatText(name, i == 0 ? mainModelPath : subModelPaths[i - 1], i));
+            var line = GenerateFormatText(name, i == 0 ? mainModelPath : subModelPaths[i - 1], i);
+            // 除了最后一个模型外,其他模型行尾添加 -next 参数
+            if (i < modelCount - 1)
+            {
+                line = line.Insert(line.Length - 1, " -next");
+            }
+            outputTextLines.Add(line);
         }
         return string.Join("\n", outputTextLines);
     }
@@ -297,6 +304,14 @@ public static class L2DWUtils
     {
         return GenerateFormatText(meta.name, meta.modelFilePath, meta.modelFilePaths.ToArray());
     }
+    
+    /// <summary>
+    /// 尝试生成 changeFigure 模板
+    /// </summary>
+    public static string GenerateFormatText(ImageModelMeta meta)
+    {
+        return GenerateFormatText(meta.name, meta.imgPath, Array.Empty<string>());
+    }
 
     /// <summary>
     /// 尝试生成 setTransfrom 模板
@@ -306,7 +321,13 @@ public static class L2DWUtils
         var outputTextLines = new List<string>();
         for (int i = 0; i < modelCount; i++)
         {
-            outputTextLines.Add($"setTransform:%me_{i}% -target={name}_{i} -duration=750 -writeDefault;");
+            var line = $"setTransform:%me_{i}% -target={name}_{i} -duration=750 -writeDefault;";
+            // 除了最后一个模型外,其他模型行尾添加 -next 参数
+            if (i < modelCount - 1)
+            {
+                line = line.Insert(line.Length - 1, " -next");
+            }
+            outputTextLines.Add(line);
         }
         return string.Join("\n", outputTextLines);
     }
@@ -317,5 +338,13 @@ public static class L2DWUtils
     public static string GenerateTransformFormatText(MyGOLive2DExMeta meta)
     {
         return GenerateTransformFormatText(meta.name, meta.modelFilePaths.Count + 1);
+    }
+    
+    /// <summary>
+    /// 尝试生成 setTransfrom 模板
+    /// </summary>
+    public static string GenerateTransformFormatText(ImageModelMeta meta)
+    {
+        return GenerateTransformFormatText(meta.name, 1);
     }
 }

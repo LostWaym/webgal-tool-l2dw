@@ -52,8 +52,8 @@ public class ImageModel : ModelAdjusterBase
         imgMeta.imgPath = path;
         imgMeta.CalculateRelativePath();
         imgMeta.name = Path.GetFileNameWithoutExtension(imgMeta.imgPath ?? "img");
-        imgMeta.motionTemplate = $"changeFigure:{relativePath} -id={imgMeta.name} -l2dw %me%;";
-        imgMeta.transformTemplate = $"setTransform:%me% -target={imgMeta.name} -duration=750;";
+        imgMeta.motionTemplate = L2DWUtils.GenerateFormatText(imgMeta);
+        imgMeta.transformTemplate = L2DWUtils.GenerateTransformFormatText(imgMeta);
     }
 
     public override void CreateModel()

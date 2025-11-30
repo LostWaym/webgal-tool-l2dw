@@ -12,7 +12,9 @@ public class ImageProfileSettingWindow : BaseWindow<ImageProfileSettingWindow>
     private InputField m_iptName;
     private InputField m_iptModelFilePath;
     private InputField m_iptFormatText;
+    private Button m_btnGenFormatText;
     private InputField m_iptTransformFormatText;
+    private Button m_btnGenTransformFormatText;
     private Button m_btnSave;
     private Button m_btnCancel;
     #endregion
@@ -23,7 +25,9 @@ public class ImageProfileSettingWindow : BaseWindow<ImageProfileSettingWindow>
         m_iptName = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/角色名/Value/InputField/m_iptName").GetComponent<InputField>();
         m_iptModelFilePath = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/主模型路径/Value/InputField/m_iptModelFilePath").GetComponent<InputField>();
         m_iptFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/立绘指令模板/Value/InputField/m_iptFormatText").GetComponent<InputField>();
+        m_btnGenFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/立绘指令模板/Label/m_btnGenFormatText").GetComponent<Button>();
         m_iptTransformFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/变换指令模板/Value/InputField/m_iptTransformFormatText").GetComponent<InputField>();
+        m_btnGenTransformFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/变换指令模板/Label/m_btnGenTransformFormatText").GetComponent<Button>();
         m_btnSave = transform.Find("Background/Popup/Window/Bottom/m_btnSave").GetComponent<Button>();
         m_btnCancel = transform.Find("Background/Popup/Window/Top/m_btnCancel").GetComponent<Button>();
 
@@ -33,8 +37,10 @@ public class ImageProfileSettingWindow : BaseWindow<ImageProfileSettingWindow>
         m_iptModelFilePath.onEndEdit.AddListener(OnInputFieldModelFilePathEndEdit);
         m_iptFormatText.onValueChanged.AddListener(OnInputFieldFormatTextChange);
         m_iptFormatText.onEndEdit.AddListener(OnInputFieldFormatTextEndEdit);
+        m_btnGenFormatText.onClick.AddListener(OnButtonGenFormatTextClick);
         m_iptTransformFormatText.onValueChanged.AddListener(OnInputFieldTransformFormatTextChange);
         m_iptTransformFormatText.onEndEdit.AddListener(OnInputFieldTransformFormatTextEndEdit);
+        m_btnGenTransformFormatText.onClick.AddListener(OnButtonGenTransformFormatTextClick);
         m_btnSave.onClick.AddListener(OnButtonSaveClick);
         m_btnCancel.onClick.AddListener(OnButtonCancelClick);
     }
@@ -70,6 +76,14 @@ public class ImageProfileSettingWindow : BaseWindow<ImageProfileSettingWindow>
     {
         Debug.Log("OnInputFieldFormatTextEndEdit");
     }
+    private void OnButtonGenFormatTextClick()
+    {
+        m_iptFormatText.text = L2DWUtils.GenerateFormatText(
+            m_iptName.text.Trim(),
+            m_iptModelFilePath.text.Trim(),
+            Array.Empty<string>()
+        );
+    }
     private void OnInputFieldTransformFormatTextChange(string value)
     {
         Debug.Log("OnInputFieldTransformFormatTextChange");
@@ -77,6 +91,13 @@ public class ImageProfileSettingWindow : BaseWindow<ImageProfileSettingWindow>
     private void OnInputFieldTransformFormatTextEndEdit(string value)
     {
         Debug.Log("OnInputFieldTransformFormatTextEndEdit");
+    }
+    private void OnButtonGenTransformFormatTextClick()
+    {
+        m_iptTransformFormatText.text = L2DWUtils.GenerateTransformFormatText(
+            m_iptName.text.Trim(),
+            1
+        );
     }
     private void OnButtonSaveClick()
     {

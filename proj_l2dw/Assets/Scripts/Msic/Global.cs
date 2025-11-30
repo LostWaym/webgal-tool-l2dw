@@ -64,8 +64,11 @@ public static class Global
         IsLoaded = true;
         ModelPath = PlayerPrefs.GetString("Global.ModelPath", "");
         BGPath = PlayerPrefs.GetString("Global.BGPath", "");
-        BGChangeTemplate = PlayerPrefs.GetString("Global.BGChangeTemplate", "");
-        BGTransformTemplate = PlayerPrefs.GetString("Global.BGTransformTemplate", "");
+        BGChangeTemplate = PlayerPrefs.GetString("Global.BGChangeTemplate", "changeBg:%me%;");
+        BGTransformTemplate = PlayerPrefs.GetString(
+            "Global.BGTransformTemplate",
+            "setTransform:%me% -target=bg-main -duration=750 -writeDefault;"
+        );
         PivotMode = (FigurePivotMode)PlayerPrefs.GetInt("Global.PivotMode", 0);
         InstNextMode = (InstDealOperation)PlayerPrefs.GetInt("Global.InstNextMode", 0);
         CameraZoomFactor = PlayerPrefs.GetFloat("Global.CameraZoomFactor", 1.1f);

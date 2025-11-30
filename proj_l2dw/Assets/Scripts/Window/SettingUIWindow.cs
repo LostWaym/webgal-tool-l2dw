@@ -162,9 +162,16 @@ public class SettingPageGeneralWidget : UIItemWidget<SettingPageGeneralWidget>
         base.OnInit();
     }
 
-    public void SetValue(string value)
+    public void SetValue(string value, bool notify)
     {
-        m_iptField.SetTextWithoutNotify(value);
+        if (notify)
+        {
+            m_iptField.text = value;
+        }
+        else
+        {
+            m_iptField.SetTextWithoutNotify(value);
+        }
     }
 }
 
@@ -174,7 +181,9 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
     private Transform m_itemModelPath;
     private Transform m_itemBGPath;
     private Transform m_itemBGChangeTemplate;
+    private Button m_btnGenChangeTemplate;
     private Transform m_itemBGTransformTemplate;
+    private Button m_btnGenTransformTemplate;
     private Toggle m_toggleCloseGreenLine;
     private Toggle m_toggleDisableJsonModelProfileInit;
     #endregion
@@ -185,16 +194,31 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
         m_itemModelPath = transform.Find("ScrollRect/Viewport/Content/m_itemModelPath").GetComponent<Transform>();
         m_itemBGPath = transform.Find("ScrollRect/Viewport/Content/m_itemBGPath").GetComponent<Transform>();
         m_itemBGChangeTemplate = transform.Find("ScrollRect/Viewport/Content/m_itemBGChangeTemplate").GetComponent<Transform>();
+        m_btnGenChangeTemplate = transform.Find("ScrollRect/Viewport/Content/m_itemBGChangeTemplate/Label/m_btnGenChangeTemplate").GetComponent<Button>();
         m_itemBGTransformTemplate = transform.Find("ScrollRect/Viewport/Content/m_itemBGTransformTemplate").GetComponent<Transform>();
+        m_btnGenTransformTemplate = transform.Find("ScrollRect/Viewport/Content/m_itemBGTransformTemplate/Label/m_btnGenTransformTemplate").GetComponent<Button>();
         m_toggleCloseGreenLine = transform.Find("ScrollRect/Viewport/Content/m_toggleCloseGreenLine").GetComponent<Toggle>();
         m_toggleDisableJsonModelProfileInit = transform.Find("ScrollRect/Viewport/Content/m_toggleDisableJsonModelProfileInit").GetComponent<Toggle>();
 
+        m_btnGenChangeTemplate.onClick.AddListener(OnButtonGenChangeTemplateClick);
+        m_btnGenTransformTemplate.onClick.AddListener(OnButtonGenTransformTemplateClick);
         m_toggleCloseGreenLine.onValueChanged.AddListener(OnToggleCloseGreenLineChange);
         m_toggleDisableJsonModelProfileInit.onValueChanged.AddListener(OnToggleDisableJsonModelProfileInitChange);
     }
     #endregion
 
     #region auto generated events
+    private void OnButtonGenChangeTemplateClick()
+    {
+        m_itemBGChangeTemplateWidget.SetValue("changeBg:%me%;", true);
+    }
+    private void OnButtonGenTransformTemplateClick()
+    {
+        m_itemBGTransformTemplateWidget.SetValue(
+            "setTransform:%me% -target=bg-main -duration=750 -writeDefault;",
+            true
+        );
+    }
     private void OnToggleCloseGreenLineChange(bool value)
     {
         MainControl.Instance.SetCloseGreenLine(value);
@@ -253,10 +277,10 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
 
         if (Global.IsLoaded)
         {
-            m_itemModelPathWidget.SetValue(Global.ModelPath);
-            m_itemBGPathWidget.SetValue(Global.BGPath);
-            m_itemBGChangeTemplateWidget.SetValue(Global.BGChangeTemplate);
-            m_itemBGTransformTemplateWidget.SetValue(Global.BGTransformTemplate);
+            m_itemModelPathWidget.SetValue(Global.ModelPath, false);
+            m_itemBGPathWidget.SetValue(Global.BGPath, false);
+            m_itemBGChangeTemplateWidget.SetValue(Global.BGChangeTemplate, false);
+            m_itemBGTransformTemplateWidget.SetValue(Global.BGTransformTemplate, false);
         }
 
         m_toggleCloseGreenLine.SetIsOnWithoutNotify(MainControl.CloseGreenLine);
