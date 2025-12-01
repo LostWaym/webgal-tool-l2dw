@@ -114,9 +114,20 @@ public class PageNavModification : UIPageWidget<PageNavModification>
             TargetSelectUI.Instance.Close();
             switch (operationName)
             {
-                case OPT_SAVE_TO_CLIPBOARD:
+                case OPT_COPY_TO_CLIPBOARD:
                 {
                     GUIUtility.systemCopyBuffer = jsonObj.ToString(true);
+                    MessageTipWindow.Instance.Show("配置", "已复制到剪贴板！");
+                    break;
+                }
+                case OPT_COPY_MAIN_MODEL_JSON_TO_CLIPBOARD:
+                {
+                    JSONObject json = new JSONObject(File.ReadAllText(m_curModel.MyGOConfig.json.filename));
+                    json.RemoveField("init_params");
+                    json.RemoveField("init_opacities");
+                    json.AddField("init_params", initParamsObj);
+                    json.AddField("init_opacities", initOpacitiesObj);
+                    GUIUtility.systemCopyBuffer = json.ToString(true);
                     MessageTipWindow.Instance.Show("配置", "已复制到剪贴板！");
                     break;
                 }
@@ -132,16 +143,19 @@ public class PageNavModification : UIPageWidget<PageNavModification>
                     MessageTipWindow.Instance.Show("配置", "已保存到主模型json！");
                     break;
                 }
-                case OPT_COPY_JSON_TO_CLIPBOARD:
+                case OPT_SAVE_ALL_MODEL_JSON:
                 {
-                    JSONObject json = new JSONObject(File.ReadAllText(m_curModel.MyGOConfig.json.filename));
-                    json.RemoveField("init_params");
-                    json.RemoveField("init_opacities");
-                    json.AddField("init_params", initParamsObj);
-                    json.AddField("init_opacities", initOpacitiesObj);
-                    json.Absorb(jsonObj);
-                    GUIUtility.systemCopyBuffer = json.ToString(true);
-                    MessageTipWindow.Instance.Show("配置", "已复制到剪贴板！");
+                    foreach (var model in m_curModel.GetModels())
+                    {
+                        JSONObject json = new JSONObject(File.ReadAllText(model.myGOConfig.json.filename));
+                        json.RemoveField("init_params");
+                        json.RemoveField("init_opacities");
+                        json.AddField("init_params", initParamsObj);
+                        json.AddField("init_opacities", initOpacitiesObj);
+                        File.WriteAllText(model.myGOConfig.json.filename, json.ToString(true));
+                    }
+
+                    MessageTipWindow.Instance.Show("配置", "已保存到所有模型json！");
                     break;
                 }
             }
@@ -161,15 +175,17 @@ public class PageNavModification : UIPageWidget<PageNavModification>
     }
     #endregion
 
-    private const string OPT_SAVE_TO_CLIPBOARD = "保存到剪贴板";
-    private const string OPT_SAVE_MAIN_MODEL_JSON = "保存到主模型json";
-    private const string OPT_COPY_JSON_TO_CLIPBOARD = "复制json到剪贴板";
+    private const string OPT_COPY_TO_CLIPBOARD = "复制属性到剪贴板";
+    private const string OPT_COPY_MAIN_MODEL_JSON_TO_CLIPBOARD = "复制主模型json到剪贴板";
+    private const string OPT_SAVE_MAIN_MODEL_JSON = "保存到主模型json中";
+    private const string OPT_SAVE_ALL_MODEL_JSON = "保存到所有模型json中";
 
     private List<string> m_listSaveOpt = new List<string>()
     {
-        OPT_SAVE_TO_CLIPBOARD,
+        OPT_COPY_TO_CLIPBOARD,
+        OPT_COPY_MAIN_MODEL_JSON_TO_CLIPBOARD,
         OPT_SAVE_MAIN_MODEL_JSON,
-        OPT_COPY_JSON_TO_CLIPBOARD,
+        OPT_SAVE_ALL_MODEL_JSON,
     };
 
     private PageNavModificationParts m_pageNavModificationParts;
@@ -342,11 +358,11 @@ public class PageNavModificationParts : PageOfPageNavModification<PageNavModific
         var partKey = entry.m_partKey;
         if (value)
         {
-            CurModel.MyGOConfig.init_opacities[partKey] = entry.SliderValue;
+            CurModel.SetInitOpacityValue(partKey, entry.SliderValue);
         }
         else
         {
-            CurModel.MyGOConfig.init_opacities.Remove(partKey);
+            CurModel.RemoveInitOpacityValue(partKey);
         }
 
         RefreshAll();
@@ -358,7 +374,7 @@ public class PageNavModificationParts : PageOfPageNavModification<PageNavModific
             return;
         }
         var partKey = entry.m_partKey;
-        CurModel.MyGOConfig.init_opacities[partKey] = value;
+        CurModel.SetInitOpacityValue(partKey, value);
         RefreshAll();
     }
 }
@@ -502,13 +518,13 @@ public class PageNavModificationInitParams : PageOfPageNavModification<PageNavMo
         {
             var defValues = CurModel.emotionEditor.list.realParamDefDict;
             defValues.TryGetValue(entry.m_paramName, out var defValue);
-            CurModel.MyGOConfig.init_params[entry.m_paramName] = defValue;
+            CurModel.SetInitParamValue(entry.m_paramName, defValue);
 
             CurModel.emotionEditor.list.SetDefParam(entry.m_paramName, defValue);
         }
         else
         {
-            CurModel.MyGOConfig.init_params.Remove(entry.m_paramName);
+            CurModel.RemoveInitParamValue(entry.m_paramName);
 
             CurModel.emotionEditor.list.RemoveDefParam(entry.m_paramName);
         }
@@ -522,7 +538,7 @@ public class PageNavModificationInitParams : PageOfPageNavModification<PageNavMo
         {
             return;
         }
-        CurModel.MyGOConfig.init_params[entry.m_paramName] = arg2;
+        CurModel.SetInitParamValue(entry.m_paramName, arg2);
         CurModel.emotionEditor.list.SetDefParam(entry.m_paramName, arg2);
         RefreshAll();
     }
@@ -536,7 +552,7 @@ public class PageNavModificationInitParams : PageOfPageNavModification<PageNavMo
         if (float.TryParse(arg2, out var value))
         {
             value = Mathf.Clamp(value, entry.m_min, entry.m_max);
-            CurModel.MyGOConfig.init_params[entry.m_paramName] = value;
+            CurModel.SetInitParamValue(entry.m_paramName, value);
             CurModel.emotionEditor.list.SetDefParam(entry.m_paramName, value);
         }
         RefreshAll();

@@ -37,6 +37,8 @@ public class MyGOLive2DEx : MonoBehaviour
     public MeshRenderer meshRenderer;
 
     public List<PartsData> m_partsDataList = new List<PartsData>();
+    // Live2D 参数默认信息列表
+    public List<Live2DParamInfo> defaultParamInfoList = new List<Live2DParamInfo>();
 
     // Live2D模型的边界框
     // Todo：应当找一个更合理的方式来获取模型的边界框
@@ -76,6 +78,8 @@ public class MyGOLive2DEx : MonoBehaviour
 
         InitPartsDataList();
         ApplyInitOpacities(live2DModel);
+        RefreshDefaultParamInfoList();
+        ResetAllParams();
     }
 
     private void InitPartsDataList()
@@ -93,6 +97,49 @@ public class MyGOLive2DEx : MonoBehaviour
             if (myGOConfig.init_opacities.TryGetValue(id.ToString(), out var value))
             {
                 model.setPartsOpacity(id.ToString(), value);
+            }
+        }
+    }
+    
+    private void RefreshDefaultParamInfoList()
+    {
+        var context = live2DModel.getModelContext();
+        var contextType = context.GetType();
+        var idListField = contextType.GetField("floatParamIDList", BindingFlags.NonPublic | BindingFlags.Instance);
+        if (idListField == null)
+            return;
+
+        var list = idListField.GetValue(context) as ParamID[];
+        if (list == null)
+            return;
+
+        foreach (var paramID in list)
+        {
+            if (paramID == null)
+                continue;
+
+            var paramIndex = context.getParamIndex(paramID);
+            
+            defaultParamInfoList.Add(new Live2DParamInfo()
+            {
+                name = paramID.ToString(),
+                min = context.getParamMin(paramIndex),
+                max = context.getParamMax(paramIndex),
+                value = context.getParamFloat(paramIndex),
+            });
+        }
+    }
+    
+    public void ResetAllParams()
+    {
+        foreach (var item in defaultParamInfoList)
+        {
+            if (myGOConfig.init_params.TryGetValue(item.name, out var value))
+            {
+                live2DModel.setParamFloat(item.name, value);
+            } else
+            {
+                live2DModel.setParamFloat(item.name, item.value);
             }
         }
     }
@@ -522,21 +569,13 @@ public class EmotionEditor
             {
                 value = item.Value;
             }
-            else if (!list.paramDefDict.TryGetValue(item.Key, out value))
+            else
             {
                 continue;
             }
 
             string calcType = inSet ? GetCalcType(item.Key) : MygoExp.CALC_TYPE_SET;
             MygoExp.Apply(model, item.Key, calcType, value, 1.0f);
-        }
-    }
-
-    public void ApplyModelDefaultValues(ALive2DModel model)
-    {
-        foreach (var item in list.paramDefDict)
-        {
-            MygoExp.Apply(model, item.Key, MygoExp.CALC_TYPE_SET, item.Value, 1.0f);
         }
     }
 

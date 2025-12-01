@@ -138,6 +138,43 @@ public class ModelAdjuster : ModelAdjusterBase
             model.speakTween.expiredTime = Time.time;
         }
     }
+    
+    public void SetInitParamValue(string name, float value)
+    {
+        foreach (var pos in webgalPoses)
+        {
+            pos.model.myGOConfig.init_params[name] = value;
+        }
+    }
+    
+    public void RemoveInitParamValue(string name)
+    {
+        foreach (var pos in webgalPoses)
+        {
+            pos.model.myGOConfig.init_params.Remove(name);
+        }
+    }
+    
+    public void SetInitOpacityValue(string name, float value)
+    {
+        foreach (var pos in webgalPoses)
+        {
+            pos.model.myGOConfig.init_opacities[name] = value;
+        }
+    }
+    
+    public void RemoveInitOpacityValue(string name)
+    {
+        foreach (var pos in webgalPoses)
+        {
+            pos.model.myGOConfig.init_opacities.Remove(name);
+        }
+    }
+
+    public List<MyGOLive2DEx> GetModels()
+    {
+        return webgalPoses.Select(pos => pos.model).ToList();
+    }
 
     public override bool IsMotionParamSetContains(string name)
     {
@@ -169,16 +206,16 @@ public class ModelAdjuster : ModelAdjusterBase
         foreach (var pos in webgalPoses)
         {
             var model = pos.model;
+            model.ResetAllParams();
             emotionEditor.ApplyValue(model.Live2DModel);
         }
     }
 
-    public void ApplyParamDefaultValues()
+    public override void ApplyParamDefaultValues()
     {
         foreach (var pos in webgalPoses)
         {
-            var model = pos.model;
-            emotionEditor.ApplyModelDefaultValues(model.Live2DModel);
+            pos.model.ResetAllParams();
         }
     }
 

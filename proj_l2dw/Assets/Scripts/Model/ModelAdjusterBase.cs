@@ -127,6 +127,11 @@ public class ModelAdjusterBase : MonoBehaviour
     {
 
     }
+    
+    public virtual void ApplyParamDefaultValues()
+    {
+
+    }
 
     public virtual void CopyFromExp(MygoExp exp)
     {
