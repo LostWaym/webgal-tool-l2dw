@@ -9,8 +9,10 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>, IOpenFolde
     #region auto generated members
     private InputField m_iptName;
     private InputField m_iptModelFilePath;
+    private Button m_btnGenConfFormatText;
     private Button m_btnGenFormatText;
     private InputField m_iptFormatText;
+    private Button m_btnGenConfTransformFormatText;
     private Button m_btnGenTransformFormatText;
     private InputField m_iptTransformFormatText;
     private InputField m_iptBoundsLeft;
@@ -29,8 +31,10 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>, IOpenFolde
     {
         m_iptName = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/角色名/Value/InputField/m_iptName").GetComponent<InputField>();
         m_iptModelFilePath = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/主模型路径/Value/InputField/m_iptModelFilePath").GetComponent<InputField>();
+        m_btnGenConfFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/立绘指令模板/Label/m_btnGenConfFormatText").GetComponent<Button>();
         m_btnGenFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/立绘指令模板/Label/m_btnGenFormatText").GetComponent<Button>();
         m_iptFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/立绘指令模板/Value/InputField/m_iptFormatText").GetComponent<InputField>();
+        m_btnGenConfTransformFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/变换指令模板/Label/m_btnGenConfTransformFormatText").GetComponent<Button>();
         m_btnGenTransformFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/变换指令模板/Label/m_btnGenTransformFormatText").GetComponent<Button>();
         m_iptTransformFormatText = transform.Find("Background/Popup/Window/Pages/ScrollRect/Viewport/Content/变换指令模板/Value/InputField/m_iptTransformFormatText").GetComponent<InputField>();
         
@@ -49,20 +53,22 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>, IOpenFolde
         m_iptName.onEndEdit.AddListener(OnInputFieldNameEndEdit);
         m_iptModelFilePath.onValueChanged.AddListener(OnInputFieldModelFilePathChange);
         m_iptModelFilePath.onEndEdit.AddListener(OnInputFieldModelFilePathEndEdit);
+        m_btnGenConfFormatText.onClick.AddListener(OnButtonGenConfFormatTextClick);
         m_btnGenFormatText.onClick.AddListener(OnButtonGenFormatTextClick);
         m_iptFormatText.onValueChanged.AddListener(OnInputFieldFormatTextChange);
         m_iptFormatText.onEndEdit.AddListener(OnInputFieldFormatTextEndEdit);
+        m_btnGenConfTransformFormatText.onClick.AddListener(OnButtonGenConfTransformFormatTextClick);
         m_btnGenTransformFormatText.onClick.AddListener(OnButtonGenTransformFormatTextClick);
         m_iptTransformFormatText.onValueChanged.AddListener(OnInputFieldTransformFormatTextChange);
         m_iptTransformFormatText.onEndEdit.AddListener(OnInputFieldTransformFormatTextEndEdit);
         
-        m_iptBoundsLeft.onValueChange.AddListener(OnInputFieldBoundsLeftChange);
+        m_iptBoundsLeft.onValueChanged.AddListener(OnInputFieldBoundsLeftChange);
         m_iptBoundsLeft.onEndEdit.AddListener(OnInputFieldBoundsLeftEndEdit);
-        m_iptBoundsTop.onValueChange.AddListener(OnInputFieldBoundsTopChange);
+        m_iptBoundsTop.onValueChanged.AddListener(OnInputFieldBoundsTopChange);
         m_iptBoundsTop.onEndEdit.AddListener(OnInputFieldBoundsTopEndEdit);
-        m_iptBoundsRight.onValueChange.AddListener(OnInputFieldBoundsRightChange);
+        m_iptBoundsRight.onValueChanged.AddListener(OnInputFieldBoundsRightChange);
         m_iptBoundsRight.onEndEdit.AddListener(OnInputFieldBoundsRightEndEdit);
-        m_iptBoundsBottom.onValueChange.AddListener(OnInputFieldBoundsBottomChange);
+        m_iptBoundsBottom.onValueChanged.AddListener(OnInputFieldBoundsBottomChange);
         m_iptBoundsBottom.onEndEdit.AddListener(OnInputFieldBoundsBottomEndEdit);
         
         m_btnAddSubModelPath.onClick.AddListener(OnButtonAddSubModelPathClick);
@@ -85,6 +91,16 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>, IOpenFolde
     }
     private void OnInputFieldModelFilePathEndEdit(string value)
     {
+    }
+    private void OnButtonGenConfFormatTextClick()
+    {
+        if (config.temp_filePath == null) return;
+        
+        m_iptFormatText.text = L2DWUtils.GenerateFormatText(
+            m_iptName.text.Trim(),
+            config.temp_filePath,
+            Array.Empty<string>()
+        );
     }
     private void OnButtonGenFormatTextClick()
     {
@@ -121,6 +137,13 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>, IOpenFolde
     }
     private void OnInputFieldFormatTextEndEdit(string value)
     {
+    }
+    private void OnButtonGenConfTransformFormatTextClick()
+    {
+        m_iptTransformFormatText.text = L2DWUtils.GenerateTransformFormatText(
+            m_iptName.text.Trim(),
+            1
+        );
     }
     private void OnButtonGenTransformFormatTextClick()
     {
