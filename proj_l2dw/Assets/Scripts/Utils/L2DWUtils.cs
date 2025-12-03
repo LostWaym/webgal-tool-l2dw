@@ -100,6 +100,21 @@ public static class L2DWUtils
         }
         return result;
     }
+    
+    public static string SaveFileDialog(string title, string pathKey, string defaultName, string extension)
+    {
+        var path = PlayerPrefs.GetString(pathKey, "");
+        if(string.IsNullOrEmpty(path))
+        {
+            path = Application.dataPath;
+        }
+        var result = SFB.StandaloneFileBrowser.SaveFilePanel(title, path, defaultName, extension);
+        if(!string.IsNullOrEmpty(result))
+        {
+            PlayerPrefs.SetString(pathKey, Path.GetDirectoryName(result));
+        }
+        return result;
+    }
 
     public static bool AutoSizeButton(string text)
     {
@@ -352,5 +367,136 @@ public static class L2DWUtils
     public static string GenerateTransformFormatText(ImageModelMeta meta)
     {
         return GenerateTransformFormatText(meta.name, 1);
+    }
+
+    /// <summary>
+    /// 获取当前模型的所以 json 文件路径，保存主模型和子模型
+    /// </summary>
+    public static List<string> GetModelJsonPaths()
+    {
+        var result = new List<string>();
+        
+        var curTarget = MainControl.Instance.curTarget;
+        if (curTarget && curTarget is ModelAdjuster adjuster && adjuster)
+        {
+            for (int i = 0; i < adjuster.ModelCount; i++)
+            {
+                result.Add(adjuster.meta.GetValidModelFilePath(i));
+            }
+        }
+        
+        return result;
+    }
+    
+    /// <summary>
+    /// 为模型 JSON 添加动作
+    /// </summary>
+    /// <param name="modelJsonObj">模型 JSON 对象</param>
+    /// <param name="modelJsonPath">模型 JSOn 路径</param>
+    /// <param name="motionPaths">动作绝对路径列表</param>
+    /// <param name="motionNames">动作名称列表</param>
+    /// <returns>错误信息，空字符串为无错误</returns>
+    public static string AddMotionsToModelJson(
+        ref JSONObject modelJsonObj,
+        string modelJsonPath,
+        List<string> motionPaths,
+        List<string> motionNames
+    ) {
+        if (modelJsonObj == null)
+        {
+            return "模型 JSON 对象为空";
+        }
+        if (motionPaths == null || motionPaths.Count == 0)
+        {
+            return "没有可添加的动作文件";
+        }
+        if (motionPaths == null || motionNames.Count == 0)
+        {
+            return "没有指定动作名称";
+        }
+        if (motionPaths.Count != motionNames.Count)
+        {
+            return "动作文件数量与动作名称数量不匹配";
+        }
+
+        var motions_obj = modelJsonObj.GetField("motions");
+        if (motions_obj == null)
+        {
+            motions_obj = new JSONObject(JSONObject.Type.OBJECT);
+        }
+
+        for (int i = 0; i < motionPaths.Count; i++)
+        {
+            var motionPath = motionPaths[i];
+            var motionName = motionNames[i];
+            
+            var motionRelativePath = PathHelper.GetRelativePath(modelJsonPath, motionPath);
+
+            var newMotionObjArr = new JSONObject(JSONObject.Type.ARRAY);
+            var newMotionObj = new JSONObject(JSONObject.Type.OBJECT);
+            newMotionObj.SetField("file", JSONObject.StringObject(motionRelativePath));
+            newMotionObjArr.Add(newMotionObj);
+            motions_obj.SetField(motionName, newMotionObjArr);
+        }
+
+        modelJsonObj.SetField("motions", motions_obj);
+
+        return "";
+    }
+    
+    /// <summary>
+    /// 为模型 JSON 添加表情
+    /// </summary>
+    /// <param name="modelJsonObj">模型 JSON 对象</param>
+    /// <param name="modelJsonPath">模型 JSOn 路径</param>
+    /// <param name="expressionPaths">表情绝对路径列表</param>
+    /// <param name="expressionNames">表情名称列表</param>
+    /// <returns>错误信息，空字符串为无错误</returns>
+    public static string AddExpressionsToModelJson(
+        ref JSONObject modelJsonObj,
+        string modelJsonPath,
+        List<string> expressionPaths,
+        List<string> expressionNames
+    ) {
+        if (modelJsonObj == null)
+        {
+            return "模型 JSON 对象为空";
+        }
+        if (expressionPaths == null || expressionPaths.Count == 0)
+        {
+            return "没有可添加的表情文件";
+        }
+        if (expressionPaths == null || expressionNames.Count == 0)
+        {
+            return "没有指定表情名称";
+        }
+        if (expressionPaths.Count != expressionNames.Count)
+        {
+            return "表情文件数量与表情名称数量不匹配";
+        }
+
+        var expressions_obj = modelJsonObj.GetField("expressions");
+        if (expressions_obj == null)
+        {
+            expressions_obj = new JSONObject(JSONObject.Type.ARRAY);
+        }
+
+        for (int i = 0; i < expressionPaths.Count; i++)
+        {
+            var expressionPath = expressionPaths[i];
+            var expressionName = expressionNames[i];
+            
+            var expressionRelativePath = PathHelper.GetRelativePath(modelJsonPath, expressionPath);
+            
+            var newExpObj = new JSONObject(JSONObject.Type.OBJECT);
+            newExpObj.SetField("name", JSONObject.StringObject(expressionName));
+            newExpObj.SetField("file", JSONObject.StringObject(expressionRelativePath));
+            
+            expressions_obj.Add(newExpObj);
+        }
+
+        modelJsonObj.SetField("expressions", expressions_obj);
+
+        return "";
     }
 }

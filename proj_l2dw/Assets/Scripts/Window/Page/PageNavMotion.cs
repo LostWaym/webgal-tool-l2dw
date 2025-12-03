@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -185,13 +186,25 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     }
 
     #region 保存按钮相关
-    private const string SAVE_OPT_SAVE_PROJ_TO_CLIPBOARD = "保存工程到剪贴板";
-    private const string SAVE_OPT_LOAD_PROJ_FROM_CLIPBOARD = "从剪贴板加载覆盖当前工程";
-    private const string SAVE_OPT_SAVE_MOTION_TO_CLIPBOARD = "保存motion到剪贴板";
+    private const string SAVE_OPT_LOAD_PROJ_FROM_FILE = "加载原始动作工程文件";
+    private const string SAVE_OPT_LOAD_PROJ_FROM_CLIPBOARD = "加载原始动作工程(从剪贴板)";
+    private const string SAVE_OPT_SAVE_MOTION_FROM_FILE = "加载 Live2D 动作文件";
+    private const string SAVE_OPT_SAVE_MOTION_FROM_CLIPBOARD = "加载 Live2D 动作(从剪贴板)";
+    private const string SAVE_OPT_SAVE_PROJ_TO_FILE = "保存原始动作工程文件";
+    private const string SAVE_OPT_SAVE_PROJ_TO_CLIPBOARD = "保存原始动作工程到剪贴板";
+    private const string SAVE_OPT_SAVE_MOTION_TO_FILE = "保存 Live2D 动作文件";
+    private const string SAVE_OPT_SAVE_MOTION_TO_FILE_AND_REGISTER = "保存 Live2D 动作文件并注册到当前模型";
+    private const string SAVE_OPT_SAVE_MOTION_TO_CLIPBOARD = "保存 Live2D 动作到剪贴板";
     private List<string> m_listSaveOpt = new List<string>()
     {
-        SAVE_OPT_SAVE_PROJ_TO_CLIPBOARD,
+        SAVE_OPT_LOAD_PROJ_FROM_FILE,
         SAVE_OPT_LOAD_PROJ_FROM_CLIPBOARD,
+        SAVE_OPT_SAVE_MOTION_FROM_FILE,
+        SAVE_OPT_SAVE_MOTION_FROM_CLIPBOARD,
+        SAVE_OPT_SAVE_PROJ_TO_FILE,
+        SAVE_OPT_SAVE_PROJ_TO_CLIPBOARD,
+        SAVE_OPT_SAVE_MOTION_TO_FILE,
+        SAVE_OPT_SAVE_MOTION_TO_FILE_AND_REGISTER,
         SAVE_OPT_SAVE_MOTION_TO_CLIPBOARD,
     };
     private void OnButtonSaveClick()
@@ -202,11 +215,29 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             TargetSelectUI.Instance.Close();
             switch (operationName)
             {
-                case SAVE_OPT_SAVE_PROJ_TO_CLIPBOARD:
-                    DoSaveProjToClipboard();
+                case SAVE_OPT_LOAD_PROJ_FROM_FILE:
+                    DoLoadProjFromFile();
                     break;
                 case SAVE_OPT_LOAD_PROJ_FROM_CLIPBOARD:
                     DoLoadProjFromClipboard();
+                    break;
+                case SAVE_OPT_SAVE_MOTION_FROM_FILE:
+                    DoLoadMotionFromFile();
+                    break;
+                case SAVE_OPT_SAVE_MOTION_FROM_CLIPBOARD:
+                    DoLoadMotionFromClipboard();
+                    break;
+                case SAVE_OPT_SAVE_PROJ_TO_FILE:
+                    DoSaveProjToFile();
+                    break;
+                case SAVE_OPT_SAVE_PROJ_TO_CLIPBOARD:
+                    DoSaveProjToClipboard();
+                    break;
+                case SAVE_OPT_SAVE_MOTION_TO_FILE:
+                    DoSaveMotionToFile();
+                    break;
+                case SAVE_OPT_SAVE_MOTION_TO_FILE_AND_REGISTER:
+                    DoSaveMotionToFileAndRegister();
                     break;
                 case SAVE_OPT_SAVE_MOTION_TO_CLIPBOARD:
                     DoSaveMotionToClipboard();
@@ -214,25 +245,146 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             }
         };
     }
-    private void DoSaveProjToClipboard()
+    private void DoLoadProjFromFile()
     {
-        var json = m_motionData.Save();
-        GUIUtility.systemCopyBuffer = json;
-        Debug.Log(json);
+        var paths = L2DWUtils.OpenFileDialog(
+            "加载原始动作工程文件",
+            "load_original_motion_file",
+            Live2dMotionData.EXTENSION,
+            false
+        );
+        if (paths.Length < 1 || string.IsNullOrEmpty(paths[0]))
+        {
+            return;
+        }
+        var json = System.IO.File.ReadAllText(paths[0]);
+        DoLoad(json, true);
     }
     private void DoLoadProjFromClipboard()
+    {
+        var json = GUIUtility.systemCopyBuffer;
+        DoLoad(json, true);
+    }
+    private void DoLoadMotionFromFile()
+    {
+        var paths = L2DWUtils.OpenFileDialog(
+            "加载 Live2D 动作文件",
+            "load_live2d_motion_file",
+            "mtn",
+            false
+        );
+        if (paths.Length < 1 || string.IsNullOrEmpty(paths[0]))
+        {
+            return;
+        }
+        var text = System.IO.File.ReadAllText(paths[0]);
+        DoLoad(text, false);
+    }
+    private void DoLoadMotionFromClipboard()
+    {
+        var text = GUIUtility.systemCopyBuffer;
+        DoLoad(text, false);
+    }
+    private void DoLoad(string text, bool isProjectFile)
     {
         var curTarget = GetValidTarget();
         if (curTarget == null)
         {
             return;
         }
-        var json = GUIUtility.systemCopyBuffer;
-        m_motionData.Load(json);
         curTarget.SetDisplayMode(ModelDisplayMode.MotionEditor, true);
-        CheckAndFixName(m_motionData);
-        SelectMotionData(m_motionData);
+        
+        Live2dMotionData motionData;
+        if (isProjectFile)
+        {
+            motionData = Live2dMotionData.Create();
+            motionData.Load(text);
+        }
+        else
+        {
+            motionData = Live2dMotionData.Create(text);
+        }
+        AddMotionData(motionData);
+        SelectMotionData(motionData);
         RefreshAll();
+    }
+    private void DoSaveProjToFile()
+    {
+        var json = m_motionData.Save();
+        var path = L2DWUtils.SaveFileDialog(
+            "保存原始动作工程文件",
+            "save_original_motion_file",
+            m_motionData.motionDataName,
+            Live2dMotionData.EXTENSION
+        );
+        if (string.IsNullOrEmpty(path))
+        {
+            return;
+        }
+        System.IO.File.WriteAllText(path, json);
+    }
+    private void DoSaveProjToClipboard()
+    {
+        var json = m_motionData.Save();
+        GUIUtility.systemCopyBuffer = json;
+        Debug.Log(json);
+    }
+    private void DoSaveMotionToFile()
+    {
+        SaveMotionToFile();
+    }
+    private void DoSaveMotionToFileAndRegister()
+    {
+        var motionPath = SaveMotionToFile();
+        if (string.IsNullOrEmpty(motionPath))
+        {
+            MessageTipWindow.Instance.Show("错误", $"表情文件路径为空");
+            return;
+        }
+
+        var jsonPaths = L2DWUtils.GetModelJsonPaths();
+        if (jsonPaths.Count == 0)
+        {
+            MessageTipWindow.Instance.Show("错误", $"未找到任何模型Json文件");
+            return;
+        }
+        
+        foreach (var jsonPath in jsonPaths)
+        {
+            var jsonText = System.IO.File.ReadAllText(jsonPath);
+            var jsonObject = new JSONObject(jsonText);
+            
+            var error = L2DWUtils.AddMotionsToModelJson(
+                ref jsonObject,
+                jsonPath,
+                new List<string>() { motionPath },
+                new List<string>() { m_motionData.GetValidLive2dMotionName() }
+            );
+            if (error != "")
+            {
+                MessageTipWindow.Instance.Show("错误", error);
+                return;
+            }
+           
+            File.WriteAllText(jsonPath, jsonObject.ToString(true));
+        }
+    }
+    private string SaveMotionToFile()
+    {
+        m_motionData.BakeAllFrames();
+        var text = m_motionData.info.Print();
+        var path = L2DWUtils.SaveFileDialog(
+            "保存 Live2D 动作文件",
+            "save_live2d_motion_file",
+            m_motionData.live2dMotionName,
+            "mtn"
+        );
+        if (!string.IsNullOrEmpty(path))
+        {
+            System.IO.File.WriteAllText(path, text);
+        }
+        
+        return path;
     }
     private void DoSaveMotionToClipboard()
     {
@@ -997,11 +1149,11 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             return;
         }
         var motionNames = curTarget.MyGOConfig.motions.Keys.ToList().OrderBy(x => x).ToList();
-        motionNames.Insert(0, "空白工程");
+        motionNames.Insert(0, "新建动作工程");
         TargetSelectUI.Instance.SetData(m_btnMotion.gameObject.GetComponent<RectTransform>(), m_rectSelectMotionArea, motionNames);
         TargetSelectUI.Instance._OnTargetItemClick = (motionName) =>
         {
-            bool isEmptyMotion = motionName == "空白工程";
+            bool isEmptyMotion = motionName == "新建动作工程";
             void OnSubmit()
             {
                 TargetSelectUI.Instance.Close();

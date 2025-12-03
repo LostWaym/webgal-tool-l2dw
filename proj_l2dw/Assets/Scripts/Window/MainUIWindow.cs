@@ -2454,6 +2454,9 @@ public class PageExpressionEditor : UIPageWidget<PageExpressionEditor>
     #region auto generated members
     private Button m_btnCopySelectedExp;
     private Button m_btnCopyExpData;
+    private Button m_btnExportExpFile;
+    private Button m_btnExportExpFileAndRegister;
+    private InputField m_iptExpName;
     private Toggle m_toggleShowSelectedOnly;
     private Toggle m_toggleLock;
     private InputField m_iptFilter;
@@ -2465,8 +2468,11 @@ public class PageExpressionEditor : UIPageWidget<PageExpressionEditor>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
-        m_btnCopySelectedExp = transform.Find("QuickCommand/Container/m_btnCopySelectedExp").GetComponent<Button>();
-        m_btnCopyExpData = transform.Find("QuickCommand/Container/m_btnCopyExpData").GetComponent<Button>();
+        m_btnCopySelectedExp = transform.Find("ImportExport/Container/m_btnCopySelectedExp").GetComponent<Button>();
+        m_btnCopyExpData = transform.Find("ImportExport/Container/m_btnCopyExpData").GetComponent<Button>();
+        m_btnExportExpFile = transform.Find("ImportExport/Container/m_btnExportExpFile").GetComponent<Button>();
+        m_btnExportExpFileAndRegister = transform.Find("ImportExport/Container/m_btnExportExpFileAndRegister").GetComponent<Button>();
+        m_iptExpName = transform.Find("ImportExport/Container/ExpName/m_iptExpName").GetComponent<InputField>();
         m_toggleShowSelectedOnly = transform.Find("QuickCommand/Container/m_toggleShowSelectedOnly").GetComponent<Toggle>();
         m_toggleLock = transform.Find("QuickCommand/Container/m_toggleLock").GetComponent<Toggle>();
         m_iptFilter = transform.Find("Parameters/Title/InputField/m_iptFilter").GetComponent<InputField>();
@@ -2476,6 +2482,10 @@ public class PageExpressionEditor : UIPageWidget<PageExpressionEditor>
 
         m_btnCopySelectedExp.onClick.AddListener(OnButtonCopySelectedExpClick);
         m_btnCopyExpData.onClick.AddListener(OnButtonCopyExpDataClick);
+        m_btnExportExpFile.onClick.AddListener(OnButtonExportExpFileClick);
+        m_btnExportExpFileAndRegister.onClick.AddListener(OnButtonExportExpFileAndRegisterClick);
+        m_iptExpName.onValueChanged.AddListener(OnInputFieldExpNameChange);
+        m_iptExpName.onEndEdit.AddListener(OnInputFieldExpNameEndEdit);
         m_toggleShowSelectedOnly.onValueChanged.AddListener(OnToggleShowSelectedOnlyChange);
         m_toggleLock.onValueChanged.AddListener(OnToggleLockChange);
         m_iptFilter.onValueChanged.AddListener(OnInputFieldFilterChange);
@@ -2508,6 +2518,57 @@ public class PageExpressionEditor : UIPageWidget<PageExpressionEditor>
     public void OnButtonCopyExpDataClick()
     {
         MainControl.Instance.CopyMotionEditor();
+    }
+    public void OnButtonExportExpFileClick()
+    {
+        SaveExpFile();
+        MessageTipWindow.Instance.Show("提示", $"表情文件已成功导出");
+    }
+    public void OnButtonExportExpFileAndRegisterClick()
+    {
+        var expPath = SaveExpFile();
+        if (string.IsNullOrEmpty(expPath))
+        {
+            MessageTipWindow.Instance.Show("错误", $"表情文件路径为空");
+            return;
+        }
+
+        var jsonPaths = L2DWUtils.GetModelJsonPaths();
+            
+        foreach (var jsonPath in jsonPaths)
+        {
+            var jsonText = System.IO.File.ReadAllText(jsonPath);
+            var jsonObject = new JSONObject(jsonText);
+
+            var expName = m_iptExpName.text;
+            if (string.IsNullOrEmpty(expName))
+            {
+                expName = Path.GetFileNameWithoutExtension(expPath);
+                expName = expName.Split(".")[0];
+            }
+            
+            var error = L2DWUtils.AddExpressionsToModelJson(
+                ref jsonObject,
+                jsonPath,
+                new List<string>() { expPath },
+                new List<string>() { expName }
+            );
+            if (error != "")
+            {
+                MessageTipWindow.Instance.Show("错误", error);
+                return;
+            }
+                
+            File.WriteAllText(jsonPath, jsonObject.ToString(true));
+        }
+        
+        MessageTipWindow.Instance.Show("提示", $"表情文件已成功导出并注册到当前模型");
+    }
+    private void OnInputFieldExpNameChange(string value)
+    {
+    }
+    private void OnInputFieldExpNameEndEdit(string value)
+    {
     }
     private void OnToggleShowSelectedOnlyChange(bool value)
     {
@@ -2664,6 +2725,30 @@ public class PageExpressionEditor : UIPageWidget<PageExpressionEditor>
         {
             widget.SetText(widget.TextValue);
         }
+    }
+    
+    private string SaveExpFile()
+    {
+        var curTarget = MainControl.Instance.curTarget;
+        if (curTarget == null)
+        {
+            return "";
+        }
+        var expJson = curTarget.GetMotionEditorExpJson();
+
+        var expPath = L2DWUtils.SaveFileDialog(
+            "导出表情文件",
+            "save_exp_path",
+            "new_exp",
+            "exp.json"
+        );
+        if (string.IsNullOrEmpty(expPath))
+        {
+            return "";
+        }
+        
+        System.IO.File.WriteAllText(expPath, expJson);
+        return expPath;
     }
 }
 

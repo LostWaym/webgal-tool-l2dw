@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class Live2dMotionData
 {
+    public const string EXTENSION = "wmot";
     public int m_state_curFrameIndex = 0;
 
     public class Track
@@ -100,8 +101,18 @@ public class Live2dMotionData
     }
 
     public string motionDataName = "未命名";
+    public string live2dMotionName = "";
     public Live2dMotionInfo info;
     public Dictionary<string, Track> tracks = new Dictionary<string, Track>();
+    
+    public string GetValidLive2dMotionName()
+    {
+        if (!string.IsNullOrEmpty(live2dMotionName))
+        {
+            return live2dMotionName;
+        }
+        return motionDataName;
+    }
 
     public Track TryGetTrack(string name, bool createIfNotExists = true)
     {
@@ -288,6 +299,7 @@ public class Live2dMotionData
     {
         var jsonobject = new JSONObject(JSONObject.Type.OBJECT);
         jsonobject.AddField("name", motionDataName);
+        jsonobject.AddField("live2dMotionName", live2dMotionName);
         jsonobject.AddField("fps", info.fps);
         jsonobject.AddField("fadein", info.fadein);
         jsonobject.AddField("fadeout", info.fadeout);
@@ -333,32 +345,55 @@ public class Live2dMotionData
         var jsonobject = new JSONObject(text);
         info = new Live2dMotionInfo();
         tracks.Clear();
-        motionDataName = jsonobject.GetField("name").str;
-        info.fps = (int)jsonobject.GetField("fps").f;
-        info.fadein = (int)jsonobject.GetField("fadein").f;
-        info.fadeout = (int)jsonobject.GetField("fadeout").f;
-        info.frameCount = (int)jsonobject.GetField("frameCount").f;
+        motionDataName = jsonobject.GetField("name")?.str ?? "未命名";
+        live2dMotionName = jsonobject.GetField("live2dMotionName")?.str ?? "";
+        info.fps = (int)(jsonobject.GetField("fps")?.f ?? 30);
+        info.fadein = (int)(jsonobject.GetField("fadein")?.f ?? 500);
+        info.fadeout = (int)(jsonobject.GetField("fadeout")?.f ?? 500);
+        info.frameCount = (int)(jsonobject.GetField("frameCount")?.f ?? 30);
         var keyFramesObject = jsonobject.GetField("keyFrames");
-        foreach (var trackKey in keyFramesObject.keys)
+        if (keyFramesObject != null && keyFramesObject.keys != null && keyFramesObject.keys.Count > 0)
         {
-            var trackObject = keyFramesObject.GetField(trackKey);
-            var trackName = trackObject.GetField("name").str;
-            var trackArray = trackObject.GetField("keyFrames").list;
-            var track = TryGetTrack(trackName, true);
-            foreach (var keyFrame in trackArray)
+            var tempTrackIndex = 0;
+
+            foreach (var trackKey in keyFramesObject.keys)
             {
-                var data = new TrackKeyFrameData();
-                var frame = (int)keyFrame.GetField("frame").f;
-                var value = keyFrame.GetField("value").f;
-                var controlPoint1_x = keyFrame.GetField("controlPoint1_x")?.f ?? 0;
-                var controlPoint1_y = keyFrame.GetField("controlPoint1_y")?.f ?? 0;
-                var controlPoint2_x = keyFrame.GetField("controlPoint2_x")?.f ?? 1;
-                var controlPoint2_y = keyFrame.GetField("controlPoint2_y")?.f ?? 1;
-                data.controlPoint1 = new Vector2(controlPoint1_x, controlPoint1_y);
-                data.controlPoint2 = new Vector2(controlPoint2_x, controlPoint2_y);
-                data.value = value;
-                data.frame = frame;
-                track.keyFrames[frame] = data;
+                var trackObject = keyFramesObject.GetField(trackKey);
+                if (!trackObject)
+                {
+                    tempTrackIndex++;
+                    continue;
+                }
+                var trackName = trackObject.GetField("name")?.str ?? $"track_{tempTrackIndex}";
+                var keyFrames = trackObject.GetField("keyFrames");
+                if (keyFrames == null || keyFrames.list == null)
+                {
+                    tempTrackIndex++;
+                    continue;
+                }
+                var track = TryGetTrack(trackName, true);
+                
+                var tempKeyFrameIndex = 0;
+                
+                foreach (var keyFrame in keyFrames.list)
+                {
+                    var data = new TrackKeyFrameData();
+                    var frame = (int)(keyFrame.GetField("frame")?.f ?? tempKeyFrameIndex);
+                    var value = keyFrame.GetField("value")?.f ?? 0;
+                    var controlPoint1_x = keyFrame.GetField("controlPoint1_x")?.f ?? 0;
+                    var controlPoint1_y = keyFrame.GetField("controlPoint1_y")?.f ?? 0;
+                    var controlPoint2_x = keyFrame.GetField("controlPoint2_x")?.f ?? 1;
+                    var controlPoint2_y = keyFrame.GetField("controlPoint2_y")?.f ?? 1;
+                    data.controlPoint1 = new Vector2(controlPoint1_x, controlPoint1_y);
+                    data.controlPoint2 = new Vector2(controlPoint2_x, controlPoint2_y);
+                    data.value = value;
+                    data.frame = frame;
+                    track.keyFrames[frame] = data;
+                    
+                    tempKeyFrameIndex++;
+                }
+                
+                tempTrackIndex++;
             }
         }
 
