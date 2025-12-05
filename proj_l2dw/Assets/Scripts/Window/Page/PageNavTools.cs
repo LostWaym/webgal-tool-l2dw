@@ -777,6 +777,18 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
             }
         }
 
+        foreach (var jsonPath in jsonPaths)
+        {
+            foreach (var file in files)
+            {
+                if(!L2DWUtils.IsSameDrive(jsonPath, file))
+                {
+                    MessageTipWindow.Instance.Show("错误", $"动作表情文件路径保存不能跨盘符！");
+                    return;
+                }
+            }
+        }
+
         var namePrefix = Prefix;
         if (!string.IsNullOrWhiteSpace(namePrefix) && !namePrefix.EndsWith("/"))
         {
@@ -836,6 +848,8 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
 
             File.WriteAllText(jsonPath, jsonObject.ToString(true));
         }
+
+        MessageTipWindow.Instance.Show("提示", $"动作文件已成功注册到当前模型\n你需要重载模型生效！");
     }
 
     private void DoExecute(bool isMotion, bool isExp, bool isRemove)

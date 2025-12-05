@@ -348,6 +348,15 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
             MessageTipWindow.Instance.Show("错误", $"未找到任何模型Json文件");
             return;
         }
+
+        foreach (var jsonPath in jsonPaths)
+        {
+            if(!L2DWUtils.IsSameDrive(motionPath, jsonPath))
+            {
+                MessageTipWindow.Instance.Show("错误", $"表情文件路径保存不能跨盘符！");
+                return;
+            }
+        }
         
         foreach (var jsonPath in jsonPaths)
         {
@@ -368,6 +377,8 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
            
             File.WriteAllText(jsonPath, jsonObject.ToString(true));
         }
+        
+        MessageTipWindow.Instance.Show("提示", $"动作文件已成功导出并注册到当前模型\n你需要重载模型生效！");
     }
     private string SaveMotionToFile()
     {

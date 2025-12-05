@@ -499,4 +499,33 @@ public static class L2DWUtils
 
         return "";
     }
+
+    /// <summary>
+    /// 判断两个路径是否在同一个盘符
+    /// </summary>
+    /// <param name="path1">路径1</param>
+    /// <param name="path2">路径2</param>
+    /// <returns>是否在同一个盘符</returns>
+    public static bool IsSameDrive(string path1, string path2)
+    {
+        if (string.IsNullOrEmpty(path1) || string.IsNullOrEmpty(path2))
+            return false;
+        string GetDrive(string path)
+        {
+            try
+            {
+                var root = Path.GetPathRoot(path);
+                if (string.IsNullOrEmpty(root))
+                    return null;
+                return root.TrimEnd('\\', '/').ToUpperInvariant();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+        var drive1 = GetDrive(path1);
+        var drive2 = GetDrive(path2);
+        return !string.IsNullOrEmpty(drive1) && drive1 == drive2;
+    }
 }

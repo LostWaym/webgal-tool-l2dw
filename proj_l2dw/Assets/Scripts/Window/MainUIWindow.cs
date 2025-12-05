@@ -2534,6 +2534,15 @@ public class PageExpressionEditor : UIPageWidget<PageExpressionEditor>
         }
 
         var jsonPaths = L2DWUtils.GetModelJsonPaths();
+
+        foreach (var jsonPath in jsonPaths)
+        {
+            if(!L2DWUtils.IsSameDrive(expPath, jsonPath))
+            {
+                MessageTipWindow.Instance.Show("错误", $"表情文件路径保存不能跨盘符！");
+                return;
+            }
+        }
             
         foreach (var jsonPath in jsonPaths)
         {
@@ -2562,7 +2571,7 @@ public class PageExpressionEditor : UIPageWidget<PageExpressionEditor>
             File.WriteAllText(jsonPath, jsonObject.ToString(true));
         }
         
-        MessageTipWindow.Instance.Show("提示", $"表情文件已成功导出并注册到当前模型");
+        MessageTipWindow.Instance.Show("提示", $"表情文件已成功导出并注册到当前模型\n你需要重载模型生效！");
     }
     private void OnInputFieldExpNameChange(string value)
     {
