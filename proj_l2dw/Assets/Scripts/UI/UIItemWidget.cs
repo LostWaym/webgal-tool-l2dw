@@ -174,7 +174,9 @@ public class UIPageWidget<T> : UIItemWidget<T>, IPageBind where T : UIPageWidget
     {
         bindedToggle = toggle;
         toggle.onValueChanged.AddListener(OnToggleValueChanged);
-        OnToggleValueChanged(toggle.isOn);
+
+        if (gameObject.activeInHierarchy)
+            OnToggleValueChanged(toggle.isOn);
     }
 
     public void BindChild(IPageBind page)

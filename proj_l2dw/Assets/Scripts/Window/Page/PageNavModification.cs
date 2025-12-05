@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -22,13 +23,9 @@ public class PageNavModification : UIPageWidget<PageNavModification>
     private Transform m_tfTrackHeaderRoot;
     private Toggle m_toggleParts;
     private Toggle m_toggleInitParams;
-    private Toggle m_toggleMotion;
-    private Toggle m_toggleExpression;
     private GameObject m_goBottom;
     private Transform m_itemPageModification_Parts;
     private Transform m_itemPageModification_InitParams;
-    private Transform m_itemPageModification_Motion;
-    private Transform m_itemPageModification_Expression;
     #endregion
 
     #region auto generated binders
@@ -47,13 +44,9 @@ public class PageNavModification : UIPageWidget<PageNavModification>
         m_tfTrackHeaderRoot = transform.Find("m_goTop/m_tfTrackHeaderRoot").GetComponent<Transform>();
         m_toggleParts = transform.Find("m_goTop/m_tfTrackHeaderRoot/m_toggleParts").GetComponent<Toggle>();
         m_toggleInitParams = transform.Find("m_goTop/m_tfTrackHeaderRoot/m_toggleInitParams").GetComponent<Toggle>();
-        m_toggleMotion = transform.Find("m_goTop/m_tfTrackHeaderRoot/m_toggleMotion").GetComponent<Toggle>();
-        m_toggleExpression = transform.Find("m_goTop/m_tfTrackHeaderRoot/m_toggleExpression").GetComponent<Toggle>();
         m_goBottom = transform.Find("m_goBottom").gameObject;
         m_itemPageModification_Parts = transform.Find("m_goBottom/m_itemPageModification_Parts").GetComponent<Transform>();
         m_itemPageModification_InitParams = transform.Find("m_goBottom/m_itemPageModification_InitParams").GetComponent<Transform>();
-        m_itemPageModification_Motion = transform.Find("m_goBottom/m_itemPageModification_Motion").GetComponent<Transform>();
-        m_itemPageModification_Expression = transform.Find("m_goBottom/m_itemPageModification_Expression").GetComponent<Transform>();
 
         m_btnResetCharaArea.onClick.AddListener(OnButtonResetCharaAreaClick);
         m_btnMotion.onClick.AddListener(OnButtonMotionClick);
@@ -61,10 +54,10 @@ public class PageNavModification : UIPageWidget<PageNavModification>
         m_btnSave.onClick.AddListener(OnButtonSaveClick);
         m_toggleParts.onValueChanged.AddListener(OnTogglePartsChange);
         m_toggleInitParams.onValueChanged.AddListener(OnToggleInitParamsChange);
-        m_toggleMotion.onValueChanged.AddListener(OnToggleMotionChange);
-        m_toggleExpression.onValueChanged.AddListener(OnToggleExpressionChange);
     }
     #endregion
+
+
 
     #region auto generated events
     private void OnButtonResetCharaAreaClick()
@@ -167,12 +160,6 @@ public class PageNavModification : UIPageWidget<PageNavModification>
     private void OnToggleInitParamsChange(bool value)
     {
     }
-    private void OnToggleMotionChange(bool value)
-    {
-    }
-    private void OnToggleExpressionChange(bool value)
-    {
-    }
     #endregion
 
     private const string OPT_COPY_TO_CLIPBOARD = "复制属性到剪贴板";
@@ -190,31 +177,21 @@ public class PageNavModification : UIPageWidget<PageNavModification>
 
     private PageNavModificationParts m_pageNavModificationParts;
     private PageNavModificationInitParams m_pageNavModificationInitParams;
-    private PageNavModificationMotion m_pageNavModificationMotion;
-    private PageNavModificationExpression m_pageNavModificationExpression;
 
     protected override void OnInit()
     {
         base.OnInit();
         m_pageNavModificationParts = PageNavModificationParts.CreateWidget(m_itemPageModification_Parts.gameObject);
         m_pageNavModificationInitParams = PageNavModificationInitParams.CreateWidget(m_itemPageModification_InitParams.gameObject);
-        m_pageNavModificationMotion = PageNavModificationMotion.CreateWidget(m_itemPageModification_Motion.gameObject);
-        m_pageNavModificationExpression = PageNavModificationExpression.CreateWidget(m_itemPageModification_Expression.gameObject);
 
         m_pageNavModificationParts.owner = this;
         m_pageNavModificationInitParams.owner = this;
-        m_pageNavModificationMotion.owner = this;
-        m_pageNavModificationExpression.owner = this;
-
-        BindChild(m_pageNavModificationParts);
-        BindChild(m_pageNavModificationInitParams);
-        BindChild(m_pageNavModificationMotion);
-        BindChild(m_pageNavModificationExpression);
 
         m_pageNavModificationParts.BindToToggle(m_toggleParts);
         m_pageNavModificationInitParams.BindToToggle(m_toggleInitParams);
-        m_pageNavModificationMotion.BindToToggle(m_toggleMotion);
-        m_pageNavModificationExpression.BindToToggle(m_toggleExpression);
+
+        BindChild(m_pageNavModificationParts);
+        BindChild(m_pageNavModificationInitParams);
 
         m_touchChara._OnPointerDown += OnTouchCharaPointerDown;
         m_touchChara._OnPointerMove += OnTouchCharaPointerMove;
@@ -293,19 +270,31 @@ public class PageOfPageNavModification<T> : UIPageWidget<T> where T : PageOfPage
 public class PageNavModificationParts : PageOfPageNavModification<PageNavModificationParts>
 {
     #region auto generated members
+    private InputField m_iptFilter;
     private Transform m_itemPartsEntry;
     #endregion
 
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
+        m_iptFilter = transform.Find("SearchBarInputField/m_iptFilter").GetComponent<InputField>();
         m_itemPartsEntry = transform.Find("ScrollRectV/Viewport/Content/m_itemPartsEntry").GetComponent<Transform>();
 
+        m_iptFilter.onValueChanged.AddListener(OnInputFieldFilterChange);
+        m_iptFilter.onEndEdit.AddListener(OnInputFieldFilterEndEdit);
     }
     #endregion
 
     #region auto generated events
+    private void OnInputFieldFilterChange(string value)
+    {
+        RefreshAll();
+    }
+    private void OnInputFieldFilterEndEdit(string value)
+    {
+    }
     #endregion
+
 
     private List<PageNavModificationPartsEntry> m_listPartsEntries = new List<PageNavModificationPartsEntry>();
 
@@ -332,6 +321,9 @@ public class PageNavModificationParts : PageOfPageNavModification<PageNavModific
         CurModel.SetDisplayMode(ModelDisplayMode.EmotionEditor, true);
         var partsDataList = CurModel.MainModel.m_partsDataList;
         var partsCount = partsDataList.Count;
+        var argFilters = m_iptFilter.text.Split(' ').Where(s => !string.IsNullOrEmpty(s)).Select(s => s.ToLower()).ToList();
+        var filterParts = argFilters.Count > 0 ? partsDataList.Where(x => argFilters.All(f => x.getPartsDataID().ToString().ToLower().Contains(f))).ToList() : partsDataList;
+        partsCount = filterParts.Count;
         SetListItem(m_listPartsEntries, m_itemPartsEntry.gameObject, m_itemPartsEntry.parent, partsCount, (entry) =>
         {
             entry._OnToggleEnableChange += OnPartsEntryToggleEnableChange;
@@ -339,7 +331,7 @@ public class PageNavModificationParts : PageOfPageNavModification<PageNavModific
         });
         for (int i = 0; i < partsCount; i++)
         {
-            var partsData = partsDataList[i];
+            var partsData = filterParts[i];
             var entry = m_listPartsEntries[i];
             var partKey = partsData.getPartsDataID().ToString();
             var enable = CurModel.MyGOConfig.init_opacities.TryGetValue(partKey, out var opacity);
@@ -444,19 +436,31 @@ public class PageNavModificationPartsEntry : UIItemWidget<PageNavModificationPar
 public class PageNavModificationInitParams : PageOfPageNavModification<PageNavModificationInitParams>
 {
     #region auto generated members
+    private InputField m_iptFilter;
     private Transform m_itemPartsEntry;
     #endregion
 
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
+        m_iptFilter = transform.Find("SearchBarInputField/m_iptFilter").GetComponent<InputField>();
         m_itemPartsEntry = transform.Find("ScrollRectV/Viewport/Content/m_itemPartsEntry").GetComponent<Transform>();
 
+        m_iptFilter.onValueChanged.AddListener(OnInputFieldFilterChange);
+        m_iptFilter.onEndEdit.AddListener(OnInputFieldFilterEndEdit);
     }
     #endregion
 
     #region auto generated events
+    private void OnInputFieldFilterChange(string value)
+    {
+        RefreshAll();
+    }
+    private void OnInputFieldFilterEndEdit(string value)
+    {
+    }
     #endregion
+
 
     private List<PageNavModificationInitParamsEntry> m_listInitParamsEntries = new List<PageNavModificationInitParamsEntry>();
 
@@ -488,7 +492,9 @@ public class PageNavModificationInitParams : PageOfPageNavModification<PageNavMo
 
         var initParams = CurModel.emotionEditor.list.list;
         var defValues = CurModel.emotionEditor.list.paramDefDict;
-        var initParamsCount = initParams.Count;
+        var argFilters = m_iptFilter.text.Split(' ').Where(s => !string.IsNullOrEmpty(s)).Select(s => s.ToLower()).ToList();
+        var filterParams = argFilters.Count > 0 ? initParams.Where(x => argFilters.All(f => x.name.ToLower().Contains(f))).ToList() : initParams;
+        var initParamsCount = filterParams.Count;
         SetListItem(m_listInitParamsEntries, m_itemPartsEntry.gameObject, m_itemPartsEntry.parent, initParamsCount, (entry) =>
         {
             entry._OnInputFieldValueSubmit += OnInitParamsEntryInputFieldValueSubmit;
@@ -498,7 +504,7 @@ public class PageNavModificationInitParams : PageOfPageNavModification<PageNavMo
 
         for (int i = 0; i < initParamsCount; i++)
         {
-            var initParam = initParams[i];
+            var initParam = filterParams[i];
             var entry = m_listInitParamsEntries[i];
             var enable = CurModel.MyGOConfig.init_params.TryGetValue(initParam.name, out var value);
             defValues.TryGetValue(initParam.name, out var defValue);
@@ -680,14 +686,4 @@ public class PageNavModificationInitParamsEntry : UIItemWidget<PageNavModificati
             EventSystem.current.SetSelectedGameObject(m_iptValue.gameObject);
         }
     }
-}
-
-public class PageNavModificationMotion : PageOfPageNavModification<PageNavModificationMotion>
-{
-
-}
-
-public class PageNavModificationExpression : PageOfPageNavModification<PageNavModificationExpression>
-{
-
 }
