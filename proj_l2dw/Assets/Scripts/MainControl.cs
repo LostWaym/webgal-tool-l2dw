@@ -90,6 +90,11 @@ public class MainControl : MonoBehaviour
         FilterUtils.LoadFilterSetPreset();
     }
 
+    void Start()
+    {
+        Application.targetFrameRate = 60;
+    }
+
     private void OnDestroy()
     {
         if (stageCaptureRenderTexture)
