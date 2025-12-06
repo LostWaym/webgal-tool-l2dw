@@ -261,47 +261,74 @@ public static class L2DWUtils
         var scaleFactor = previewWindowWidth / texture.width;
         rawImage.rectTransform.sizeDelta = new Vector2(texture.width, texture.height) * scaleFactor;
     }
-
-    /// <summary>
-    /// 尝试生成单行 changeFigure 模板
-    /// <param name= "name" >模型名称/id</param>
-    /// <param name= "modelPath" >模型路径</param>
-    /// <param name= "index" >模型索引</param>
-    /// </summary>
-    public static string GenerateFormatText(string name, string modelPath, int index)
+    
+    public static string GetTemplatePath(string absolutePath, bool isBackground)
     {
-        if (IsSubFolderOf(modelPath, Global.ModelPath))
+        var pathResult = absolutePath;
+        
+        if (isBackground)
         {
-            modelPath = GetRelativePath(modelPath, Global.ModelPath);
+            if (IsSubFolderOf(absolutePath, Global.BGPath))
+            {
+                pathResult = GetRelativePath(absolutePath, Global.BGPath);
+            }
+            else
+            {
+                // 如果不在全局设置的 background 目录下,则尝试截取 background 目录后面的路径
+                absolutePath = absolutePath.Replace('\\', '/');
+                const string backgroundDir = "background/";
+                var backgroundDirIndex = absolutePath.IndexOf(backgroundDir);
+                if (backgroundDirIndex >= 0)
+                {
+                    pathResult = absolutePath.Substring(backgroundDirIndex + backgroundDir.Length);
+                }
+            }
         }
         else
         {
-            // 如果不在全局设置的 figure 目录下,则尝试截取 figure 目录后面的路径
-            modelPath = modelPath.Replace('\\', '/');
-            const string figureDir = "figure/";
-            var figureDirIndex = modelPath.IndexOf(figureDir);
-            if (figureDirIndex >= 0)
+            if (IsSubFolderOf(absolutePath, Global.ModelPath))
             {
-                modelPath = modelPath.Substring(figureDirIndex + figureDir.Length);
+                pathResult = GetRelativePath(absolutePath, Global.ModelPath);
+            }
+            else
+            {
+                // 如果不在全局设置的 figure 目录下,则尝试截取 figure 目录后面的路径
+                absolutePath = absolutePath.Replace('\\', '/');
+                const string figureDir = "figure/";
+                var figureDirIndex = absolutePath.IndexOf(figureDir);
+                if (figureDirIndex >= 0)
+                {
+                    pathResult = absolutePath.Substring(figureDirIndex + figureDir.Length);
+                }
             }
         }
         
-        return $"changeFigure:{modelPath} -id={name}_{index} -zIndex={index} %me_{index}%;";
+        return pathResult;
     }
-    
+
     /// <summary>
     /// 尝试生成 changeFigure 模板
     /// <param name="name">模型名称</param>
-    /// <param name="mainModelPath">主模型路径</param>
-    /// <param name="subModelPaths">子模型路径</param>
+    /// <param name="modelPath">模型路径</param>
+    /// <param name="modelIndex">模型索引</param>
     /// </summary>
-    public static string GenerateFormatText(string name, string mainModelPath, string[] subModelPaths)
+    public static string GenerateFormatText(string name, string modelPath, int modelIndex)
+    {
+        return $"changeFigure:{modelPath} -id={name}_{modelIndex} -zIndex={modelIndex} %me_{modelIndex}%;";
+    }
+
+    /// <summary>
+    /// 尝试生成 changeFigure 模板
+    /// <param name="name">模型名称</param>
+    /// <param name="modelCount">模型数量</param>
+    /// </summary>
+    public static string GenerateFormatText(string name, int modelCount)
     {
         var outputTextLines = new List<string>();
-        var modelCount = subModelPaths.Length + 1;
+
         for (int i = 0; i < modelCount; i++)
         {
-            var line = GenerateFormatText(name, i == 0 ? mainModelPath : subModelPaths[i - 1], i);
+            var line = GenerateFormatText(name, $"%path_{i}%", i);
             // 除了最后一个模型外,其他模型行尾添加 -next 参数
             if (i < modelCount - 1)
             {
@@ -317,13 +344,7 @@ public static class L2DWUtils
     /// </summary>
     public static string GenerateFormatText(L2DWModelConfig meta)
     {
-        var modelAbsolutePath = meta.GetValidModelFilePath(0);
-        var subModelAbsolutePaths = new string[meta.subModels.Count()];
-        for (int i = 0; i < meta.subModels.Count; i++)
-        {
-            subModelAbsolutePaths[i] = meta.GetValidModelFilePath(i + 1);
-        }
-        return GenerateFormatText(meta.name, modelAbsolutePath, subModelAbsolutePaths);
+        return GenerateFormatText(meta.name, meta.subModels.Count() + 1);
     }
     
     /// <summary>
@@ -331,7 +352,7 @@ public static class L2DWUtils
     /// </summary>
     public static string GenerateFormatText(ImageModelMeta meta)
     {
-        return GenerateFormatText(meta.name, meta.imgPath, Array.Empty<string>());
+        return GenerateFormatText(meta.name, 1);
     }
 
     /// <summary>

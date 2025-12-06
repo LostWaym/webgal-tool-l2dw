@@ -155,6 +155,20 @@ public class ImageModel : ModelAdjusterBase
         CopyScaleFromRoot();
         SetCharacterWorldPosition(oldPos.x, oldPos.y);
     }
+    
+    public override string GetPathText(int modelIndex)
+    {
+        var absolutePath = imgMeta.imgPath;
+
+        return L2DWUtils.GetTemplatePath(absolutePath, false);
+    }
+    
+    public override string GetConfPathText()
+    {
+        // 如果以后图片做成配置文件，这里要改一下
+        // 目前图片没有配置文件，直接返回图片路径
+        return this.GetPathText(0);
+    }
 
     #region 滤镜
 

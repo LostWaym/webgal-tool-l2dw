@@ -745,4 +745,18 @@ public class ModelAdjuster : ModelAdjusterBase
     {
         return rt;
     }
+
+    public override string GetPathText(int modelIndex)
+    {
+        var absolutePath = meta.GetValidModelFilePath(modelIndex);
+
+        return L2DWUtils.GetTemplatePath(absolutePath, false);
+    }
+
+    public override string GetConfPathText()
+    {
+        var absolutePath = meta.temp_filePath;
+
+        return L2DWUtils.GetTemplatePath(absolutePath, false);
+    }
 }

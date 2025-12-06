@@ -94,43 +94,11 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>, IOpenFolde
     }
     private void OnButtonGenConfFormatTextClick()
     {
-        if (config.temp_filePath == null) return;
-        
-        m_iptFormatText.text = L2DWUtils.GenerateFormatText(
-            m_iptName.text.Trim(),
-            config.temp_filePath,
-            Array.Empty<string>()
-        );
+        m_iptFormatText.text = L2DWUtils.GenerateFormatText(m_iptName.text.Trim(), "%conf_path%", 0);
     }
     private void OnButtonGenFormatTextClick()
     {
-        if (config.temp_filePath == null) return;
-        
-        var dir = Path.GetDirectoryName(config.temp_filePath);
-
-        var modelPath = m_iptModelFilePath.text.Trim();
-        if (!Path.IsPathRooted(modelPath))
-        {
-            modelPath = Path.Combine(dir, modelPath);
-        }
-        modelPath = Path.GetFullPath(modelPath); // 这是为了把../这种相对路径给简化掉
-
-        var subModelPaths = new string[subModelInfos.Count];
-        for (int i = 0; i < subModelInfos.Count; i++)
-        {
-            var subModelPath = subModelInfos[i].filePath.Trim();
-            if (!Path.IsPathRooted(subModelPath))
-            {
-                subModelPath = Path.Combine(dir, subModelPath);
-            }
-            subModelPaths[i] = Path.GetFullPath(subModelPath);
-        }
-
-        m_iptFormatText.text = L2DWUtils.GenerateFormatText(
-            m_iptName.text.Trim(),
-            modelPath,
-            subModelPaths
-        );
+        m_iptFormatText.text = L2DWUtils.GenerateFormatText(m_iptName.text.Trim(), subModelInfos.Count + 1);
     }
     private void OnInputFieldFormatTextChange(string value)
     {

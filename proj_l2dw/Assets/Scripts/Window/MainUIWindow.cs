@@ -3559,12 +3559,6 @@ public class PageBackgroundMenu : UIPageWidget<PageBackgroundMenu>
     #region auto generated events
     private void OnButtonChangeClick()
     {
-        if (string.IsNullOrEmpty(Global.BGPath))
-        {
-            MessageTipWindow.Instance.Show("错误", "请先设置背景文件夹");
-            return;
-        }
-
         var result = L2DWUtils.OpenFileDialog("选择背景文件夹", "BGPath", "png|jpg");
         if(result.Length > 0)
         {

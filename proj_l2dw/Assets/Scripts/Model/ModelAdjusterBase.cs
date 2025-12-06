@@ -170,6 +170,16 @@ public class ModelAdjusterBase : MonoBehaviour
 
     }
 
+    public virtual string GetPathText(int modelIndex)
+    {
+        return "";
+    }
+
+    public virtual string GetConfPathText()
+    {
+        return "";
+    }
+
     public virtual string GetMotionExpressionParamsText()
     {
         return "";
