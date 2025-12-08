@@ -292,12 +292,6 @@ public class MainControl : MonoBehaviour
         if(string.IsNullOrEmpty(path) || !File.Exists(path))
             return;
 
-        if(!L2DWUtils.IsSubFolderOf(path, Global.BGPath))
-        {
-            messageTipWindow.Show("错误", "背景路径错误！\n你应该选择背景文件夹下的图片文件");
-            return;
-        }
-
         var texture = new Texture2D(2, 2);
         backgroundPaths.Remove(path);
         backgroundPaths.Insert(0, path);
@@ -468,9 +462,12 @@ public class MainControl : MonoBehaviour
         {
             var format = curTarget.MotionTemplate;
             var output = format.Replace("%me%", curTarget.GetMotionExpressionParamsText());
+            output = output.Replace("%path%", curTarget.GetPathText(0));
+            output = output.Replace("%conf_path%", curTarget.GetConfPathText());
             for (int i = 0; i < curTarget.ModelCount; i++)
             {
                 output = output.Replace($"%me_{i}%", curTarget.GetMotionExpressionParamsText());
+                output = output.Replace($"%path_{i}%", curTarget.GetPathText(i));
             }
             commands.AppendLine(output);
         }
@@ -506,11 +503,14 @@ public class MainControl : MonoBehaviour
         var boundsString = curTarget.GetBoundsText() != "" ? $" -bounds={curTarget.GetBoundsText()}" : "";
         var meText = motionExpressionString + transformString + boundsString;
         var output = format.Replace("%me%", meText.Trim());
+        output = output.Replace("%path%", curTarget.GetPathText(0));
+        output = output.Replace("%conf_path%", curTarget.GetConfPathText());
         for (int i = 0; i < curTarget.ModelCount; i++)
         {
             var subModelTransformString = $" -transform={GetTransformTextTarget(curTarget, i)}";
             var subMeText = motionExpressionString + subModelTransformString + boundsString;
             output = output.Replace($"%me_{i}%", subMeText.Trim());
+            output = output.Replace($"%path_{i}%", curTarget.GetPathText(i));
         }
         L2DWUtils.CopyInstructionToCopyBoard(output);
         ShowDebugText("复制成功！");
@@ -576,12 +576,6 @@ public class MainControl : MonoBehaviour
 
     private bool CheckBackGroundValid()
     {
-        if (string.IsNullOrEmpty(Global.BGPath))
-        {
-            MessageTipWindow.Instance.Show("错误", "请先设置背景文件夹");
-            return false;
-        }
-        
         if (string.IsNullOrEmpty(MainControl.CurrentBGPath))
         {
             MessageTipWindow.Instance.Show("错误", "请先加载一张背景\n默认背景只是拿来看的，不会被导出");
@@ -596,7 +590,7 @@ public class MainControl : MonoBehaviour
         if (!CheckBackGroundValid())
             return;
 
-        var relativePath = L2DWUtils.GetRelativePath(MainControl.CurrentBGPath, Global.BGPath);
+        var relativePath = L2DWUtils.GetTemplatePath(MainControl.CurrentBGPath, true);
         var template = Global.BGChangeTemplate;
         var result = template.Replace("%me%", relativePath);
         Debug.Log(result);
@@ -621,7 +615,7 @@ public class MainControl : MonoBehaviour
         if (!CheckBackGroundValid())
             return;
 
-        var relativePath = L2DWUtils.GetRelativePath(MainControl.CurrentBGPath, Global.BGPath);
+        var relativePath = L2DWUtils.GetTemplatePath(MainControl.CurrentBGPath, true);
         var template = Global.BGChangeTemplate;
         var result = template.Replace("%me%", $"{relativePath} -transform={MainControl.Instance.GetTransformTextBG()}");
         Debug.Log(result);
@@ -661,9 +655,12 @@ public class MainControl : MonoBehaviour
                 //动作表情
                 var format2 = model.MotionTemplate;
                 var output2 = format2.Replace("%me%", model.GetMotionExpressionParamsText());
+                output2 = output2.Replace("%path%", model.GetPathText(0));
+                output2 = output2.Replace("%conf_path%", curTarget.GetConfPathText());
                 for (int i = 0; i < model.ModelCount; i++)
                 {
                     output2 = output2.Replace($"%me_{i}%", model.GetMotionExpressionParamsText());
+                    output2 = output2.Replace($"%path_{i}%", model.GetPathText(i));
                 }
                 commands.AppendLine(output2);
             }
@@ -716,11 +713,14 @@ public class MainControl : MonoBehaviour
             var boundsString = model.GetBoundsText() != "" ? $" -bounds={curTarget.GetBoundsText()}" : "";
             var meText = motionExpressionString + transformString + boundsString;
             var output = format.Replace("%me%", meText.Trim());
+            output = output.Replace("%path%", curTarget.GetPathText(0));
+            output = output.Replace("%conf_path%", curTarget.GetConfPathText());
             for (int i = 0; i < model.ModelCount; i++)
             {
                 var subModelTransformString = $" -transform={GetTransformTextTarget(model, i)}";
                 var subMeText = motionExpressionString + subModelTransformString + boundsString;
                 output = output.Replace($"%me_{i}%", subMeText.Trim());
+                output = output.Replace($"%path_{i}%", curTarget.GetPathText(i));
             }
             commands.AppendLine(output);
         }
@@ -952,12 +952,6 @@ public class MainControl : MonoBehaviour
 
     public void LoadImg()
     {
-        if (string.IsNullOrEmpty(Global.ModelPath))
-        {
-            messageTipWindow.Show("错误", "请先设置模型文件夹");
-            return;
-        }
-
         var paths = L2DWUtils.OpenFileDialog("选择图片文件", "img_path", "png|jpg");
         if (paths == null || paths.Length == 0)
             return;
@@ -965,12 +959,6 @@ public class MainControl : MonoBehaviour
         var path = paths[0];
         if (string.IsNullOrEmpty(path))
             return;
-
-        if (!L2DWUtils.TryGetRelativePath(path, Global.ModelPath, out var relativePath))
-        {
-            messageTipWindow.Show("错误", "图片文件路径错误！\n你应该选择模型文件夹下的图片文件");
-            return;
-        }
         
         LoadImgModel(path);
     }

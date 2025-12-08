@@ -61,12 +61,7 @@ public class ImageProfileSettingWindow : BaseWindow<ImageProfileSettingWindow>
     }
     private void OnInputFieldModelFilePathEndEdit(string value)
     {
-        if (!L2DWUtils.TryGetRelativePath(value, Global.ModelPath, out var relativePath))
-        {
-            MessageTipWindow.instance.Show("错误", "图片文件路径错误！\n你应该选择模型文件夹下的图片文件");
-            m_iptModelFilePath.SetTextWithoutNotify(m_meta.imgPath);
-            return;
-        }
+        Debug.Log("OnInputFieldModelFilePathEndEdit");
     }
     private void OnInputFieldFormatTextChange(string value)
     {
@@ -78,11 +73,7 @@ public class ImageProfileSettingWindow : BaseWindow<ImageProfileSettingWindow>
     }
     private void OnButtonGenFormatTextClick()
     {
-        m_iptFormatText.text = L2DWUtils.GenerateFormatText(
-            m_iptName.text.Trim(),
-            m_iptModelFilePath.text.Trim(),
-            Array.Empty<string>()
-        );
+        m_iptFormatText.text = L2DWUtils.GenerateFormatText( m_iptName.text.Trim(), 1);
     }
     private void OnInputFieldTransformFormatTextChange(string value)
     {
