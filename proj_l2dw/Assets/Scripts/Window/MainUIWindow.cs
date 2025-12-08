@@ -3377,11 +3377,7 @@ public class PageGroupFunctions : UIPageWidget<PageGroupFunctions>
             groupItem.SetData(subGroup.groupName);
             bool modelInGroup = curGroup.subGroups.Contains(subGroup);
             groupItem.SetStateStyle(modelInGroup ? UIStateStyle.UIState.Selected : UIStateStyle.UIState.Normal);
-
-            if (subGroup == curGroup)
-            {
-                groupItem.gameObject.SetActive(false);
-            }
+            groupItem.gameObject.SetActive(subGroup != curGroup);
         }
     }
 
