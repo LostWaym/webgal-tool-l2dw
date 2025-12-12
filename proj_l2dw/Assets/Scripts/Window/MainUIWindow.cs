@@ -22,6 +22,7 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
     private Toggle m_toggleInstructions;
     private Toggle m_toggleModification;
     private Toggle m_toggleTools;
+    private Button m_btnJoin;
     private Button m_btnDocument;
     private Button m_btnSetting;
     #endregion
@@ -39,6 +40,7 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
         m_toggleInstructions = transform.Find("Tabs/toggles/m_toggleInstructions").GetComponent<Toggle>();
         m_toggleModification = transform.Find("Tabs/toggles/m_toggleModification").GetComponent<Toggle>();
         m_toggleTools = transform.Find("Tabs/toggles/m_toggleTools").GetComponent<Toggle>();
+        m_btnJoin = transform.Find("Tabs/m_btnJoin").GetComponent<Button>();
         m_btnDocument = transform.Find("Tabs/m_btnDocument").GetComponent<Button>();
         m_btnSetting = transform.Find("Tabs/m_btnSetting").GetComponent<Button>();
 
@@ -47,11 +49,17 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
         m_toggleInstructions.onValueChanged.AddListener(OnToggleInstructionsChange);
         m_toggleModification.onValueChanged.AddListener(OnToggleModificationChange);
         m_toggleTools.onValueChanged.AddListener(OnToggleToolsChange);
+        m_btnJoin.onClick.AddListener(OnButtonJoinClick);
         m_btnDocument.onClick.AddListener(OnButtonDocumentClick);
         m_btnSetting.onClick.AddListener(OnButtonSettingClick);
     }
     #endregion
 
+    private const string JOIN_QQ_GROUP_URL = "http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=fF7QOt3NjNIuXcmDa6BPvkr3tVkrGf0K&authKey=C3CzTfFUKExMPH9geGpsmf0AYzUXbU5OMNBamzfMfd4lUf0UHsymzuqSC%2FvdzJVJ&noverify=0&group_code=596774006";
+    private void OnButtonJoinClick()
+    {
+        Application.OpenURL(JOIN_QQ_GROUP_URL);
+    }
     #region auto generated events
     private void OnTogglePreviewChange(bool value)
     {
