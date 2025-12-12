@@ -32,6 +32,7 @@ public static class Global
 
     public static FigurePivotMode PivotMode = FigurePivotMode.W_4_5_12;
     public static bool DisableJsonModelProfileInit = false;
+    public static bool CloseWelcomePage = false;
 
     public static bool IsLoaded = false;
 
@@ -57,6 +58,7 @@ public static class Global
         PlayerPrefs.SetInt("Global.IsSetResolution", IsSetResolution ? 1 : 0);
         PlayerPrefs.SetInt("Global.NewResolutionWidth", NewResolutionWidth);
         PlayerPrefs.SetInt("Global.NewResolutionHeight", NewResolutionHeight);
+        PlayerPrefs.SetInt("Global.CloseWelcomePage", CloseWelcomePage ? 1 : 0);
     }
 
     public static void Load()
@@ -77,6 +79,7 @@ public static class Global
         IsSetResolution = PlayerPrefs.GetInt("Global.IsSetResolution", 0) == 1;
         NewResolutionWidth = PlayerPrefs.GetInt("Global.NewResolutionWidth", 2560);
         NewResolutionHeight = PlayerPrefs.GetInt("Global.NewResolutionHeight", 1440);
+        CloseWelcomePage = PlayerPrefs.GetInt("Global.CloseWelcomePage", 0) == 1;
 
         if (string.IsNullOrEmpty(BGChangeTemplate))
         {

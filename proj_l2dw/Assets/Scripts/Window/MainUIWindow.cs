@@ -70,7 +70,7 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
     }
     private void OnButtonDocumentClick()
     {
-        Application.OpenURL("https://l2dw-docs.pages.dev/");
+        MainControl.Instance.ShowDocument();
     }
     private void OnButtonSettingClick()
     {
@@ -2282,6 +2282,7 @@ public class PageCharacterPreview : UIPageWidget<PageCharacterPreview>
             return;
         }
         model.meta.m_filterMotion = value;
+        L2DWUtils.ResetScrollViewTop(m_scrollMotion);
         RefreshMotionList();
     }
     private void OnInputFieldFilterMotionEndEdit(string value)
@@ -2296,6 +2297,7 @@ public class PageCharacterPreview : UIPageWidget<PageCharacterPreview>
             return;
         }
         model.meta.m_filterExp = value;
+        L2DWUtils.ResetScrollViewTop(m_scrollExpression);
         RefreshExpressionList();
     }
     private void OnInputFieldFilterExpressionEndEdit(string value)
@@ -2595,6 +2597,7 @@ public class PageExpressionEditor : UIPageWidget<PageExpressionEditor>
     }
     private void OnInputFieldFilterChange(string value)
     {
+        L2DWUtils.ResetScrollViewTop(m_scrollExpression);
         RefreshExpEntryList();
     }
     private void OnInputFieldFilterEndEdit(string value)

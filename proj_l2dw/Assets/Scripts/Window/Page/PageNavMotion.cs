@@ -504,6 +504,7 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
     }
     private void OnInputFieldFilterChange(string value)
     {
+        m_sliderV.value = 0;
         RefreshAll();
     }
     private void OnInputFieldFilterEndEdit(string value)

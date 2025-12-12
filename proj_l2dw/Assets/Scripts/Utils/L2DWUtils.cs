@@ -549,4 +549,10 @@ public static class L2DWUtils
         var drive2 = GetDrive(path2);
         return !string.IsNullOrEmpty(drive1) && drive1 == drive2;
     }
+
+    public static void ResetScrollViewTop(ScrollRect scroll)
+    {
+        scroll.normalizedPosition = new Vector2(0, 1);
+        scroll.velocity = Vector2.zero;
+    }
 }

@@ -176,6 +176,11 @@ internal class PageNavInstructions : UIPageWidget<PageNavInstructions>
                     var targetId = info.GetParameter("target");
                     var target = MainControl.Instance.FindTarget(targetId);
                     var duration = (Experiment.GetSayDuration(content) + 500) * 0.001f;
+                    if (info.HasParameter("time") && float.TryParse(info.GetParameter("time"), out var time))
+                    {
+                        duration = time * 0.001f;
+                    }
+                    
                     if (target != null && target is ModelAdjuster modelAdjuster)
                     {
                         modelAdjuster.Speak(Time.time + duration);

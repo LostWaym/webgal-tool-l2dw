@@ -88,6 +88,27 @@ public class MainControl : MonoBehaviour
         UIEventBus.AddListener(UIEventType.OnModelDeleted, RenderBatch);
 
         FilterUtils.LoadFilterSetPreset();
+
+        if (!Global.CloseWelcomePage)
+        {
+            string title = "欢迎界面";
+            string content = "欢迎使用L2DW，请先阅读使用说明！\n记得去设置那边先调整你的live2d定位模式！\n否则你可能会遇到一些奇怪的问题！\n不想让我每次打开都弹出的话，那就去设置界面勾上【关闭欢迎界面】吧！\n需要帮忙打开文档地址吗？";
+            ConfirmUI.Instance.SetData(title, content, () => {
+                // Global.CloseWelcomePage = true;
+                ShowDocument();
+                SettingUIWindow.Instance.Show();
+                SettingUIWindow.Instance.ShowExperimentPage();
+            }, () => {
+                // Global.CloseWelcomePage = false;
+                SettingUIWindow.Instance.Show();
+                SettingUIWindow.Instance.ShowExperimentPage();
+            });
+        }
+    }
+
+    public void ShowDocument()
+    {
+        Application.OpenURL("https://l2dw-docs.pages.dev/");
     }
 
     void Start()

@@ -101,16 +101,18 @@ public class SettingUIWindow : BaseWindow<SettingUIWindow>
         m_settingPageExperiment.Inject(this, m_toggleExperiment);
         m_settingPageNavigation.Inject(this, m_toggleNavigation);
         m_settingPageThanks.Inject(this, m_toggleThanks);
-    }
 
-    void Start()
-    {
         m_toggleGeneral.isOn = true;
     }
 
     public void SetTitle(string title)
     {
         m_lblTitle.text = title;
+    }
+
+    public void ShowExperimentPage()
+    {
+        m_toggleExperiment.isOn = true;
     }
 
 }
@@ -181,11 +183,10 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
     private Transform m_itemModelPath;
     private Transform m_itemBGPath;
     private Transform m_itemBGChangeTemplate;
-    private Button m_btnGenChangeTemplate;
     private Transform m_itemBGTransformTemplate;
-    private Button m_btnGenTransformTemplate;
     private Toggle m_toggleCloseGreenLine;
     private Toggle m_toggleDisableJsonModelProfileInit;
+    private Toggle m_toggleCloseWelcomePage;
     #endregion
 
     #region auto generated binders
@@ -194,18 +195,17 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
         m_itemModelPath = transform.Find("ScrollRect/Viewport/Content/m_itemModelPath").GetComponent<Transform>();
         m_itemBGPath = transform.Find("ScrollRect/Viewport/Content/m_itemBGPath").GetComponent<Transform>();
         m_itemBGChangeTemplate = transform.Find("ScrollRect/Viewport/Content/m_itemBGChangeTemplate").GetComponent<Transform>();
-        m_btnGenChangeTemplate = transform.Find("ScrollRect/Viewport/Content/m_itemBGChangeTemplate/Label/m_btnGenChangeTemplate").GetComponent<Button>();
         m_itemBGTransformTemplate = transform.Find("ScrollRect/Viewport/Content/m_itemBGTransformTemplate").GetComponent<Transform>();
-        m_btnGenTransformTemplate = transform.Find("ScrollRect/Viewport/Content/m_itemBGTransformTemplate/Label/m_btnGenTransformTemplate").GetComponent<Button>();
         m_toggleCloseGreenLine = transform.Find("ScrollRect/Viewport/Content/m_toggleCloseGreenLine").GetComponent<Toggle>();
         m_toggleDisableJsonModelProfileInit = transform.Find("ScrollRect/Viewport/Content/m_toggleDisableJsonModelProfileInit").GetComponent<Toggle>();
+        m_toggleCloseWelcomePage = transform.Find("ScrollRect/Viewport/Content/m_toggleCloseWelcomePage").GetComponent<Toggle>();
 
-        m_btnGenChangeTemplate.onClick.AddListener(OnButtonGenChangeTemplateClick);
-        m_btnGenTransformTemplate.onClick.AddListener(OnButtonGenTransformTemplateClick);
         m_toggleCloseGreenLine.onValueChanged.AddListener(OnToggleCloseGreenLineChange);
         m_toggleDisableJsonModelProfileInit.onValueChanged.AddListener(OnToggleDisableJsonModelProfileInitChange);
+        m_toggleCloseWelcomePage.onValueChanged.AddListener(OnToggleCloseWelcomePageChange);
     }
     #endregion
+
 
     #region auto generated events
     private void OnButtonGenChangeTemplateClick()
@@ -228,6 +228,10 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
     {
         Global.DisableJsonModelProfileInit = value;
     }
+    private void OnToggleCloseWelcomePageChange(bool value)
+    {
+        Global.CloseWelcomePage = value;
+    }
     #endregion
 
 
@@ -240,6 +244,8 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
     protected override void OnInit()
     {
         base.OnInit();
+        OMG();
+
         m_itemModelPathWidget = SettingPageGeneralWidget.CreateWidget(m_itemModelPath.gameObject);
         m_itemBGPathWidget = SettingPageGeneralWidget.CreateWidget(m_itemBGPath.gameObject);
         m_itemBGChangeTemplateWidget = SettingPageGeneralWidget.CreateWidget(m_itemBGChangeTemplate.gameObject);
@@ -249,6 +255,16 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
         m_itemBGPathWidget._OnValueChanged += OnBGPathChanged;
         m_itemBGChangeTemplateWidget._OnValueChanged += OnBGChangeTemplateChanged;
         m_itemBGTransformTemplateWidget._OnValueChanged += OnBGTransformTemplateChanged;
+    }
+
+    private Button m_btnGenChangeTemplate;
+    private Button m_btnGenTransformTemplate;
+    private  void OMG()
+    {
+        m_btnGenChangeTemplate = transform.Find("ScrollRect/Viewport/Content/m_itemBGChangeTemplate/Label/m_btnGenChangeTemplate").GetComponent<Button>();
+        m_btnGenTransformTemplate = transform.Find("ScrollRect/Viewport/Content/m_itemBGTransformTemplate/Label/m_btnGenTransformTemplate").GetComponent<Button>();
+        m_btnGenChangeTemplate.onClick.AddListener(OnButtonGenChangeTemplateClick);
+        m_btnGenTransformTemplate.onClick.AddListener(OnButtonGenTransformTemplateClick);
     }
 
     private void OnModelPathChanged(string value)
@@ -285,6 +301,7 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
 
         m_toggleCloseGreenLine.SetIsOnWithoutNotify(MainControl.CloseGreenLine);
         m_toggleDisableJsonModelProfileInit.SetIsOnWithoutNotify(Global.DisableJsonModelProfileInit);
+        m_toggleCloseWelcomePage.SetIsOnWithoutNotify(Global.CloseWelcomePage);
     }
 }
 

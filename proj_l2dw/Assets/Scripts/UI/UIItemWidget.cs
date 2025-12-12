@@ -172,7 +172,7 @@ public class UIPageWidget<T> : UIItemWidget<T>, IPageBind where T : UIPageWidget
         bindedToggle = toggle;
         toggle.onValueChanged.AddListener(OnToggleValueChanged);
 
-        if (gameObject.activeInHierarchy)
+        if (toggle.gameObject.activeInHierarchy)
             OnToggleValueChanged(toggle.isOn);
     }
 
