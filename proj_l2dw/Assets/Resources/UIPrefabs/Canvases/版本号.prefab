@@ -79,9 +79,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'v1.4.24
-
-    f1'
+  m_Text: v1.4.25
 --- !u!114 &8697541980210083477
 MonoBehaviour:
   m_ObjectHideFlags: 0
