@@ -70,7 +70,7 @@ public class PageNavModification : UIPageWidget<PageNavModification>
     }
     private void OnButtonHelpClick()
     {
-        string helpText = "目前不支持拼好模的编辑，只支持单个模型的编辑嗷…\n执意要在拼好模的编辑器里编辑的话，请先在拼好模的编辑器里导出单个模型，再在单个模型的编辑器里编辑嗷…\n否则会出现可怕的事情嗷…";
+        string helpText = "目前修改参数会连同主立绘和子立绘一起修改\n如果需要仅修改主立绘或某个子立绘，请作为单个模型导入并编辑";
         MessageTipWindow.Instance.Show("帮助", helpText);
     }
     private void OnButtonSaveClick()

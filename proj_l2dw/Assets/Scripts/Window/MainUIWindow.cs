@@ -22,6 +22,7 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
     private Toggle m_toggleInstructions;
     private Toggle m_toggleModification;
     private Toggle m_toggleTools;
+    private Button m_btnDocument;
     private Button m_btnSetting;
     #endregion
 
@@ -38,6 +39,7 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
         m_toggleInstructions = transform.Find("Tabs/toggles/m_toggleInstructions").GetComponent<Toggle>();
         m_toggleModification = transform.Find("Tabs/toggles/m_toggleModification").GetComponent<Toggle>();
         m_toggleTools = transform.Find("Tabs/toggles/m_toggleTools").GetComponent<Toggle>();
+        m_btnDocument = transform.Find("Tabs/m_btnDocument").GetComponent<Button>();
         m_btnSetting = transform.Find("Tabs/m_btnSetting").GetComponent<Button>();
 
         m_togglePreview.onValueChanged.AddListener(OnTogglePreviewChange);
@@ -45,6 +47,7 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
         m_toggleInstructions.onValueChanged.AddListener(OnToggleInstructionsChange);
         m_toggleModification.onValueChanged.AddListener(OnToggleModificationChange);
         m_toggleTools.onValueChanged.AddListener(OnToggleToolsChange);
+        m_btnDocument.onClick.AddListener(OnButtonDocumentClick);
         m_btnSetting.onClick.AddListener(OnButtonSettingClick);
     }
     #endregion
@@ -64,6 +67,10 @@ public class MainUIWindow : BaseWindow<MainUIWindow>
     }
     private void OnToggleToolsChange(bool value)
     {
+    }
+    private void OnButtonDocumentClick()
+    {
+        Application.OpenURL("https://l2dw-docs.pages.dev/");
     }
     private void OnButtonSettingClick()
     {

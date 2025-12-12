@@ -1831,6 +1831,16 @@ public class PageNavMotion : UIPageWidget<PageNavMotion>
         for (int i = 0; i < trackCount; i++)
         {
             m_listMotionTrack[i].SetData(m_motionData.TryGetTrack(filteredParamKeys[trackIndex + i].name), frameIndex);
+            if (m_listMotionTrack[i].gameObject.TryGetComponent(out Image imageComp))
+            {
+                var originalColor = imageComp.color;
+                imageComp.color = new Color(
+                    originalColor.r,
+                    originalColor.g,
+                    originalColor.b,
+                    (i + trackIndex) % 2f * 0.5f + 0.5f
+                );
+            }
         }
         RefreshTrackLabels();
     }
