@@ -677,7 +677,7 @@ public class MainControl : MonoBehaviour
                 var format2 = model.MotionTemplate;
                 var output2 = format2.Replace("%me%", model.GetMotionExpressionParamsText());
                 output2 = output2.Replace("%path%", model.GetPathText(0));
-                output2 = output2.Replace("%conf_path%", curTarget.GetConfPathText());
+                output2 = output2.Replace("%conf_path%", model.GetConfPathText());
                 for (int i = 0; i < model.ModelCount; i++)
                 {
                     output2 = output2.Replace($"%me_{i}%", model.GetMotionExpressionParamsText());
@@ -734,14 +734,14 @@ public class MainControl : MonoBehaviour
             var boundsString = model.GetBoundsText() != "" ? $" -bounds={curTarget.GetBoundsText()}" : "";
             var meText = motionExpressionString + transformString + boundsString;
             var output = format.Replace("%me%", meText.Trim());
-            output = output.Replace("%path%", curTarget.GetPathText(0));
-            output = output.Replace("%conf_path%", curTarget.GetConfPathText());
+            output = output.Replace("%path%", model.GetPathText(0));
+            output = output.Replace("%conf_path%", model.GetConfPathText());
             for (int i = 0; i < model.ModelCount; i++)
             {
                 var subModelTransformString = $" -transform={GetTransformTextTarget(model, i)}";
                 var subMeText = motionExpressionString + subModelTransformString + boundsString;
                 output = output.Replace($"%me_{i}%", subMeText.Trim());
-                output = output.Replace($"%path_{i}%", curTarget.GetPathText(i));
+                output = output.Replace($"%path_{i}%", model.GetPathText(i));
             }
             commands.AppendLine(output);
         }
