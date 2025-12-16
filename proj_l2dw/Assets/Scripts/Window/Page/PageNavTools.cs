@@ -678,32 +678,26 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
     private void OnButtonAddMotionClick()
     {
         DoExecute(true, false, false);
-        MessageTipWindow.Instance.Show("提示", "复制成功");
     }
     private void OnButtonAddExpClick()
     {
         DoExecute(false, true, false);
-        MessageTipWindow.Instance.Show("提示", "复制成功");
     }
     private void OnButtonAddAllClick()
     {
         DoExecute(true, true, false);
-        MessageTipWindow.Instance.Show("提示", "复制成功");
     }
     private void OnButtonRemoveMotionClick()
     {
         DoExecute(true, false, true);
-        MessageTipWindow.Instance.Show("提示", "删除成功");
     }
     private void OnButtonRemoveExpClick()
     {
         DoExecute(false, true, true);
-        MessageTipWindow.Instance.Show("提示", "删除成功");
     }
     private void OnButtonRemoveAllClick()
     {
         DoExecute(true, true, true);
-        MessageTipWindow.Instance.Show("提示", "删除成功");
     }
 
     private void OnButtonSelectAddAllClick()
@@ -713,7 +707,6 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
             return;
         
         DoAdds(files);
-        MessageTipWindow.Instance.Show("提示", "添加成功！");
     }
     #endregion
 
@@ -822,34 +815,40 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
                 }
             }
 
-            var motionError = L2DWUtils.AddMotionsToModelJson(
-                ref jsonObject,
-                jsonPath,
-                motionPaths,
-                motionNames
-            );
-            if (!string.IsNullOrEmpty(motionError))
+            if (motionPaths.Count > 0)
             {
-                MessageTipWindow.Instance.Show("错误", motionError);
-                return;
+                var motionError = L2DWUtils.AddMotionsToModelJson(
+                    ref jsonObject,
+                    jsonPath,
+                    motionPaths,
+                    motionNames
+                );
+                if (!string.IsNullOrEmpty(motionError))
+                {
+                    MessageTipWindow.Instance.Show("错误", motionError);
+                    return;
+                }
             }
 
-            var expError = L2DWUtils.AddExpressionsToModelJson(
-                ref jsonObject,
-                jsonPath,
-                expressionPaths,
-                expressionNames
-            );
-            if (!string.IsNullOrEmpty(expError))
+            if (expressionPaths.Count > 0)
             {
-                MessageTipWindow.Instance.Show("错误", expError);
-                return;
+                var expError = L2DWUtils.AddExpressionsToModelJson(
+                    ref jsonObject,
+                    jsonPath,
+                    expressionPaths,
+                    expressionNames
+                );
+                if (!string.IsNullOrEmpty(expError))
+                {
+                    MessageTipWindow.Instance.Show("错误", expError);
+                    return;
+                }
             }
 
             File.WriteAllText(jsonPath, jsonObject.ToString(true));
         }
 
-        MessageTipWindow.Instance.Show("提示", $"动作文件已成功注册到当前模型\n你需要重载模型生效！");
+        MessageTipWindow.Instance.Show("提示", $"动作表情文件已成功注册到当前模型\n你需要重载模型生效！");
     }
 
     private void DoExecute(bool isMotion, bool isExp, bool isRemove)
@@ -945,6 +944,10 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
             
             File.WriteAllText(jsonPath, jsonObject.ToString(true));
         }
+        
+        var fileType = isMotion ? (isExp ? "动作和表情" : "动作") : "表情";
+        var action = isRemove ? "移除出模型" : "注册到模型";
+        MessageTipWindow.Instance.Show("提示", $"{fileType}文件已成功{action}\n你需要重载模型生效！");
     }
 
     private bool IsJsonPathValid(string jsonPath)
