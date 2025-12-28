@@ -321,6 +321,22 @@ public class MyGOLive2DEx : MonoBehaviour
 
         return live2DModel.getCanvasHeight() - live2dBounds[1] + live2dBounds[3];
     }
+
+    public JSONObject FixOpacitiesJsonObject(JSONObject opacities)
+    {
+        var clone = opacities.Copy();
+        var partsNames = m_partsDataList.Select(x => x.getPartsDataID().ToString()).ToHashSet();
+        clone.list.RemoveAll(item => !partsNames.Contains(item.GetField("id").str));
+        return clone;
+    }
+
+    public JSONObject FixParamsJsonObject(JSONObject paramsObject)
+    {
+        var clone = paramsObject.Copy();
+        var paramNames = defaultParamInfoList.Select(x => x.name).ToHashSet();
+        clone.list.RemoveAll(item => !paramNames.Contains(item.GetField("id").str));
+        return clone;
+    }
 }
 
 public static class MyGOLive2DExExtensions

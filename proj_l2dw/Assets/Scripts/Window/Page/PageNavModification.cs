@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -140,11 +139,17 @@ public class PageNavModification : UIPageWidget<PageNavModification>
                 {
                     foreach (var model in m_curModel.GetModels())
                     {
+                        // 移除没有的部位
+                        var cloneOpacities = model.FixOpacitiesJsonObject(initOpacitiesObj);
+                        // 移除没有的参数
+                        var cloneParams = model.FixParamsJsonObject(initParamsObj);
+
                         JSONObject json = new JSONObject(File.ReadAllText(model.myGOConfig.json.filename));
                         json.RemoveField("init_params");
                         json.RemoveField("init_opacities");
-                        json.AddField("init_params", initParamsObj);
-                        json.AddField("init_opacities", initOpacitiesObj);
+                        json.AddField("init_params", cloneParams);
+                        json.AddField("init_opacities", cloneOpacities);
+
                         File.WriteAllText(model.myGOConfig.json.filename, json.ToString(true));
                     }
 
