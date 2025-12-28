@@ -66,7 +66,34 @@ public class PageNavModification : UIPageWidget<PageNavModification>
     }
     private void OnButtonMotionClick()
     {
+        // 懒…后面再做吧
+        return;
+        if (m_curModel == null)
+            return;
+
+        var modelNames = m_curModel.GetModels().Select((x, index) => $"{index}.{Path.GetFileNameWithoutExtension(x.myGOConfig.json.filename)}").ToList();
+        TargetsSelectUI.Instance.SetData(m_btnMotion.transform.GetComponent<RectTransform>(), m_rectSelectMotionArea.GetComponent<RectTransform>(), modelNames, m_listSelectedMotionIndexes, "modification");
+        TargetsSelectUI.Instance._OnSelectedIndexesChange = OnTargetsSelectedIndexesChange;
+        TargetsSelectUI.Instance._OnClose = OnTargetsClose;
     }
+
+    private void OnTargetsClose()
+    {
+    }
+
+    private void OnTargetsSelectedIndexesChange(List<int> list)
+    {
+        m_listSelectedMotionIndexes.Clear();
+        m_listSelectedMotionIndexes.AddRange(list);
+        if (m_listSelectedMotionIndexes.Count == 0)
+        {
+            m_listSelectedMotionIndexes.Add(0);
+            TargetsSelectUI.Instance.SetSelectedIndexes(m_listSelectedMotionIndexes);
+        }
+        RefreshAll();
+        UIEventBus.SendEvent(UIEventType.OnModificationSelectedIndexesChanged);
+    }
+
     private void OnButtonHelpClick()
     {
         string helpText = "目前修改参数会连同主立绘和子立绘一起修改\n如果需要仅修改主立绘或某个子立绘，请作为单个模型导入并编辑";
@@ -233,22 +260,43 @@ public class PageNavModification : UIPageWidget<PageNavModification>
 
     protected override void OnPageShown()
     {
-        UIEventBus.AddListener(UIEventType.OnModelChanged, RefreshAll);
-        RefreshAll();
+        UIEventBus.AddListener(UIEventType.OnModelChanged, ReselectTarget);
+        ReselectTarget();
 
         base.OnPageShown();
     }
 
     protected override void OnPageHidden()
     {
-        UIEventBus.RemoveListener(UIEventType.OnModelChanged, RefreshAll);
+        UIEventBus.RemoveListener(UIEventType.OnModelChanged, ReselectTarget);
 
         base.OnPageHidden();
     }
 
     public ModelAdjuster m_curModel;
+    public List<int> m_listSelectedMotionIndexes = new List<int>();
     public void RefreshAll()
     {
+        m_rawChara.texture = m_curModel.MainModel.meshRenderer.material.mainTexture;
+        L2DWUtils.AutoSizeRawImage(m_rawChara, m_curModel.MainModel.meshRenderer.material.mainTexture);
+
+        var models = m_curModel.GetModels();
+        var selectedModelNames = m_listSelectedMotionIndexes.Select(index => 
+        {
+            // 安全点：确保 index 在有效范围内，且 model 路径存在
+            if (index < 0 || index >= models.Count || models[index].myGOConfig?.json?.filename == null)
+                return $"{index}.(Invalid)";
+            return $"{index}.{Path.GetFileNameWithoutExtension(models[index].myGOConfig.json.filename)}";
+        }).ToList();
+
+        m_lblMotion.text = string.Join(", ", selectedModelNames);
+    }
+
+    private void ReselectTarget()
+    {
+        m_curModel = null;
+        m_listSelectedMotionIndexes.Clear();
+
         var curTarget = MainControl.Instance.curTarget;
         if (curTarget == null || curTarget is not ModelAdjuster model)
         {
@@ -258,6 +306,9 @@ public class PageNavModification : UIPageWidget<PageNavModification>
         m_rawChara.texture = model.MainModel.meshRenderer.material.mainTexture;
         L2DWUtils.AutoSizeRawImage(m_rawChara, model.MainModel.meshRenderer.material.mainTexture);
         m_curModel = model;
+        m_listSelectedMotionIndexes.Clear();
+        m_listSelectedMotionIndexes.Add(0); // 默认选中第一个
+        RefreshAll();
     }
 }
 

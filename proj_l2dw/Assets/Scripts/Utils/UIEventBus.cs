@@ -61,4 +61,5 @@ public enum UIEventType
     BGChanged,
     OnModelChanged,
     OnModelDeleted,
+    OnModificationSelectedIndexesChanged,
 }
