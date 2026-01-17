@@ -187,6 +187,7 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
     private Toggle m_toggleCloseGreenLine;
     private Toggle m_toggleDisableJsonModelProfileInit;
     private Toggle m_toggleCloseWelcomePage;
+    private Toggle m_toggleUseFileNameAsMetaName;
     #endregion
 
     #region auto generated binders
@@ -199,12 +200,15 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
         m_toggleCloseGreenLine = transform.Find("ScrollRect/Viewport/Content/m_toggleCloseGreenLine").GetComponent<Toggle>();
         m_toggleDisableJsonModelProfileInit = transform.Find("ScrollRect/Viewport/Content/m_toggleDisableJsonModelProfileInit").GetComponent<Toggle>();
         m_toggleCloseWelcomePage = transform.Find("ScrollRect/Viewport/Content/m_toggleCloseWelcomePage").GetComponent<Toggle>();
+        m_toggleUseFileNameAsMetaName = transform.Find("ScrollRect/Viewport/Content/m_toggleUseFileNameAsMetaName").GetComponent<Toggle>();
 
         m_toggleCloseGreenLine.onValueChanged.AddListener(OnToggleCloseGreenLineChange);
         m_toggleDisableJsonModelProfileInit.onValueChanged.AddListener(OnToggleDisableJsonModelProfileInitChange);
         m_toggleCloseWelcomePage.onValueChanged.AddListener(OnToggleCloseWelcomePageChange);
+        m_toggleUseFileNameAsMetaName.onValueChanged.AddListener(OnToggleUseFileNameAsMetaNameChange);
     }
     #endregion
+
 
 
     #region auto generated events
@@ -231,6 +235,10 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
     private void OnToggleCloseWelcomePageChange(bool value)
     {
         Global.CloseWelcomePage = value;
+    }
+    private void OnToggleUseFileNameAsMetaNameChange(bool value)
+    {
+        MainControl.UseFileNameAsMetaName = value;
     }
     #endregion
 
@@ -302,6 +310,7 @@ public class SettingPageGeneral : SettingPageBase<SettingPageGeneral>
         m_toggleCloseGreenLine.SetIsOnWithoutNotify(MainControl.CloseGreenLine);
         m_toggleDisableJsonModelProfileInit.SetIsOnWithoutNotify(Global.DisableJsonModelProfileInit);
         m_toggleCloseWelcomePage.SetIsOnWithoutNotify(Global.CloseWelcomePage);
+        m_toggleUseFileNameAsMetaName.SetIsOnWithoutNotify(MainControl.UseFileNameAsMetaName);
     }
 }
 

@@ -19,6 +19,7 @@ public class MainControl : MonoBehaviour
     public static bool WebGalExpressionSupport = true;
     public static bool CloseGreenLine = false;
     public static bool AllowBlink = true;
+    public static bool UseFileNameAsMetaName = true;
     public static string ModelPath = "";
     public static string CurrentBGPath = "";
 
@@ -74,6 +75,7 @@ public class MainControl : MonoBehaviour
         AllowBlink = PlayerPrefs.GetInt("AllowBlink", 1) == 1;
         WebGalExpressionSupport = PlayerPrefs.GetInt("WebGalExpressionSupport", 1) == 1;
         CloseGreenLine = PlayerPrefs.GetInt("CloseGreenLine", 0) == 1;
+        UseFileNameAsMetaName = PlayerPrefs.GetInt("UseFileNameAsMetaName", 1) == 1;
         Global.Load();
         AddDefaultGroup();
         UpdateResolution();
@@ -176,6 +178,7 @@ public class MainControl : MonoBehaviour
         PlayerPrefs.SetInt("AllowBlink", AllowBlink ? 1 : 0);
         PlayerPrefs.SetInt("WebGalExpressionSupport", WebGalExpressionSupport ? 1 : 0);
         PlayerPrefs.SetInt("CloseGreenLine", CloseGreenLine ? 1 : 0);
+        PlayerPrefs.SetInt("UseFileNameAsMetaName", UseFileNameAsMetaName ? 1 : 0);
         Global.Save();
         SaveMainCamTransform();
         SaveStageCaptureSettings();
@@ -910,7 +913,7 @@ public class MainControl : MonoBehaviour
         meta.temp_filePath = path;
         var folder = Path.GetDirectoryName(path);
         meta.modelRelativePath = Path.GetRelativePath(folder, path);
-        meta.name = Path.GetFileNameWithoutExtension(path);
+        meta.name = L2DWUtils.GetModelDefaultMetaName(path);
         meta.figureTemplate = L2DWUtils.GenerateFormatText(meta);
         meta.transformTemplate = L2DWUtils.GenerateTransformFormatText(meta);
         

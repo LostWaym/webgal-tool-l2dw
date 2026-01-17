@@ -67,6 +67,10 @@ public class PageNavTools : UIPageWidget<PageNavTools>
         m_pageNavTools_Motions.BindToToggle(m_toggleMotions);
         m_pageNavTools_Param.BindToToggle(m_toggleParam);
         m_pageNavTools_ExpParam.BindToToggle(m_toggleExpParam);
+
+        BindChild(m_pageNavTools_Motions);
+        BindChild(m_pageNavTools_Param);
+        BindChild(m_pageNavTools_ExpParam);
     }
 }
 
@@ -596,11 +600,12 @@ public class PageNavTools_ExpParam : UIPageWidget<PageNavTools_ExpParam>
 public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
 {
     #region auto generated members
-
     private Toggle m_toggleCurrentModel;
-    private Text m_lblCurentModelName;
+    private Text m_lblCurrentModelName;
     private InputField m_iptJsonPath;
     private InputField m_iptPrefix;
+    private Button m_btnMotionEdit;
+    private Button m_btnExpressionEdit;
     private Button m_btnSelectAddAll;
     private InputField m_iptFolder;
     private Toggle m_toggleIncludeChildren;
@@ -616,9 +621,11 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
     protected override void CodeGenBindMembers()
     {
         m_toggleCurrentModel = transform.Find("Controls/Sources/m_toggleCurrentModel").GetComponent<Toggle>();
-        m_lblCurentModelName = transform.Find("Controls/CurrentModelContainer/m_lblCurrentModelName").GetComponent<Text>();
+        m_lblCurrentModelName = transform.Find("Controls/CurrentModelContainer/m_lblCurrentModelName").GetComponent<Text>();
         m_iptJsonPath = transform.Find("Controls/SelectModelContainer/json文件路径/Value/InputField/m_iptJsonPath").GetComponent<InputField>();
         m_iptPrefix = transform.Find("Controls/前缀/Value/InputField/m_iptPrefix").GetComponent<InputField>();
+        m_btnMotionEdit = transform.Find("Controls/Operations/m_btnMotionEdit").GetComponent<Button>();
+        m_btnExpressionEdit = transform.Find("Controls/Operations/m_btnExpressionEdit").GetComponent<Button>();
         m_btnSelectAddAll = transform.Find("Controls/ManualAddContainer/m_btnSelectAddAll").GetComponent<Button>();
         m_iptFolder = transform.Find("Controls/BulkAddContainer/LabelValueH (1)/Value/InputField/m_iptFolder").GetComponent<InputField>();
         m_toggleIncludeChildren = transform.Find("Controls/BulkAddContainer/GameObject/m_toggleIncludeChildren").GetComponent<Toggle>();
@@ -634,6 +641,8 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
         m_iptJsonPath.onEndEdit.AddListener(OnInputFieldJsonPathEndEdit);
         m_iptPrefix.onValueChanged.AddListener(OnInputFieldPrefixChange);
         m_iptPrefix.onEndEdit.AddListener(OnInputFieldPrefixEndEdit);
+        m_btnMotionEdit.onClick.AddListener(OnButtonMotionEditClick);
+        m_btnExpressionEdit.onClick.AddListener(OnButtonExpressionEditClick);
         m_btnSelectAddAll.onClick.AddListener(OnButtonSelectAddAllClick);
         m_iptFolder.onValueChanged.AddListener(OnInputFieldFolderChange);
         m_iptFolder.onEndEdit.AddListener(OnInputFieldFolderEndEdit);
@@ -644,8 +653,8 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
         m_btnRemoveMotion.onClick.AddListener(OnButtonRemoveMotionClick);
         m_btnRemoveExp.onClick.AddListener(OnButtonRemoveExpClick);
         m_btnRemoveAll.onClick.AddListener(OnButtonRemoveAllClick);
+
         
-        useCurrentModel = m_toggleCurrentModel.isOn;
     }
     #endregion
 
@@ -671,6 +680,14 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
     }
     private void OnInputFieldPrefixEndEdit(string value)
     {
+    }
+    private void OnButtonMotionEditClick()
+    {
+        MEEditUI.Instance.SetData(MEEditUI.MEEditType.Motion, GetModelJsonPaths());
+    }
+    private void OnButtonExpressionEditClick()
+    {
+        MEEditUI.Instance.SetData(MEEditUI.MEEditType.Expression, GetModelJsonPaths());
     }
     private void OnToggleIncludeChildrenChange(bool value)
     {
@@ -719,6 +736,7 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
     protected override void OnPageShown()
     {
         UIEventBus.AddListener(UIEventType.OnModelChanged, RefreshAll);
+        useCurrentModel = m_toggleCurrentModel.isOn;
         RefreshAll();
 
         base.OnPageShown();
@@ -733,13 +751,13 @@ public class PageNavTools_Motions : UIPageWidget<PageNavTools_Motions>
 
     private void RefreshAll()
     {
-        if (MainControl.Instance.curTarget == null || !m_lblCurentModelName)
+        if (MainControl.Instance.curTarget == null || !m_lblCurrentModelName)
         {
-            m_lblCurentModelName.text = "当前模型: 无";
+            m_lblCurrentModelName.text = "当前模型: 无";
         }
         else
         {
-            m_lblCurentModelName.text = $"当前模型: {MainControl.Instance.curTarget.Name}";
+            m_lblCurrentModelName.text = $"当前模型: {MainControl.Instance.curTarget.Name}";
         }
     }
 

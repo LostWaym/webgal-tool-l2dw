@@ -555,4 +555,25 @@ public static class L2DWUtils
         scroll.normalizedPosition = new Vector2(0, 1);
         scroll.velocity = Vector2.zero;
     }
+
+    public static string GetFileFolderName(string path)
+    {
+        return Path.GetFileName(Path.GetDirectoryName(path));
+    }
+
+    public static string GetModelDefaultMetaName(string filepath)
+    {
+        if (MainControl.UseFileNameAsMetaName)
+        {
+            return Path.GetFileNameWithoutExtension(filepath);
+        }
+        return GetFileFolderName(filepath);
+    }
+
+    public static List<T> FilterItems<T>(List<T> items, Func<T, string> getName, string filter)
+    {
+        var filters = filter.Split(' ').Where(s => !string.IsNullOrEmpty(s)).Select(s => s.ToLower());
+        items = items.Where(x => filters.All(f => getName(x).ToLower().Contains(f))).ToList();
+        return items;
+    }
 }
