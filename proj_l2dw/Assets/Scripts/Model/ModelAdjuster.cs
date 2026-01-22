@@ -42,6 +42,8 @@ public class ModelAdjuster : ModelAdjusterBase
         get => rootScale;
     }
 
+    public ModelExtraData extraData = new();
+
     public override Transform MainPos => webgalPoses[0].transform;
     public override int ModelCount => webgalPoses.Count;
 
@@ -84,6 +86,27 @@ public class ModelAdjuster : ModelAdjusterBase
             {
                 var model = pos.model;
                 model.ReloadTexturesIfDirty();
+            }
+        }
+    }
+
+    private const string PARAM_ANGLE_X = "PARAM_ANGLE_X";
+    private const string PARAM_ANGLE_Y = "PARAM_ANGLE_Y";
+    private void OnModelDisplayParamSet(MyGOLive2DEx model)
+    {
+        if (extraData.enableFocus)
+        {
+            emotionEditor.list.paramInfoDict.TryGetValue("PARAM_ANGLE_X", out var paramInfoX);
+            emotionEditor.list.paramInfoDict.TryGetValue("PARAM_ANGLE_Y", out var paramInfoY);
+            if (paramInfoX != null)
+            {
+                var value = L2DWUtils.Remap(extraData.focusData.x, -1, 1, paramInfoX.min, paramInfoX.max);
+                model.Live2DModel.addToParamFloat("PARAM_ANGLE_X", value);
+            }
+            if (paramInfoY != null)
+            {
+                var value = L2DWUtils.Remap(extraData.focusData.y, -1, 1, paramInfoY.min, paramInfoY.max);
+                model.Live2DModel.addToParamFloat("PARAM_ANGLE_Y", value);
             }
         }
     }
@@ -412,6 +435,8 @@ public class ModelAdjuster : ModelAdjusterBase
 
             pos.transform.SetParent(pivot);
             pos.gameObject.SetActive(true);
+
+            model.onModelDisplayParamSet += OnModelDisplayParamSet;
             return pos;
         }
 
@@ -758,5 +783,97 @@ public class ModelAdjuster : ModelAdjusterBase
         var absolutePath = meta.temp_filePath;
 
         return L2DWUtils.GetTemplatePath(absolutePath, false);
+    }
+
+    #region ExtraData
+
+    public void ApplyExtraData()
+    {
+        extraData.focusData.x = Mathf.Clamp(extraData.focusData.x, -1, 1);
+        extraData.focusData.y = Mathf.Clamp(extraData.focusData.y, -1, 1);
+    }
+
+    #endregion
+}
+
+public class ModelExtraData
+{
+    /// <summary>
+    /// 数据结构：角色眨眼相关数据。单位均为毫秒。
+    /// </summary>
+    [Serializable]
+    public class BlinkData
+    {
+        /// <summary>
+        /// 眨眼间隔，单位毫秒，默认值24小时(24*60*60*1000)
+        /// </summary>
+        public int blinkInterval = 24 * 60 * 60 * 1000;
+
+        /// <summary>
+        /// 眨眼间隔随机值，单位毫秒，默认值1000
+        /// </summary>
+        public int blinkIntervalRandom = 1000;
+
+        /// <summary>
+        /// 闭眼持续时间，单位毫秒，默认值100
+        /// </summary>
+        public int closingDuration = 100;
+
+        /// <summary>
+        /// 闭眼时间，单位毫秒，默认值50
+        /// </summary>
+        public int closedDuration = 50;
+
+        /// <summary>
+        /// 睁眼持续时间，单位毫秒，默认值150
+        /// </summary>
+        public int openingDuration = 150;
+    }
+
+    /// <summary>
+    /// 数据结构：角色注视点相关数据。
+    /// </summary>
+    [Serializable]
+    public class FocusData
+    {
+        /// <summary>
+        /// 注视点的 x 坐标，范围 -1 到 1，默认值 0
+        /// </summary>
+        public float x = 0f;
+
+        /// <summary>
+        /// 注视点的 y 坐标，范围 -1 到 1，默认值 0
+        /// </summary>
+        public float y = 0f;
+
+        /// <summary>
+        /// 是否立即转向注视点，默认值 false
+        /// </summary>
+        public bool instant = false;
+    }
+
+    public bool enableBlink = false;
+    public bool enableFocus = false;
+    public BlinkData blinkData = new();
+    public FocusData focusData = new();
+
+    public string GetBlinkDataJson()
+    {
+        var json = new JSONObject();
+        json.AddField("blinkInterval", blinkData.blinkInterval);
+        json.AddField("blinkIntervalRandom", blinkData.blinkIntervalRandom);
+        json.AddField("closingDuration", blinkData.closingDuration);
+        json.AddField("closedDuration", blinkData.closedDuration);
+        json.AddField("openingDuration", blinkData.openingDuration);
+        return json.ToString();
+    }
+
+    public string GetFocusDataJson()
+    {
+        var json = new JSONObject();
+        json.AddField("x", focusData.x);
+        json.AddField("y", focusData.y);
+        json.AddField("instant", focusData.instant);
+        return json.ToString();
     }
 }

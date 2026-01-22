@@ -43,6 +43,8 @@ public class MyGOLive2DEx : MonoBehaviour
     // Live2D模型的边界框
     // Todo：应当找一个更合理的方式来获取模型的边界框
     public float[] live2dBounds = new float[] { 0, 0, 0, 0 }; // left, top, right, bottom
+
+    public Action<MyGOLive2DEx> onModelDisplayParamSet = null;
     
     public void LoadConfig(MygoConfig config)
     {
@@ -233,6 +235,7 @@ public class MyGOLive2DEx : MonoBehaviour
             EmotionEditorUpdate();
         else if (displayMode == ModelDisplayMode.MotionEditor)
             MotionUpdate();
+            
     }
 
     private void NormalUpdate()
@@ -252,6 +255,8 @@ public class MyGOLive2DEx : MonoBehaviour
         double t = timeSec * 2 * Math.PI;
         live2DModel.setParamFloat("PARAM_BREATH", (float)(0.5f + 0.5f * Math.Sin(t / 3.0)));
         speakTween.Update(live2DModel);
+
+        onModelDisplayParamSet?.Invoke(this);
 
         live2DModel.update();
     }
@@ -368,6 +373,7 @@ public class Live2DParamInfo
 public class Live2DParamInfoList
 {
     public List<Live2DParamInfo> list = new List<Live2DParamInfo>();
+    public Dictionary<string, Live2DParamInfo> paramInfoDict = new Dictionary<string, Live2DParamInfo>();
     public Dictionary<string, float> paramDefDict = new Dictionary<string, float>();
     public Dictionary<string, float> realParamDefDict = new Dictionary<string, float>();
 
@@ -384,13 +390,15 @@ public class Live2DParamInfoList
 
             var paramIndex = context.getParamIndex(paramID);
             var param = context.getParamFloat(paramIndex);
-            list.Add(new Live2DParamInfo()
+            var paramInfo = new Live2DParamInfo()
             {
                 name = paramID.ToString(),
                 min = context.getParamMin(paramIndex),
                 max = context.getParamMax(paramIndex),
                 value = param,
-            });
+            };
+            list.Add(paramInfo);
+            paramInfoDict[paramID.ToString()] = paramInfo;
             paramDefDict.Add(paramID.ToString(), param);
         }
     }
@@ -419,13 +427,15 @@ public class Live2DParamInfoList
 
                 var paramIndex = context.getParamIndex(paramID);
                 var param = context.getParamFloat(paramIndex);
-                list.Add(new Live2DParamInfo()
+                var paramInfo = new Live2DParamInfo()
                 {
                     name = paramID.ToString(),
                     min = context.getParamMin(paramIndex),
                     max = context.getParamMax(paramIndex),
                     value = param,
-                });
+                };
+                list.Add(paramInfo);
+                paramInfoDict[paramID.ToString()] = paramInfo;
                 paramDefDict.Add(paramID.ToString(), param);
                 realParamDefDict.Add(paramID.ToString(), param);
             }

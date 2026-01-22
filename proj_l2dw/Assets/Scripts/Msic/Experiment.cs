@@ -196,7 +196,7 @@ public class CommandInfo
 {
     public string command;
     public string commandParam;
-    public Dictionary<string, string> otherParameters;
+    public Dictionary<string, string> otherParameters = new Dictionary<string, string>();
 
     public bool HasParameter(string key)
     {
@@ -218,21 +218,33 @@ public class CommandInfo
         otherParameters.Remove(key);
     }
 
+    public void RemoveEmptyParameter()
+    {
+        otherParameters.ToList().Where(p => string.IsNullOrWhiteSpace(p.Value)).ToList().ForEach(p => RemoveParameter(p.Key));
+    }
+
     public string GetInstruction()
     {
         var list = otherParameters.ToList();
 
-        string GetParamString(string key, string value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                return $"-{key}";
-            }
-
-            return $"-{key}={value}";
-        }
 
         var paramStr = string.Join(" ", list.Select(p => GetParamString(p.Key, p.Value)));
         return $"{command}:{commandParam} {paramStr};";
+    }
+
+    public string GetParamText()
+    {
+        var list = otherParameters.ToList();
+        var paramStr = string.Join(" ", list.Select(p => GetParamString(p.Key, p.Value)));
+        return $"{paramStr}";
+    }
+    string GetParamString(string key, string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return $"-{key}";
+        }
+
+        return $"-{key}={value}";
     }
 }

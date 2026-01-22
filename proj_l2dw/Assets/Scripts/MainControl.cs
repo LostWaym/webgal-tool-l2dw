@@ -484,13 +484,37 @@ public class MainControl : MonoBehaviour
         StringBuilder commands = new StringBuilder();
         if (motion)
         {
+            CommandInfo motionCommandInfo = new CommandInfo();
+            motionCommandInfo.SetParameter("bounds", curTarget.GetBoundsText());
+            if (!string.IsNullOrEmpty(curTarget.curMotionName))
+            {
+                motionCommandInfo.SetParameter("motion", curTarget.curMotionName);
+            }
+            if (!string.IsNullOrEmpty(curTarget.curExpName))
+            {
+                motionCommandInfo.SetParameter("expression", curTarget.curExpName);
+            }
+            if (curTarget is ModelAdjuster modelAdjuster)
+            {
+                if (modelAdjuster.extraData.enableBlink)
+                {
+                    motionCommandInfo.SetParameter("blink", modelAdjuster.extraData.GetBlinkDataJson());
+                }
+                if (modelAdjuster.extraData.enableFocus)
+                {
+                    motionCommandInfo.SetParameter("focus", modelAdjuster.extraData.GetFocusDataJson());
+                }
+            }
+            motionCommandInfo.RemoveEmptyParameter();
+            var motionText = motionCommandInfo.GetParamText();
+
             var format = curTarget.MotionTemplate;
-            var output = format.Replace("%me%", curTarget.GetMotionExpressionParamsText());
+            var output = format.Replace("%me%", motionText.Trim());
             output = output.Replace("%path%", curTarget.GetPathText(0));
             output = output.Replace("%conf_path%", curTarget.GetConfPathText());
             for (int i = 0; i < curTarget.ModelCount; i++)
             {
-                output = output.Replace($"%me_{i}%", curTarget.GetMotionExpressionParamsText());
+                output = output.Replace($"%me_{i}%", motionText);
                 output = output.Replace($"%path_{i}%", curTarget.GetPathText(i));
             }
             commands.AppendLine(output);
@@ -521,18 +545,39 @@ public class MainControl : MonoBehaviour
             return;
         }
 
+        CommandInfo commandInfo = new CommandInfo();
+        commandInfo.SetParameter("transform", GetTransformTextTarget(curTarget));
+        commandInfo.SetParameter("bounds", curTarget.GetBoundsText());
+        if (!string.IsNullOrEmpty(curTarget.curMotionName))
+        {
+            commandInfo.SetParameter("motion", curTarget.curMotionName);
+        }
+        if (!string.IsNullOrEmpty(curTarget.curExpName))
+        {
+            commandInfo.SetParameter("expression", curTarget.curExpName);
+        }
+        if (curTarget is ModelAdjuster modelAdjuster)
+        {
+            if (modelAdjuster.extraData.enableBlink)
+            {
+                commandInfo.SetParameter("blink", modelAdjuster.extraData.GetBlinkDataJson());
+            }
+            if (modelAdjuster.extraData.enableFocus)
+            {
+                commandInfo.SetParameter("focus", modelAdjuster.extraData.GetFocusDataJson());
+            }
+        }
+        commandInfo.RemoveEmptyParameter();
+        var meText = commandInfo.GetParamText();
+
         var format = curTarget.MotionTemplate;
-        var motionExpressionString = curTarget.GetMotionExpressionParamsText();
-        var transformString = $" -transform={GetTransformTextTarget(curTarget)}";
-        var boundsString = curTarget.GetBoundsText() != "" ? $" -bounds={curTarget.GetBoundsText()}" : "";
-        var meText = motionExpressionString + transformString + boundsString;
         var output = format.Replace("%me%", meText.Trim());
         output = output.Replace("%path%", curTarget.GetPathText(0));
         output = output.Replace("%conf_path%", curTarget.GetConfPathText());
         for (int i = 0; i < curTarget.ModelCount; i++)
         {
-            var subModelTransformString = $" -transform={GetTransformTextTarget(curTarget, i)}";
-            var subMeText = motionExpressionString + subModelTransformString + boundsString;
+            commandInfo.SetParameter("transform", GetTransformTextTarget(curTarget, i));
+            var subMeText = commandInfo.GetParamText();
             output = output.Replace($"%me_{i}%", subMeText.Trim());
             output = output.Replace($"%path_{i}%", curTarget.GetPathText(i));
         }

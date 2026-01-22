@@ -62,4 +62,5 @@ public enum UIEventType
     OnModelChanged,
     OnModelDeleted,
     OnModificationSelectedIndexesChanged,
+    ShowCharaBlinkFocus,
 }

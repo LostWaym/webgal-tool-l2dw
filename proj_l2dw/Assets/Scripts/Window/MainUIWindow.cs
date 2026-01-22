@@ -1095,10 +1095,12 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
     private Transform m_itemPosY;
     private Transform m_itemScale;
     private Transform m_itemRotation;
+    private Button m_btnExtraParam;
     private Button m_btnReloadModel;
     private Button m_btnReloadTexture;
     private Button m_btnOpenModelPath;
     private Toggle m_toggleAutoReloadTexture;
+    private Transform m_itemCharaBlinkFocus;
     #endregion
 
     #region auto generated binders
@@ -1123,10 +1125,12 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         m_itemPosY = transform.Find("Properties/Container/m_itemPosY").GetComponent<Transform>();
         m_itemScale = transform.Find("Properties/Container/m_itemScale").GetComponent<Transform>();
         m_itemRotation = transform.Find("Properties/Container/m_itemRotation").GetComponent<Transform>();
+        m_btnExtraParam = transform.Find("Properties/Container/GameObject (2)/m_btnExtraParam").GetComponent<Button>();
         m_btnReloadModel = transform.Find("Properties/Container/GameObject/m_btnReloadModel").GetComponent<Button>();
         m_btnReloadTexture = transform.Find("Properties/Container/GameObject/m_btnReloadTexture").GetComponent<Button>();
         m_btnOpenModelPath = transform.Find("Properties/Container/GameObject/m_btnOpenModelPath").GetComponent<Button>();
         m_toggleAutoReloadTexture = transform.Find("Properties/Container/m_toggleAutoReloadTexture").GetComponent<Toggle>();
+        m_itemCharaBlinkFocus = transform.Find("m_itemCharaBlinkFocus").GetComponent<Transform>();
 
         m_btnLoadConf.onClick.AddListener(OnButtonLoadConfClick);
         m_btnLoadJson.onClick.AddListener(OnButtonLoadJsonClick);
@@ -1140,6 +1144,7 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         m_btnDown.onClick.AddListener(OnButtonDownClick);
         m_btnSaveTransform.onClick.AddListener(OnButtonSaveTransformClick);
         m_btnLoadTransform.onClick.AddListener(OnButtonLoadTransformClick);
+        m_btnExtraParam.onClick.AddListener(OnButtonExtraParamClick);
         m_btnReloadModel.onClick.AddListener(OnButtonReloadModelClick);
         m_btnReloadTexture.onClick.AddListener(OnButtonReloadTextureClick);
         m_btnOpenModelPath.onClick.AddListener(OnButtonOpenModelPathClick);
@@ -1215,6 +1220,11 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         TransformCopyUI.Instance.Show();
     }
 
+    public void OnButtonExtraParamClick()
+    {
+        UIEventBus.SendEvent(UIEventType.ShowCharaBlinkFocus);
+    }
+
     public void OnButtonReloadModelClick()
     {
         var model = MainControl.Instance.curTarget;
@@ -1260,6 +1270,8 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
     private List<CharaItemWidget> m_listChara = new List<CharaItemWidget>();
     private PageCharaFunctions m_pageCharaFunctions;
 
+    private CharaBlinkFocus m_charaBlinkFocus;
+
     protected override void OnInit()
     {
         base.OnInit();
@@ -1275,6 +1287,8 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         m_liptScale.SetDataSubmit(OnScaleSubmit);
         m_liptScale.SetToggleChange(OnFlipChange);
         m_liptRotation.SetDataSubmit(OnRotationSubmit);
+
+        m_charaBlinkFocus = CharaBlinkFocus.CreateWidget(m_itemCharaBlinkFocus.gameObject);
     }
 
     protected override void OnPageShown()
@@ -1288,6 +1302,8 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
 
         UIEventBus.AddListener(UIEventType.LockXChanged, OnLockXChanged);
         UIEventBus.AddListener(UIEventType.LockYChanged, OnLockYChanged);
+
+        UIEventBus.AddListener(UIEventType.ShowCharaBlinkFocus, OnShowCharaBlinkFocus);
 
         MainControl.Instance.editType = EditType.Model;
 
@@ -1305,6 +1321,22 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
 
         UIEventBus.RemoveListener(UIEventType.LockXChanged, OnLockXChanged);
         UIEventBus.RemoveListener(UIEventType.LockYChanged, OnLockYChanged);
+
+        UIEventBus.RemoveListener(UIEventType.ShowCharaBlinkFocus, OnShowCharaBlinkFocus);
+    }
+
+    private void OnShowCharaBlinkFocus()
+    {
+        var model = MainControl.Instance.curTarget;
+        if (model != null && model is ModelAdjuster modelAdjuster)
+        {
+            m_charaBlinkFocus.gameObject.SetActive(true);
+            m_charaBlinkFocus.SetTargetModel(modelAdjuster);
+        }
+        else
+        {
+            m_charaBlinkFocus.gameObject.SetActive(false);
+        }
     }
 
     public void SetTargetZSort(bool isUp, bool isFinal)
