@@ -10,6 +10,7 @@ using Klak.Spout;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.Text.RegularExpressions;
 
 public class MainControl : MonoBehaviour
 {
@@ -484,40 +485,67 @@ public class MainControl : MonoBehaviour
         StringBuilder commands = new StringBuilder();
         if (motion)
         {
-            CommandInfo motionCommandInfo = new CommandInfo();
-            motionCommandInfo.SetParameter("bounds", curTarget.GetBoundsText());
-            if (!string.IsNullOrEmpty(curTarget.curMotionName))
+            bool visible = curTarget.gameObject.activeInHierarchy;
+            if (visible)
             {
-                motionCommandInfo.SetParameter("motion", curTarget.curMotionName);
-            }
-            if (!string.IsNullOrEmpty(curTarget.curExpName))
-            {
-                motionCommandInfo.SetParameter("expression", curTarget.curExpName);
-            }
-            if (curTarget is ModelAdjuster modelAdjuster)
-            {
-                if (modelAdjuster.extraData.enableBlink)
+                CommandInfo motionCommandInfo = new CommandInfo();
+                motionCommandInfo.SetParameter("bounds", curTarget.GetBoundsText());
+                if (!string.IsNullOrEmpty(curTarget.curMotionName))
                 {
-                    motionCommandInfo.SetParameter("blink", modelAdjuster.extraData.GetBlinkDataJson());
+                    motionCommandInfo.SetParameter("motion", curTarget.curMotionName);
                 }
-                if (modelAdjuster.extraData.enableFocus)
+                if (!string.IsNullOrEmpty(curTarget.curExpName))
                 {
-                    motionCommandInfo.SetParameter("focus", modelAdjuster.extraData.GetFocusDataJson());
+                    motionCommandInfo.SetParameter("expression", curTarget.curExpName);
                 }
-            }
-            motionCommandInfo.RemoveEmptyParameter();
-            var motionText = motionCommandInfo.GetParamText();
+                if (curTarget is ModelAdjuster modelAdjuster)
+                {
+                    if (modelAdjuster.extraData.enableBlink)
+                    {
+                        motionCommandInfo.SetParameter("blink", modelAdjuster.extraData.GetBlinkDataJson());
+                    }
+                    if (modelAdjuster.extraData.enableFocus)
+                    {
+                        motionCommandInfo.SetParameter("focus", modelAdjuster.extraData.GetFocusDataJson());
+                    }
+                }
+                motionCommandInfo.RemoveEmptyParameter();
+                var motionText = motionCommandInfo.GetParamText();
 
-            var format = curTarget.MotionTemplate;
-            var output = format.Replace("%me%", motionText.Trim());
-            output = output.Replace("%path%", curTarget.GetPathText(0));
-            output = output.Replace("%conf_path%", curTarget.GetConfPathText());
-            for (int i = 0; i < curTarget.ModelCount; i++)
-            {
-                output = output.Replace($"%me_{i}%", motionText);
-                output = output.Replace($"%path_{i}%", curTarget.GetPathText(i));
+                var format = curTarget.MotionTemplate;
+                var output = format.Replace("%me%", motionText.Trim());
+                output = output.Replace("%path%", curTarget.GetPathText(0));
+                output = output.Replace("%conf_path%", curTarget.GetConfPathText());
+                for (int i = 0; i < curTarget.ModelCount; i++)
+                {
+                    output = output.Replace($"%me_{i}%", motionText);
+                    output = output.Replace($"%path_{i}%", curTarget.GetPathText(i));
+                }
+                commands.AppendLine(output);
             }
-            commands.AppendLine(output);
+            else
+            {
+                var formatString = curTarget.MotionTemplate;
+                var formats = formatString.Split(new char[]{'\n','\r'}, StringSplitOptions.RemoveEmptyEntries);
+                // 检测并移除所有%xxx%的文本
+                Regex regex = new Regex(@"%[^%]+%");
+                string RemovePercentPlaceholders(string input)
+                {
+                    return regex.Replace(input, "");
+                }
+                foreach (var format in formats)
+                {
+                    var commandInfo = Experiment.Parse(RemovePercentPlaceholders(format));
+                    if (commandInfo.command == "changeFigure")
+                    {
+                        commandInfo.commandParam = "";
+                        commandInfo.otherParameters.Where(p => p.Key != "id").ToList().ForEach(p => commandInfo.otherParameters.Remove(p.Key));
+                        var id = commandInfo.GetParameter("id");
+                        commandInfo.SetParameter("id", id.Trim());
+                        commands.AppendLine(commandInfo.GetInstruction());
+                    }
+                }
+            }
         }
         if (transform)
         {
