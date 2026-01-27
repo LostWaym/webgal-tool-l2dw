@@ -142,6 +142,7 @@ public class CharaBlinkFocus : UIItemWidget<CharaBlinkFocus>
     {
         m_touchFocus._OnPointerDown += OnTouchFocusPointerDown;
         m_touchFocus._OnDrag += OnTouchFocusDrag;
+        m_touchFocus._OnScroll += OnTouchFocusScroll;
     }
 
     private void OnTouchFocusPointerDown(PointerEventData eventData)
@@ -152,13 +153,23 @@ public class CharaBlinkFocus : UIItemWidget<CharaBlinkFocus>
         var y = Mathf.Clamp(localPos.y, rect.yMin, rect.yMax);
         x /= rect.width * 0.5f;
         y /= rect.height * 0.5f;
-        modelAdjuster.extraData.focusData.x = x;
-        modelAdjuster.extraData.focusData.y = y;
+        // 保留三位小数
+        modelAdjuster.extraData.focusData.x = Mathf.Round(x * 1000f) / 1000f;
+        modelAdjuster.extraData.focusData.y = Mathf.Round(y * 1000f) / 1000f;
         OnSetFieldSuccess();
     }
     private void OnTouchFocusDrag(PointerEventData eventData)
     {
         OnTouchFocusPointerDown(eventData);
+    }
+
+    private void OnTouchFocusScroll(PointerEventData eventData)
+    {
+        ExecuteEvents.ExecuteHierarchy<IScrollHandler>(
+            m_touchFocus.transform.parent.gameObject,
+            eventData,
+            ExecuteEvents.scrollHandler
+        );
     }
 
     private ModelAdjuster modelAdjuster;
