@@ -89,25 +89,17 @@ public class ModelAdjuster : ModelAdjusterBase
             }
         }
     }
-
-    private const string PARAM_ANGLE_X = "PARAM_ANGLE_X";
-    private const string PARAM_ANGLE_Y = "PARAM_ANGLE_Y";
+    
     private void OnModelDisplayParamSet(MyGOLive2DEx model)
     {
         if (extraData.enableFocus)
         {
-            emotionEditor.list.paramInfoDict.TryGetValue("PARAM_ANGLE_X", out var paramInfoX);
-            emotionEditor.list.paramInfoDict.TryGetValue("PARAM_ANGLE_Y", out var paramInfoY);
-            if (paramInfoX != null)
-            {
-                var value = L2DWUtils.Remap(extraData.focusData.x, -1, 1, paramInfoX.min, paramInfoX.max);
-                model.Live2DModel.addToParamFloat("PARAM_ANGLE_X", value);
-            }
-            if (paramInfoY != null)
-            {
-                var value = L2DWUtils.Remap(extraData.focusData.y, -1, 1, paramInfoY.min, paramInfoY.max);
-                model.Live2DModel.addToParamFloat("PARAM_ANGLE_Y", value);
-            }
+            model.Live2DModel.addToParamFloat("PARAM_EYE_BALL_X", extraData.focusData.x);
+            model.Live2DModel.addToParamFloat("PARAM_EYE_BALL_Y", extraData.focusData.y);
+            model.Live2DModel.addToParamFloat("PARAM_ANGLE_X", extraData.focusData.x * 30.0f);
+            model.Live2DModel.addToParamFloat("PARAM_ANGLE_Y", extraData.focusData.y * 30.0f);
+            model.Live2DModel.addToParamFloat("PARAM_ANGLE_Z", extraData.focusData.x * extraData.focusData.y * -30.0f);
+            model.Live2DModel.addToParamFloat("PARAM_BODY_ANGLE_X", extraData.focusData.x * 10.0f);
         }
     }
 
