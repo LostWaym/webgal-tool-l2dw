@@ -67,14 +67,36 @@ Material:
     m_Floats:
     - PixelSnap: 0
     - _Alpha: 1
+    - _Bevel: 0
+    - _BevelBlue: 255
+    - _BevelFilterLegacy: 0
+    - _BevelFilterSoftness: 0
+    - _BevelGreen: 255
+    - _BevelRed: 255
+    - _BevelRotation: 0
+    - _BevelSoftness: 0
+    - _BevelThickness: 0
+    - _Bloom: 0
+    - _BloomBlur: 0
+    - _BloomBrightness: 1
+    - _BloomFilterBlur: 0
+    - _BloomThreshold: 0
     - _Blur: 2.93
+    - _BlurFilter: 0
     - _BlurSampleScaleX: 0.0061728396
     - _BlurSampleScaleY: 0.0061728396
+    - _Brightness: 1
     - _BumpScale: 1
+    - _ColorBlue: 255
+    - _ColorGreen: 255
+    - _ColorRed: 255
+    - _Contrast: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
-    - _DstBlend: 0
+    - _DstAlphaBlend: 10
+    - _DstBlend: 10
     - _EnableExternalAlpha: 0
+    - _Gamma: 1
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -82,9 +104,13 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _SampleScaleX: 1
+    - _SampleScaleY: 1
+    - _Saturation: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
-    - _SrcBlend: 1
+    - _SrcAlphaBlend: 1
+    - _SrcBlend: 5
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:

@@ -4,6 +4,13 @@ Shader "Webgal/WebgalContainer"
     {
         [HideInInspector] _MainTex ("Texture", 2D) = "white" {}
         
+        [KeywordEnum(Normal, Add, Multiply, Screen)] _BlendMode ("BlendMode", Float) = 0
+        
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("SrcBlend", Float) = 5
+        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("DstBlend", Float) = 10
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcAlphaBlend ("SrcAlphaBlend", Float) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)] _DstAlphaBlend ("DstAlphaBlend", Float) = 10
+        
         _SampleScaleX ("SampleScaleX", Float) = 1
         _SampleScaleY ("SampleScaleY", Float) = 1
         
@@ -42,7 +49,7 @@ Shader "Webgal/WebgalContainer"
             "Queue"="Transparent"
         }
         LOD 100
-        Blend SrcAlpha OneMinusSrcAlpha
+        Blend [_SrcBlend] [_DstBlend], [_SrcAlphaBlend] [_DstAlphaBlend]
         ZWrite Off
         ZTest LEqual
         Cull Off
@@ -54,6 +61,7 @@ Shader "Webgal/WebgalContainer"
             #pragma fragment frag
             // make fog work
             #pragma multi_compile_fog
+            #pragma multi_compile _BLEND_MODE_NORMAL _BLEND_MODE_ADD _BLEND_MODE_MULTIPLY _BLEND_MODE_SCREEN
 
             #include "UnityCG.cginc"
             #include "Library/AlphaFilter.cginc"
@@ -91,10 +99,17 @@ Shader "Webgal/WebgalContainer"
                 col = ApplyBlurFilter(i.uv);
                 col = ApplyAlphaFilter(col);
 
-                col.rgb = pow(col.rgb, 2.0);
+                // col.rgb = pow(col.rgb, 2.0);
                 
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
+                
+                #if defined(_BLEND_MODE_MULTIPLY)
+                    col.rgb = lerp(1, col.rgb, col.a);
+                #elif defined(_BLEND_MODE_SCREEN)
+                    col.rgb *= col.a;
+                #endif
+                
                 return col;
             }
             ENDCG

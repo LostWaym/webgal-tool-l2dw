@@ -39,6 +39,66 @@ public static class FilterUtils
         }
     }
 
+    public static void UpdateBlendMode(Material mat, WebgalBlendMode blendMode)
+    {
+        mat.DisableKeyword("_BLEND_MODE_NORMAL");
+        mat.DisableKeyword("_BLEND_MODE_ADD");
+        mat.DisableKeyword("_BLEND_MODE_MULTIPLY");
+        mat.DisableKeyword("_BLEND_MODE_SCREEN");
+        
+        switch (blendMode)
+        {
+            // 暂时和 Normal 一样处理
+            case WebgalBlendMode.DontChange:
+            case WebgalBlendMode.Normal:
+            {
+                mat.EnableKeyword("_BLEND_MODE_NORMAL");
+                mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                mat.SetInt("_SrcAlphaBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                mat.SetInt("_DstAlphaBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                break;
+            }
+            case WebgalBlendMode.Add:
+            {
+                mat.EnableKeyword("_BLEND_MODE_ADD");
+                mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                mat.SetInt("_SrcAlphaBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                mat.SetInt("_DstAlphaBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                break;
+            }
+            case WebgalBlendMode.Multiply:
+            {
+                mat.EnableKeyword("_BLEND_MODE_MULTIPLY");
+                mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.DstColor);
+                mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                mat.SetInt("_SrcAlphaBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                mat.SetInt("_DstAlphaBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                break;
+            }
+            case WebgalBlendMode.Screen:
+            {
+                mat.EnableKeyword("_BLEND_MODE_SCREEN");
+                mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcColor);
+                mat.SetInt("_SrcAlphaBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                mat.SetInt("_DstAlphaBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                break;
+            }
+            default:
+            {
+                Debug.LogWarning($"未支持的混合模式: {blendMode}");
+                mat.EnableKeyword("_BLEND_MODE_NORMAL");
+                mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                mat.SetInt("_SrcAlphaBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                mat.SetInt("_DstAlphaBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                break;
+            }
+        }
+    }
+
     public static void UpdateAlphaFilter(Material mat, FilterSetData filterSetData)
     {
         mat.SetFloat("_Alpha", filterSetData.Alpha);

@@ -15,7 +15,7 @@ fixed4 ApplyAdjustmentFilter(float2 rawUv)
 {
     fixed4 tex = tex2D(_MainTex, rawUv);
     // 第一次矫正
-    tex.rgb = pow(tex.rgb, 1.0 / 2.0);
+    // tex.rgb = pow(tex.rgb, 1.0 / 2.0);
     
     float3 rgb = pow(tex.rgb, 1.0 / _Gamma);
     float s = dot(float3(0.2125, 0.7154, 0.0721), rgb);

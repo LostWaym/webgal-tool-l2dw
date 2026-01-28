@@ -73,6 +73,13 @@ public class ModelAdjuster : ModelAdjusterBase
     {
         this.canvasHackField =
             typeof(Canvas).GetField("willRenderCanvases", BindingFlags.NonPublic | BindingFlags.Static);
+        
+        onBlendModeChanged += OnBlendModeChanged;
+    }
+
+    private void OnDestroy()
+    {
+        onBlendModeChanged -= OnBlendModeChanged;
     }
 
     private float m_nextRefreshTime = 0;
@@ -634,6 +641,12 @@ public class ModelAdjuster : ModelAdjusterBase
     }
 
     #region 滤镜
+    
+    public void OnBlendModeChanged(WebgalBlendMode oldValue, WebgalBlendMode newValue)
+    {
+        var mat = MainModel.meshRenderer.material;
+        FilterUtils.UpdateBlendMode(mat, newValue);
+    }
 
     public override void OnFilterSetDataChanged(FilterProperty property)
     {
@@ -693,6 +706,12 @@ public class ModelAdjuster : ModelAdjusterBase
         }
 
         FilterUtils.UpdateScreenParams(mat, modelAspect, RootScaleValue, pivotScale, false);
+    }
+    
+    private void UpdateBlendMode()
+    {
+        var mat = MainModel.meshRenderer.material;
+        FilterUtils.UpdateBlendMode(mat, blendMode);
     }
 
     private void UpdateAlphaFilter()

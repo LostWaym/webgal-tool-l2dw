@@ -145,15 +145,15 @@ Shader "UI/ColorPicker"
 
 #if _MODE_SV_RECT
                 float3 tempRgb = HsvToRgb(_Hue, IN.texcoord.x, IN.texcoord.y);
-                tempRgb = pow(tempRgb, 2.2);
+                // tempRgb = pow(tempRgb, 2.2);
                 color.rgb = tempRgb;
 #elif _MODE_HUE_BAR
                 float3 tempRgb = HsvToRgb(IN.texcoord.x, 1.0, 1.0);
-                tempRgb = pow(tempRgb, 2.2);
+                // tempRgb = pow(tempRgb, 2.2);
                 color.rgb = tempRgb;
 #elif _MODE_DRAGGER
                 float3 tempRgb = HsvToRgb(_Hue, _Saturation, _Value);
-                tempRgb = pow(tempRgb, 2.2);
+                // tempRgb = pow(tempRgb, 2.2);
                 color.rgb = tempRgb;
 
                 float normalizedSphere = length(IN.texcoord - float2(0.5, 0.5)) * 2.0;

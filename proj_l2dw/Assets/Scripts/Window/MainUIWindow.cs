@@ -1694,6 +1694,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
 {
     private ModelAdjusterBase m_model;
     private BGContainer m_bgContainer;
+    private WebgalBlendMode m_blendMode = WebgalBlendMode.DontChange;
     private FilterSetData m_filterSetData;
 
 
@@ -1701,6 +1702,8 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
     private Button m_btnHelpFilter;
     private Button m_btnAddPreset;
     private Button m_btnLoadPreset;
+    private Transform m_tfBlendMode;
+    private Dropdown m_dropdownBlendMode;
     private InputField m_iptAlpha;
     private InputField m_iptBlur;
     private InputField m_iptBrightness;
@@ -1733,6 +1736,9 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_btnHelpFilter = transform.Find("Parameters/Container/Scroll/Viewport/Content/Operation/Title/m_btnHelpFilter").GetComponent<Button>();
         m_btnAddPreset = transform.Find("Parameters/Container/Scroll/Viewport/Content/Operation/Container/m_btnAddPreset").GetComponent<Button>();
         m_btnLoadPreset = transform.Find("Parameters/Container/Scroll/Viewport/Content/Operation/Container/m_btnLoadPreset").GetComponent<Button>();
+        
+        m_tfBlendMode = transform.Find("Parameters/Container/Scroll/Viewport/Content/Effect/Container/m_tfBlendMode").GetComponent<Transform>();
+        m_dropdownBlendMode = transform.Find("Parameters/Container/Scroll/Viewport/Content/Effect/Container/m_tfBlendMode/Value/m_dropdownBlendMode").GetComponent<Dropdown>();
 
         m_iptAlpha = transform.Find("Parameters/Container/Scroll/Viewport/Content/Effect/Container/透明度/Value/InputField/m_iptAlpha").GetComponent<InputField>();
         m_iptBlur = transform.Find("Parameters/Container/Scroll/Viewport/Content/Effect/Container/高斯模糊/Value/InputField/m_iptBlur").GetComponent<InputField>();
@@ -1767,6 +1773,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_btnAddPreset.onClick.AddListener(OnButtonAddPresetClick);
         m_btnLoadPreset.onClick.AddListener(OnButtonLoadPresetClick);
 
+        m_dropdownBlendMode.onValueChanged.AddListener(OnDropdownBlendModeChange);
 
         m_iptAlpha.onValueChanged.AddListener(OnInputFieldAlphaChange);
         m_iptAlpha.onEndEdit.AddListener(OnInputFieldAlphaEndEdit);
@@ -1841,6 +1848,22 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
             AskTargetApplyFilterSetData();
             RefreshFilterSet();
         });
+    }
+    
+    private void OnDropdownBlendModeChange(int value)
+    {
+        try
+        {
+            m_blendMode = (WebgalBlendMode)value;
+            if (m_model != null)
+            {
+                m_model.blendMode = m_blendMode;
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"设置混合模式失败, {ex}");
+        }
     }
 
     private void OnInputFieldAlphaChange(string value)
@@ -2162,8 +2185,11 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
             return;
         }
         m_model = model;
+        m_blendMode = model.blendMode;
         m_filterSetData = model.filterSetData;
         m_bgContainer = null;
+        RefreshBlendMode();
+        RefreshShowBlendModeOption();
         RefreshFilterSet();
     }
 
@@ -2177,6 +2203,7 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         m_filterSetData = bg.filterSetData;
         m_model = null;
         m_bgContainer = bg;
+        RefreshShowBlendModeOption();
         RefreshFilterSet();
     }
 
@@ -2202,6 +2229,24 @@ public class PageFilterSet : UIPageWidget<PageFilterSet>
         {
             m_model.UpdateAllFilter();
         }   
+    }
+    
+    private void RefreshShowBlendModeOption()
+    {
+        bool show = m_model != null;
+        m_tfBlendMode.gameObject.SetActive(show);
+    }
+
+    public void RefreshBlendMode()
+    {
+        try
+        {
+            m_dropdownBlendMode.SetValueWithoutNotify((int)m_blendMode);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"刷新混合模式失败, {e}");
+        }
     }
 
     public void RefreshFilterSet()

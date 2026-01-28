@@ -71,7 +71,7 @@ fixed4 ApplyBloomFilter(float2 rawUv)
 
     float oldBloomAlpha = bloomColor.a;
     bloomColor.rgb += (1.0 - color.a) * bloomColor.rgb / oldBloomAlpha;
-    bloomColor.a = lerp(bloomColor.a * bloomColor.a, bloomColor.a, color.a);
+    // bloomColor.a = lerp(bloomColor.a * bloomColor.a, bloomColor.a, color.a);
     // bloomColor.a = lerp(color.a, bloomColor.a, _Bloom);
     bloomColor.a = bloomColor.a * _Bloom;
     // bloomColor.a = lerp(

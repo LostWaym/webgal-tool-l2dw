@@ -508,6 +508,12 @@ public class MainControl : MonoBehaviour
                     {
                         motionCommandInfo.SetParameter("focus", modelAdjuster.extraData.GetFocusDataJson());
                     }
+                    
+                    var blendModeText = WebgalBlendModeUtils.ToString(curTarget.blendMode);
+                    if (!string.IsNullOrEmpty(blendModeText))
+                    {
+                        motionCommandInfo.SetParameter("blendMode", blendModeText);
+                    }
                 }
                 motionCommandInfo.RemoveEmptyParameter();
                 var motionText = motionCommandInfo.GetParamText();
@@ -575,6 +581,11 @@ public class MainControl : MonoBehaviour
 
         CommandInfo commandInfo = new CommandInfo();
         commandInfo.SetParameter("transform", GetTransformTextTarget(curTarget));
+        var blendModeString = WebgalBlendModeUtils.ToString(curTarget.blendMode);
+        if (!string.IsNullOrEmpty(blendModeString))
+        {
+            commandInfo.SetParameter("blendMode", blendModeString);
+        }
         commandInfo.SetParameter("bounds", curTarget.GetBoundsText());
         if (!string.IsNullOrEmpty(curTarget.curMotionName))
         {
@@ -594,6 +605,12 @@ public class MainControl : MonoBehaviour
             {
                 commandInfo.SetParameter("focus", modelAdjuster.extraData.GetFocusDataJson());
             }
+            
+            var blendModeText = WebgalBlendModeUtils.ToString(curTarget.blendMode);
+            if (!string.IsNullOrEmpty(blendModeText))
+            {
+                commandInfo.SetParameter("blendMode", blendModeText);
+            }
         }
         commandInfo.RemoveEmptyParameter();
         var meText = commandInfo.GetParamText();
@@ -605,6 +622,12 @@ public class MainControl : MonoBehaviour
         for (int i = 0; i < curTarget.ModelCount; i++)
         {
             commandInfo.SetParameter("transform", GetTransformTextTarget(curTarget, i));
+            
+            if (!string.IsNullOrEmpty(blendModeString))
+            {
+                commandInfo.SetParameter("blendMode", blendModeString);
+            }
+
             var subMeText = commandInfo.GetParamText();
             output = output.Replace($"%me_{i}%", subMeText.Trim());
             output = output.Replace($"%path_{i}%", curTarget.GetPathText(i));
@@ -749,14 +772,17 @@ public class MainControl : MonoBehaviour
         {
             if (motion)
             {
+                // 混合模式
+                var blendModeText = WebgalBlendModeUtils.ToString(curTarget.blendMode);
+                var blendModeString = !string.IsNullOrEmpty(blendModeText) ? $" -blendMode={blendModeText}" : "";
                 //动作表情
                 var format2 = model.MotionTemplate;
-                var output2 = format2.Replace("%me%", model.GetMotionExpressionParamsText());
+                var output2 = format2.Replace("%me%", model.GetMotionExpressionParamsText() + blendModeString);
                 output2 = output2.Replace("%path%", model.GetPathText(0));
                 output2 = output2.Replace("%conf_path%", model.GetConfPathText());
                 for (int i = 0; i < model.ModelCount; i++)
                 {
-                    output2 = output2.Replace($"%me_{i}%", model.GetMotionExpressionParamsText());
+                    output2 = output2.Replace($"%me_{i}%", model.GetMotionExpressionParamsText() + blendModeString);
                     output2 = output2.Replace($"%path_{i}%", model.GetPathText(i));
                 }
                 commands.AppendLine(output2);
@@ -807,15 +833,17 @@ public class MainControl : MonoBehaviour
             var format = model.MotionTemplate;
             var motionExpressionString = model.GetMotionExpressionParamsText();
             var transformString = $" -transform={GetTransformTextTarget(model)}";
+            var blendModeText = WebgalBlendModeUtils.ToString(curTarget.blendMode);
+            var blendModeString = !string.IsNullOrEmpty(blendModeText) ? $" -blendMode={blendModeText}" : "";
             var boundsString = model.GetBoundsText() != "" ? $" -bounds={curTarget.GetBoundsText()}" : "";
-            var meText = motionExpressionString + transformString + boundsString;
+            var meText = motionExpressionString + transformString + boundsString + blendModeString;
             var output = format.Replace("%me%", meText.Trim());
             output = output.Replace("%path%", model.GetPathText(0));
             output = output.Replace("%conf_path%", model.GetConfPathText());
             for (int i = 0; i < model.ModelCount; i++)
             {
                 var subModelTransformString = $" -transform={GetTransformTextTarget(model, i)}";
-                var subMeText = motionExpressionString + subModelTransformString + boundsString;
+                var subMeText = motionExpressionString + subModelTransformString + boundsString + blendModeString;
                 output = output.Replace($"%me_{i}%", subMeText.Trim());
                 output = output.Replace($"%path_{i}%", model.GetPathText(i));
             }
@@ -1240,6 +1268,7 @@ public class MainControl : MonoBehaviour
         public float scale;
         public float rotation;
         public bool reverseX;
+        public WebgalBlendMode blendMode;
         public FilterSetData filterSetData;
     }
 
@@ -1254,6 +1283,7 @@ public class MainControl : MonoBehaviour
         transformData.scale = curTarget.RootScaleValue;
         transformData.rotation = curTarget.RootRotation;
         transformData.reverseX = curTarget.ReverseXScale;
+        transformData.blendMode = curTarget.blendMode;
         transformData.filterSetData = curTarget.filterSetData.Clone();
 
         ShowDebugText("保存变换成功！");
@@ -1288,6 +1318,8 @@ public class MainControl : MonoBehaviour
 
         if (filter)
         {
+            curTarget.blendMode = transformData.blendMode;
+
             var json = new JSONObject();
             transformData.filterSetData.ApplyToJson(json);
             curTarget.filterSetData.ReadFromJson(json);

@@ -37,6 +37,16 @@ public class ImageModel : ModelAdjusterBase
     public override Transform MainPos => root;
 
     public ImageModelMeta imgMeta = new ImageModelMeta();
+    
+    private void Start()
+    {
+        onBlendModeChanged += OnBlendModeChanged;
+    }
+
+    private void OnDestroy()
+    {
+        onBlendModeChanged -= OnBlendModeChanged;
+    }
 
     public override void InitTransform(Vector3 pos, float scale, float rotation, bool reverseXScale)
     {
@@ -171,6 +181,12 @@ public class ImageModel : ModelAdjusterBase
     }
 
     #region 滤镜
+    
+    public void OnBlendModeChanged(WebgalBlendMode oldValue, WebgalBlendMode newValue)
+    {
+        var mat = spriteRenderer.material;
+        FilterUtils.UpdateBlendMode(mat, newValue);
+    }
 
     public override void OnFilterSetDataChanged(FilterProperty property)
     {

@@ -1,5 +1,6 @@
 
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -258,6 +259,23 @@ public class ModelAdjusterBase : MonoBehaviour
 
     #endregion
 
+    #region BlendMode
+
+    public Action<WebgalBlendMode, WebgalBlendMode> onBlendModeChanged;
+    private WebgalBlendMode _blendMode = WebgalBlendMode.DontChange;
+    public WebgalBlendMode blendMode
+    {
+        get => _blendMode;
+        set
+        {
+            var oldValue = _blendMode;
+            _blendMode = value;
+            onBlendModeChanged?.Invoke(oldValue, value);
+        }
+    }
+
+    #endregion
+    
     #region Filter
     public FilterSetData filterSetData = new FilterSetData();
 
