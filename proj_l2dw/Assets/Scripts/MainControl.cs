@@ -534,26 +534,7 @@ public class MainControl : MonoBehaviour
             }
             else
             {
-                var formatString = curTarget.MotionTemplate;
-                var formats = formatString.Split(new char[]{'\n','\r'}, StringSplitOptions.RemoveEmptyEntries);
-                // 检测并移除所有%xxx%的文本
-                Regex regex = new Regex(@"%[^%]+%");
-                string RemovePercentPlaceholders(string input)
-                {
-                    return regex.Replace(input, "");
-                }
-                foreach (var format in formats)
-                {
-                    var commandInfo = Experiment.Parse(RemovePercentPlaceholders(format));
-                    if (commandInfo.command == "changeFigure")
-                    {
-                        commandInfo.commandParam = "";
-                        commandInfo.otherParameters.Where(p => p.Key != "id").ToList().ForEach(p => commandInfo.otherParameters.Remove(p.Key));
-                        var id = commandInfo.GetParameter("id");
-                        commandInfo.SetParameter("id", id.Trim());
-                        commands.AppendLine(commandInfo.GetInstruction());
-                    }
-                }
+                AddHideModelInstruction(commands, curTarget);
             }
         }
         if (transform)
@@ -579,6 +560,15 @@ public class MainControl : MonoBehaviour
         if(shouldMotion && (string.IsNullOrEmpty(curTarget.curExpName) || string.IsNullOrEmpty(curTarget.curMotionName)))
         {
             ShowErrorDebugText("请先设置表情和动作");
+            return;
+        }
+
+        if (!curTarget.gameObject.activeInHierarchy)
+        {
+            StringBuilder commands = new StringBuilder();
+            AddHideModelInstruction(commands, curTarget);
+            L2DWUtils.CopyInstructionToCopyBoard(commands.ToString());
+            ShowDebugText("复制成功！");
             return;
         }
 
@@ -775,20 +765,28 @@ public class MainControl : MonoBehaviour
         {
             if (motion)
             {
-                // 混合模式
-                var blendModeText = WebgalBlendModeUtils.ToString(curTarget.blendMode);
-                var blendModeString = !string.IsNullOrEmpty(blendModeText) ? $" -blendMode={blendModeText}" : "";
-                //动作表情
-                var format2 = model.MotionTemplate;
-                var output2 = format2.Replace("%me%", model.GetMotionExpressionParamsText() + blendModeString);
-                output2 = output2.Replace("%path%", model.GetPathText(0));
-                output2 = output2.Replace("%conf_path%", model.GetConfPathText());
-                for (int i = 0; i < model.ModelCount; i++)
+                var visible = model.gameObject.activeInHierarchy;
+                if (visible)
                 {
-                    output2 = output2.Replace($"%me_{i}%", model.GetMotionExpressionParamsText() + blendModeString);
-                    output2 = output2.Replace($"%path_{i}%", model.GetPathText(i));
+                    // 混合模式
+                    var blendModeText = WebgalBlendModeUtils.ToString(model.blendMode);
+                    var blendModeString = !string.IsNullOrEmpty(blendModeText) ? $" -blendMode={blendModeText}" : "";
+                    //动作表情
+                    var format2 = model.MotionTemplate;
+                    var output2 = format2.Replace("%me%", model.GetMotionExpressionParamsText() + blendModeString);
+                    output2 = output2.Replace("%path%", model.GetPathText(0));
+                    output2 = output2.Replace("%conf_path%", model.GetConfPathText());
+                    for (int i = 0; i < model.ModelCount; i++)
+                    {
+                        output2 = output2.Replace($"%me_{i}%", model.GetMotionExpressionParamsText() + blendModeString);
+                        output2 = output2.Replace($"%path_{i}%", model.GetPathText(i));
+                    }
+                    commands.AppendLine(output2);
                 }
-                commands.AppendLine(output2);
+                else
+                {
+                    AddHideModelInstruction(commands, model);
+                }
             }
 
             if (transform)
@@ -817,6 +815,31 @@ public class MainControl : MonoBehaviour
         L2DWUtils.CopyInstructionToCopyBoard(commands.ToString());
         ShowDebugText("复制成功！");
     }
+
+    private static void AddHideModelInstruction(StringBuilder commands, ModelAdjusterBase model)
+    {
+        var formatString = model.MotionTemplate;
+        var formats = formatString.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+        // 检测并移除所有%xxx%的文本
+        Regex regex = new Regex(@"%[^%]+%");
+        string RemovePercentPlaceholders(string input)
+        {
+            return regex.Replace(input, "");
+        }
+        foreach (var format in formats)
+        {
+            var commandInfo = Experiment.Parse(RemovePercentPlaceholders(format));
+            if (commandInfo.command == "changeFigure")
+            {
+                commandInfo.commandParam = "";
+                commandInfo.otherParameters.Where(p => p.Key != "id").ToList().ForEach(p => commandInfo.otherParameters.Remove(p.Key));
+                var id = commandInfo.GetParameter("id");
+                commandInfo.SetParameter("id", id.Trim());
+                commands.AppendLine(commandInfo.GetInstruction());
+            }
+        }
+    }
+
     public void CopyAllGroup()
     {
         if (curGroup == null)
@@ -832,25 +855,33 @@ public class MainControl : MonoBehaviour
                 ShowErrorDebugText($"请先给 【{model.Name}】 设置表情和动作！");
                 return;
             }
-            
-            var format = model.MotionTemplate;
-            var motionExpressionString = model.GetMotionExpressionParamsText();
-            var transformString = $" -transform={GetTransformTextTarget(model)}";
-            var blendModeText = WebgalBlendModeUtils.ToString(curTarget.blendMode);
-            var blendModeString = !string.IsNullOrEmpty(blendModeText) ? $" -blendMode={blendModeText}" : "";
-            var boundsString = model.GetBoundsText() != "" ? $" -bounds={curTarget.GetBoundsText()}" : "";
-            var meText = motionExpressionString + transformString + boundsString + blendModeString;
-            var output = format.Replace("%me%", meText.Trim());
-            output = output.Replace("%path%", model.GetPathText(0));
-            output = output.Replace("%conf_path%", model.GetConfPathText());
-            for (int i = 0; i < model.ModelCount; i++)
+
+            var visible = model.gameObject.activeInHierarchy;
+            if (visible)
             {
-                var subModelTransformString = $" -transform={GetTransformTextTarget(model, i)}";
-                var subMeText = motionExpressionString + subModelTransformString + boundsString + blendModeString;
-                output = output.Replace($"%me_{i}%", subMeText.Trim());
-                output = output.Replace($"%path_{i}%", model.GetPathText(i));
+                var format = model.MotionTemplate;
+                var motionExpressionString = model.GetMotionExpressionParamsText();
+                var transformString = $" -transform={GetTransformTextTarget(model)}";
+                var blendModeText = WebgalBlendModeUtils.ToString(curTarget.blendMode);
+                var blendModeString = !string.IsNullOrEmpty(blendModeText) ? $" -blendMode={blendModeText}" : "";
+                var boundsString = model.GetBoundsText() != "" ? $" -bounds={curTarget.GetBoundsText()}" : "";
+                var meText = motionExpressionString + transformString + boundsString + blendModeString;
+                var output = format.Replace("%me%", meText.Trim());
+                output = output.Replace("%path%", model.GetPathText(0));
+                output = output.Replace("%conf_path%", model.GetConfPathText());
+                for (int i = 0; i < model.ModelCount; i++)
+                {
+                    var subModelTransformString = $" -transform={GetTransformTextTarget(model, i)}";
+                    var subMeText = motionExpressionString + subModelTransformString + boundsString + blendModeString;
+                    output = output.Replace($"%me_{i}%", subMeText.Trim());
+                    output = output.Replace($"%path_{i}%", model.GetPathText(i));
+                }
+                commands.AppendLine(output);
             }
-            commands.AppendLine(output);
+            else
+            {
+                AddHideModelInstruction(commands, model);
+            }
         }
 
         if(curGroup.containBackgroundCopy)
