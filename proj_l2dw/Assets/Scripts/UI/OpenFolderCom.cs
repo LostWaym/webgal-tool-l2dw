@@ -46,6 +46,8 @@ public class OpenFolderCom : MonoBehaviour
         if (!Directory.Exists(dir))
             return;
 
+        path = path.Replace('/', '\\');
+
         if (isFile)
             System.Diagnostics.Process.Start("explorer.exe", "/select," + path);
         else

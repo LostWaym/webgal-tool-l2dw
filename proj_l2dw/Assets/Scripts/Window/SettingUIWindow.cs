@@ -11,18 +11,20 @@ public class SettingUIWindow : BaseWindow<SettingUIWindow>
     #region auto generated members
     private Toggle m_toggleGeneral;
     private Toggle m_toggleNavigation;
+    private Toggle m_toggleCapture;
     private Toggle m_toggleExperiment;
     private Toggle m_toggleManual;
     private Toggle m_toggleAbout;
     private Toggle m_toggleThanks;
-    private Transform m_itemSettingPageGeneral;
-    private Transform m_itemSettingPageNavigation;
-    private Transform m_itemSettingPageExperiment;
-    private Transform m_itemSettingPageManual;
-    private Transform m_itemSettingPageAbout;
-    private Transform m_itemSettingPageThanks;
-    private Text m_lblTitle;
     private Button m_btnClose;
+    private Text m_lblTitle;
+    private Transform m_itemSettingPageExperiment;
+    private Transform m_itemSettingPageAbout;
+    private Transform m_itemSettingPageGeneral;
+    private Transform m_itemSettingPageCapture;
+    private Transform m_itemSettingPageManual;
+    private Transform m_itemSettingPageNavigation;
+    private Transform m_itemSettingPageThanks;
     #endregion
 
     #region auto generated binders
@@ -30,21 +32,24 @@ public class SettingUIWindow : BaseWindow<SettingUIWindow>
     {
         m_toggleGeneral = transform.Find("Background/Popup/Left/Viewport/Content/m_toggleGeneral").GetComponent<Toggle>();
         m_toggleNavigation = transform.Find("Background/Popup/Left/Viewport/Content/m_toggleNavigation").GetComponent<Toggle>();
+        m_toggleCapture = transform.Find("Background/Popup/Left/Viewport/Content/m_toggleCapture").GetComponent<Toggle>();
         m_toggleExperiment = transform.Find("Background/Popup/Left/Viewport/Content/m_toggleExperiment").GetComponent<Toggle>();
         m_toggleManual = transform.Find("Background/Popup/Left/Viewport/Content/m_toggleManual").GetComponent<Toggle>();
         m_toggleAbout = transform.Find("Background/Popup/Left/Viewport/Content/m_toggleAbout").GetComponent<Toggle>();
         m_toggleThanks = transform.Find("Background/Popup/Left/Viewport/Content/m_toggleThanks").GetComponent<Toggle>();
-        m_itemSettingPageGeneral = transform.Find("Background/Popup/Right/Pages/m_itemSettingPageGeneral").GetComponent<Transform>();
-        m_itemSettingPageNavigation = transform.Find("Background/Popup/Right/Pages/m_itemSettingPageNavigation").GetComponent<Transform>();
-        m_itemSettingPageExperiment = transform.Find("Background/Popup/Right/Pages/m_itemSettingPageExperiment").GetComponent<Transform>();
-        m_itemSettingPageManual = transform.Find("Background/Popup/Right/Pages/m_itemSettingPageManual").GetComponent<Transform>();
-        m_itemSettingPageAbout = transform.Find("Background/Popup/Right/Pages/m_itemSettingPageAbout").GetComponent<Transform>();
-        m_itemSettingPageThanks = transform.Find("Background/Popup/Right/Pages/m_itemSettingPageThanks").GetComponent<Transform>();
-        m_lblTitle = transform.Find("Background/Popup/Right/Top/m_lblTitle").GetComponent<Text>();
         m_btnClose = transform.Find("Background/Popup/Right/Top/m_btnClose").GetComponent<Button>();
+        m_lblTitle = transform.Find("Background/Popup/Right/Top/m_lblTitle").GetComponent<Text>();
+        m_itemSettingPageExperiment = transform.Find("Background/Popup/Right/Pages/m_itemSettingPageExperiment").GetComponent<Transform>();
+        m_itemSettingPageAbout = transform.Find("Background/Popup/Right/Pages/m_itemSettingPageAbout").GetComponent<Transform>();
+        m_itemSettingPageGeneral = transform.Find("Background/Popup/Right/Pages/m_itemSettingPageGeneral").GetComponent<Transform>();
+        m_itemSettingPageCapture = transform.Find("Background/Popup/Right/Pages/m_itemSettingPageCapture").GetComponent<Transform>();
+        m_itemSettingPageManual = transform.Find("Background/Popup/Right/Pages/m_itemSettingPageManual").GetComponent<Transform>();
+        m_itemSettingPageNavigation = transform.Find("Background/Popup/Right/Pages/m_itemSettingPageNavigation").GetComponent<Transform>();
+        m_itemSettingPageThanks = transform.Find("Background/Popup/Right/Pages/m_itemSettingPageThanks").GetComponent<Transform>();
 
         m_toggleGeneral.onValueChanged.AddListener(OnToggleGeneralChange);
         m_toggleNavigation.onValueChanged.AddListener(OnToggleNavigationChange);
+        m_toggleCapture.onValueChanged.AddListener(OnToggleCaptureChange);
         m_toggleExperiment.onValueChanged.AddListener(OnToggleExperimentChange);
         m_toggleManual.onValueChanged.AddListener(OnToggleManualChange);
         m_toggleAbout.onValueChanged.AddListener(OnToggleAboutChange);
@@ -53,6 +58,9 @@ public class SettingUIWindow : BaseWindow<SettingUIWindow>
     }
     #endregion
 
+    private void OnToggleCaptureChange(bool value)
+    {
+    }
 
     #region auto-generated code event
     private void OnToggleGeneralChange(bool value)
@@ -85,6 +93,7 @@ public class SettingUIWindow : BaseWindow<SettingUIWindow>
     private SettingPageExperiment m_settingPageExperiment;
     private SettingPageNavigation m_settingPageNavigation;
     private SettingPageThanks m_settingPageThanks;
+    private SettingPageCapture m_settingPageCapture;
     protected override void OnInit()
     {
         base.OnInit();
@@ -94,6 +103,7 @@ public class SettingUIWindow : BaseWindow<SettingUIWindow>
         m_settingPageExperiment = SettingPageExperiment.CreateWidget(m_itemSettingPageExperiment.gameObject);
         m_settingPageNavigation = SettingPageNavigation.CreateWidget(m_itemSettingPageNavigation.gameObject);
         m_settingPageThanks = SettingPageThanks.CreateWidget(m_itemSettingPageThanks.gameObject);
+        m_settingPageCapture = SettingPageCapture.CreateWidget(m_itemSettingPageCapture.gameObject);
 
         m_settingPageGeneral.Inject(this, m_toggleGeneral);
         m_settingPageAbout.Inject(this, m_toggleAbout);
@@ -101,6 +111,7 @@ public class SettingUIWindow : BaseWindow<SettingUIWindow>
         m_settingPageExperiment.Inject(this, m_toggleExperiment);
         m_settingPageNavigation.Inject(this, m_toggleNavigation);
         m_settingPageThanks.Inject(this, m_toggleThanks);
+        m_settingPageCapture.Inject(this, m_toggleCapture);
 
         m_toggleGeneral.isOn = true;
     }
@@ -659,5 +670,66 @@ public class SettingPageThanks : SettingPageBase<SettingPageThanks>
     protected override void OnInit()
     {
         base.OnInit();
+    }
+}
+
+
+public class SettingPageCapture : SettingPageBase<SettingPageCapture>
+{
+    protected override string Title => "截图";
+
+    #region auto generated members
+    private InputField m_iptSaveFolderField;
+    private InputField m_iptSaveNameField;
+    private Dropdown m_dropdownInstCopy;
+    #endregion
+
+    #region auto generated binders
+    protected override void CodeGenBindMembers()
+    {
+        m_iptSaveFolderField = transform.Find("ScrollRect/Viewport/Content/ModelPath/Value/InputField/m_iptSaveFolderField").GetComponent<InputField>();
+        m_iptSaveNameField = transform.Find("ScrollRect/Viewport/Content/SaveName/Value/InputField/m_iptSaveNameField").GetComponent<InputField>();
+        m_dropdownInstCopy = transform.Find("ScrollRect/Viewport/Content/GameObject (1)/m_dropdownInstCopy").GetComponent<Dropdown>();
+
+        m_iptSaveFolderField.onValueChanged.AddListener(OnInputFieldSaveFolderFieldChange);
+        m_iptSaveFolderField.onEndEdit.AddListener(OnInputFieldSaveFolderFieldEndEdit);
+        m_iptSaveNameField.onValueChanged.AddListener(OnInputFieldSaveNameFieldChange);
+        m_iptSaveNameField.onEndEdit.AddListener(OnInputFieldSaveNameFieldEndEdit);
+        m_dropdownInstCopy.onValueChanged.AddListener(OnDropdownInstCopyChange);
+    }
+    #endregion
+
+    #region auto generated events
+    private void OnInputFieldSaveFolderFieldChange(string value)
+    {
+        Global.CaptureSavePath = value;
+    }
+    private void OnInputFieldSaveFolderFieldEndEdit(string value)
+    {
+    }
+    private void OnInputFieldSaveNameFieldChange(string value)
+    {
+        Global.CaptureSaveName = value;
+    }
+    private void OnInputFieldSaveNameFieldEndEdit(string value)
+    {
+    }
+    private void OnDropdownInstCopyChange(int value)
+    {
+        Global.CaptureInstNextMode = (CaptureInstNextMode)value;
+    }
+    #endregion
+
+    protected override void OnInit()
+    {
+        base.OnInit();
+    }
+
+    protected override void OnPageShown()
+    {
+        base.OnPageShown();
+        m_dropdownInstCopy.SetValueWithoutNotify((int)Global.CaptureInstNextMode);
+        m_iptSaveFolderField.SetTextWithoutNotify(Global.CaptureSavePath);
+        m_iptSaveNameField.SetTextWithoutNotify(Global.CaptureSaveName);
     }
 }

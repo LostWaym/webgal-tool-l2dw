@@ -39,7 +39,10 @@ public static class Global
     public static bool IsSetResolution = false;
     public static int NewResolutionWidth = 2560;
     public static int NewResolutionHeight = 1440;
-    
+
+    public static string CaptureSaveName = "{model}-{time}";
+    public static CaptureInstNextMode CaptureInstNextMode = CaptureInstNextMode.Replace;
+    public static string CaptureSavePath = "./Snapshots";
 
     public static void Save()
     {
@@ -59,6 +62,10 @@ public static class Global
         PlayerPrefs.SetInt("Global.NewResolutionWidth", NewResolutionWidth);
         PlayerPrefs.SetInt("Global.NewResolutionHeight", NewResolutionHeight);
         PlayerPrefs.SetInt("Global.CloseWelcomePage", CloseWelcomePage ? 1 : 0);
+
+        PlayerPrefs.SetString("Global.CaptureSaveName", CaptureSaveName);
+        PlayerPrefs.SetInt("Global.CaptureInstNextMode", (int)CaptureInstNextMode);
+        PlayerPrefs.SetString("Global.CaptureSavePath", CaptureSavePath);
     }
 
     public static void Load()
@@ -89,6 +96,10 @@ public static class Global
         {
             BGTransformTemplate = "setTransform:%me% -target=bg-main -duration=750;";
         }
+
+        CaptureSaveName = PlayerPrefs.GetString("Global.CaptureSaveName", "{time}-{counter}");
+        CaptureInstNextMode = (CaptureInstNextMode)PlayerPrefs.GetInt("Global.CaptureInstNextMode", 0);
+        CaptureSavePath = PlayerPrefs.GetString("Global.CaptureSavePath", "../Snapshots");
     }
 }
 
@@ -97,4 +108,10 @@ public enum InstDealOperation
     No,
     All,
     ExceptLast,
+}
+
+public enum CaptureInstNextMode
+{
+    Replace,
+    AddIndexAtLast,
 }
