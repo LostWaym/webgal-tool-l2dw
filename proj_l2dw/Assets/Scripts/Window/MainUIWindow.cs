@@ -3078,7 +3078,7 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
     private void OnInputFieldGroupNameEndEdit(string value)
     {
         var group = MainControl.Instance.curGroup;
-        if (group == null)
+        if (group == null || group.isAllGroup)
         {
             return;
         }

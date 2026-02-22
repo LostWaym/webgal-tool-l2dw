@@ -14,6 +14,8 @@ public class ModelGroup : MonoBehaviour
     public Vector3 WorldPosition => root.position;
     public Vector3 LocalPosition => root.localPosition;
 
+    public bool isAllGroup = false;
+
     public bool containBackground = false;
     public bool containBackgroundCopy = false;
     public bool autoApply = true;
@@ -23,6 +25,16 @@ public class ModelGroup : MonoBehaviour
 
     public void RemoveInvalidModelAndSubGroup()
     {
+        if (isAllGroup)
+        {
+            m_tempModelsHashSet.Clear();
+            foreach (var model in MainControl.Instance.models)
+            {
+                m_tempModelsHashSet.Add(model);
+            }
+            return;
+        }
+
         modelAdjusters.RemoveAll(model => model == null);
         subGroups.RemoveAll(group => group == null);
 

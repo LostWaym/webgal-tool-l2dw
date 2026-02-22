@@ -592,6 +592,7 @@ public class ModelAdjuster : ModelAdjusterBase
         var oldPos = MainPos.position;
         root.parent = transform;
         root.eulerAngles = Vector3.zero;
+        //root.localEulerAngles = Vector3.zero;
         SetRotation(rootRotation + rotationDelta);
         CopyScaleFromRoot();
         SetCharacterWorldPosition(oldPos.x, oldPos.y);
@@ -756,6 +757,7 @@ public class ModelAdjuster : ModelAdjusterBase
 
     #endregion
 
+    public static int captureCounter = 0;
     public void SaveImage()
     {
         var tex2d = new Texture2D(rt.width, rt.height);
@@ -764,8 +766,16 @@ public class ModelAdjuster : ModelAdjusterBase
         tex2d.Apply();
         RenderTexture.active = null;
         var bytes = tex2d.EncodeToPNG();
-        string fileName = $"{meta.name}_{DateTime.Now.ToString("yyyyMMddHHmmss")}.png";
-        var path = Path.Combine(Application.dataPath, "..", "Snapshots", fileName);
+        // string fileName = $"{meta.name}_{DateTime.Now.ToString("yyyyMMddHHmmss")}.png";
+        string fileName = Global.CaptureSaveName;
+        fileName = fileName
+            .Replace("{time}", DateTime.Now.ToString("yyyyMMddHHmmss"))
+            .Replace("{counter}", captureCounter++.ToString())
+            .Replace("{model}", meta.name)
+            .Replace("{expr}", curExpName)
+            .Replace("{motion}", curMotionName);
+        fileName = EscapeAllInvalidCharacters(fileName);
+        var path = Path.Combine(Global.CaptureSavePath, fileName + ".png");
         //确保目录存在
         var dir = Path.GetDirectoryName(path);
         if (!Directory.Exists(dir))
@@ -773,8 +783,44 @@ public class ModelAdjuster : ModelAdjusterBase
             Directory.CreateDirectory(dir);
         }
 
+        var mode = Global.CaptureInstNextMode;
+        if (mode == CaptureInstNextMode.Replace)
+        {
+            // do nothing
+        }
+        else if (mode == CaptureInstNextMode.AddIndexAtLast)
+        {
+            int ind = 0;
+            while (File.Exists(path))
+            {
+                ind++;
+                path = Path.Combine(Global.CaptureSavePath, fileName + $" ({ind}).png");
+            }
+        }
+
         File.WriteAllBytes(path, bytes);
         Debug.Log($"Save image to {path}");
+    }
+
+    private string EscapeAllInvalidCharacters(string str)
+    {
+        // 定义不能用在文件名中的字符
+        char[] invalidChars = Path.GetInvalidFileNameChars();
+        var sb = new System.Text.StringBuilder();
+
+        foreach (var c in str)
+        {
+            if (Array.IndexOf(invalidChars, c) == -1)
+            {
+                sb.Append(c);
+            }
+            else
+            {
+                sb.Append("_");
+            }
+        }
+
+        return sb.ToString();
     }
 
     public override Texture GetCharaTexture()

@@ -229,7 +229,10 @@ public class MainControl : MonoBehaviour
     {
         //添加一个默认的group
         ModelGroup defaultGroup = Instantiate(modelGroupPrefab);
-        defaultGroup.groupName = "默认组";
+        defaultGroup.groupName = "*所有模型*";
+        defaultGroup.isAllGroup = true;
+        defaultGroup.containBackground = true;
+        defaultGroup.containBackgroundCopy = true;
         defaultGroup.gameObject.SetActive(true);
         modelGroups.Add(defaultGroup);
         SetGroup(defaultGroup);
@@ -1173,6 +1176,12 @@ public class MainControl : MonoBehaviour
 
     public void RemoveGroup(ModelGroup group)
     {
+        if (group.isAllGroup)
+        {
+            ShowErrorDebugText("无法删除这个组");
+            return;
+        }
+
         modelGroups.Remove(group);
         if (curGroup == group)
         {
