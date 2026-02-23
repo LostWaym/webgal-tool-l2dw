@@ -962,6 +962,11 @@ public class MainControl : MonoBehaviour
         debugText.text = text;
     }
 
+    public void ShowMessageTip(string title, string message)
+    {
+        messageTipWindow.Show(title, message);
+    }
+
     #endregion
 
     #region  配置加载相关
@@ -1370,6 +1375,25 @@ public class MainControl : MonoBehaviour
         ShowDebugText("加载变换成功！");
 
         UIEventBus.SendEvent(UIEventType.ModelTransformChanged);
+    }
+
+    public void ExternalLoadTransform(ModelAdjusterBase model, TransformData transformData)
+    {
+        if (model == null)
+            return;
+
+        model.SetRotation(transformData.rotation);
+        model.SetScale(transformData.scale);
+        model.SetReverseXScale(transformData.reverseX);
+        model.SetCharacterWorldPosition(transformData.position.x, transformData.position.y);
+        model.blendMode = transformData.blendMode;
+
+        var json = new JSONObject();
+        transformData.filterSetData.ApplyToJson(json);
+        model.filterSetData.ReadFromJson(json);
+        model.UpdateAllFilter();
+
+        model.Adjust();
     }
 }
 

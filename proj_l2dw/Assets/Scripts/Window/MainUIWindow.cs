@@ -1096,11 +1096,13 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
     private Transform m_itemScale;
     private Transform m_itemRotation;
     private Button m_btnExtraParam;
+    private Button m_btnSnapshot;
     private Button m_btnReloadModel;
     private Button m_btnReloadTexture;
     private Button m_btnOpenModelPath;
     private Toggle m_toggleAutoReloadTexture;
     private Transform m_itemCharaBlinkFocus;
+    private Transform m_itemCharaSnapshot;
     #endregion
 
     #region auto generated binders
@@ -1126,11 +1128,13 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         m_itemScale = transform.Find("Properties/Container/m_itemScale").GetComponent<Transform>();
         m_itemRotation = transform.Find("Properties/Container/m_itemRotation").GetComponent<Transform>();
         m_btnExtraParam = transform.Find("Properties/Container/GameObject (2)/m_btnExtraParam").GetComponent<Button>();
+        m_btnSnapshot = transform.Find("Properties/Container/GameObject (2)/m_btnSnapshot").GetComponent<Button>();
         m_btnReloadModel = transform.Find("Properties/Container/GameObject/m_btnReloadModel").GetComponent<Button>();
         m_btnReloadTexture = transform.Find("Properties/Container/GameObject/m_btnReloadTexture").GetComponent<Button>();
         m_btnOpenModelPath = transform.Find("Properties/Container/GameObject/m_btnOpenModelPath").GetComponent<Button>();
         m_toggleAutoReloadTexture = transform.Find("Properties/Container/m_toggleAutoReloadTexture").GetComponent<Toggle>();
         m_itemCharaBlinkFocus = transform.Find("m_itemCharaBlinkFocus").GetComponent<Transform>();
+        m_itemCharaSnapshot = transform.Find("m_itemCharaSnapshot").GetComponent<Transform>();
 
         m_btnLoadConf.onClick.AddListener(OnButtonLoadConfClick);
         m_btnLoadJson.onClick.AddListener(OnButtonLoadJsonClick);
@@ -1145,6 +1149,7 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         m_btnSaveTransform.onClick.AddListener(OnButtonSaveTransformClick);
         m_btnLoadTransform.onClick.AddListener(OnButtonLoadTransformClick);
         m_btnExtraParam.onClick.AddListener(OnButtonExtraParamClick);
+        m_btnSnapshot.onClick.AddListener(OnButtonSnapshotClick);
         m_btnReloadModel.onClick.AddListener(OnButtonReloadModelClick);
         m_btnReloadTexture.onClick.AddListener(OnButtonReloadTextureClick);
         m_btnOpenModelPath.onClick.AddListener(OnButtonOpenModelPathClick);
@@ -1152,8 +1157,12 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
     }
     #endregion
 
-
     #region auto-generated code event
+    public void OnButtonSnapshotClick()
+    {
+        m_charaSnapshot.gameObject.SetActive(true);
+        m_charaSnapshot.RefreshAll();
+    }
     public void OnButtonLoadConfClick()
     {
         MainControl.Instance.LoadConf();
@@ -1271,6 +1280,7 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
     private PageCharaFunctions m_pageCharaFunctions;
 
     private CharaBlinkFocus m_charaBlinkFocus;
+    private CharaSnapshot m_charaSnapshot;
 
     protected override void OnInit()
     {
@@ -1289,6 +1299,7 @@ public class PageCharaMenu : UIPageWidget<PageCharaMenu>
         m_liptRotation.SetDataSubmit(OnRotationSubmit);
 
         m_charaBlinkFocus = CharaBlinkFocus.CreateWidget(m_itemCharaBlinkFocus.gameObject);
+        m_charaSnapshot = CharaSnapshot.CreateWidget(m_itemCharaSnapshot.gameObject);
     }
 
     protected override void OnPageShown()
