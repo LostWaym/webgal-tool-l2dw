@@ -86,6 +86,12 @@ public class ProjData : IJSonSerializable
                 modelPath = charaData.modelPath;
             }
             var model = MainControl.Instance.AddModel(modelPath, false);
+            if (model == null)
+            {
+                Debug.LogError($"无法加载模型: {modelPath}");
+                continue;
+            }
+            
             model.PlayMotion(charaData.motion);
             model.PlayExp(charaData.expression);
             if (model is ImageModel imgModel)

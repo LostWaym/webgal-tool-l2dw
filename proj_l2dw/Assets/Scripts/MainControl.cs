@@ -484,6 +484,10 @@ public class MainControl : MonoBehaviour
             // load img
             model = LoadImgModel(path, showSettingWindow);
         }
+        else if (extension == ".json")
+        {
+            model = LoadJsonModel(path, false);
+        }
         else 
         {
             var (confModel, meta) = LoadConfModelSingle(path);
@@ -1101,7 +1105,7 @@ public class MainControl : MonoBehaviour
         return (target, meta);
     }
 
-    private void LoadJsonModel(string path)
+    private ModelAdjusterBase LoadJsonModel(string path, bool showSettingWindow = true)
     {
         var target = CreateModelAdjuster();
         var meta = new L2DWModelConfig();
@@ -1118,21 +1122,20 @@ public class MainControl : MonoBehaviour
         {
             ShowErrorDebugText($"无法加载主模型，不加载了: {path}");
             DeleteModel(target);
-            return;
+            return null;
         }
         target.Adjust();
         SetCharacter(target);
         TryPlayDefaultMotion(target);
-
-
-
         Resources.UnloadUnusedAssets();
 
-        if (!Global.DisableJsonModelProfileInit)
+        if (showSettingWindow && !Global.DisableJsonModelProfileInit)
         {
             settingWindow.gameObject.SetActive(true);
             settingWindow.Load(curMeta);
         }
+
+        return target;
     }
 
     private ImageModel LoadImgModel(string path, bool showSettingWindow = true)
