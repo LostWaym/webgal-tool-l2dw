@@ -92,6 +92,64 @@ public class TargetSelectUI : BaseWindow<TargetSelectUI>
         }
     }
 
+    /// <summary>
+    /// 直接传入宽高以及item高度的版本，需要headerArea来获得初始展示位置
+    /// </summary>
+    /// <param name="headerArea">用于确定初始展示位置的header区域</param>
+    /// <param name="width">窗口宽度</param>
+    /// <param name="height">窗口高度</param>
+    /// <param name="itemHeight">每个 item 的高度</param>
+    /// <param name="targetList">目标列表</param>
+    /// <param name="markKey">标记 key</param>
+    public void SetData(RectTransform headerArea, float width, float height, float itemHeight, List<string> targetList, string markKey = null)
+    {
+        Show();
+
+        // 根据headerArea确定初始展示位置
+        if (headerArea != null)
+        {
+            var headerAreaWorldPos = headerArea.transform.position;
+            // rectRoot在世界坐标下与headerArea的x/y/z保持一致
+            m_rectRoot.position = headerAreaWorldPos;
+        }
+
+        m_rectRoot.sizeDelta = new Vector2(width, height);
+
+        // 设置iptSearch的宽度和高度
+        var searchRect = m_iptSearch.GetComponent<RectTransform>();
+        if (searchRect != null)
+        {
+            searchRect.sizeDelta = new Vector2(width, itemHeight > 0 ? itemHeight : searchRect.sizeDelta.y);
+        }
+
+        m_listTargetName = targetList;
+        UpdateFilter();
+
+        m_markKey = markKey;
+        if (string.IsNullOrEmpty(markKey))
+        {
+            m_iptSearch.text = "";
+        }
+        else
+        {
+            m_iptSearch.text = m_dictTargetMark.TryGetValue(markKey, out var mark) ? mark : "";
+        }
+    }
+
+    /// <summary>
+    /// 使用默认宽高和item高度的重载方法
+    /// </summary>
+    /// <param name="headerArea">用于确定初始展示位置的header区域</param>
+    /// <param name="targetList">目标列表</param>
+    /// <param name="markKey">标记 key</param>
+    public void SetData(RectTransform headerArea, List<string> targetList, string markKey = null)
+    {
+        float defaultWidth = 400f;
+        float defaultHeight = 600f;
+        float defaultItemHeight = 40f;
+        SetData(headerArea, defaultWidth, defaultHeight, defaultItemHeight, targetList, markKey);
+    }
+
     public override void Close()
     {
         if (!string.IsNullOrEmpty(m_markKey))

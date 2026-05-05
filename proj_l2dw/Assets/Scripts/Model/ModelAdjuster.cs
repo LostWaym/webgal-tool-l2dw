@@ -12,6 +12,7 @@ public class ModelAdjuster : ModelAdjusterBase
     public override bool SupportExpressionMode => true;
     public override bool HasMotions => true;
     public override string Name => meta.name;
+    public override string IdName => Name;
     public override string MotionTemplate => meta.figureTemplate;
     public override string TransformTemplate => meta.transformTemplate;
 

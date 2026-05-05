@@ -22,7 +22,7 @@ public class ImageModel : ModelAdjusterBase
     public override bool SupportExpressionMode => false;
     public override bool HasMotions => false;
     public override string Name => IdName + "[图]";
-    private string IdName => imgMeta.name;
+    public override string IdName => imgMeta.name;
 
     public override string TransformTemplate => imgMeta.transformTemplate;
     public override string MotionTemplate => imgMeta.motionTemplate;
@@ -259,7 +259,7 @@ public class ImageModel : ModelAdjusterBase
     #endregion
 }
 
-public class ImageModelMeta
+public class ImageModelMeta : IJSonSerializable
 {
     public string name;
     public string imgPath;
@@ -276,5 +276,23 @@ public class ImageModelMeta
             return true;
         }
         return false;
+    }
+
+    public void DeserializeFromJson(JSONObject json)
+    {
+        name = json.GetField(nameof(name))?.str ?? "";
+        imgPath = json.GetField(nameof(imgPath))?.str ?? "";
+        motionTemplate = json.GetField(nameof(motionTemplate))?.str ?? "";
+        transformTemplate = json.GetField(nameof(transformTemplate))?.str ?? "";
+        relativePath = json.GetField(nameof(relativePath))?.str ?? "";
+    }
+
+    public void SerializeToJson(JSONObject json)
+    {
+        json.AddField(nameof(name), name);
+        json.AddField(nameof(imgPath), imgPath);
+        json.AddField(nameof(motionTemplate), motionTemplate);
+        json.AddField(nameof(transformTemplate), transformTemplate);
+        json.AddField(nameof(relativePath), relativePath);
     }
 }

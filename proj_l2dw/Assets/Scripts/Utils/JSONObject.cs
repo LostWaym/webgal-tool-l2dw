@@ -4,6 +4,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 /*
  * http://www.opensource.org/licenses/lgpl-2.1.php
@@ -54,6 +55,7 @@ public float f {
 }
 #endif
     public bool boolean;
+    public int i => (int)number;
     public delegate void AddJSONConents(JSONObject self);
 
     public static JSONObject nullJO { get { return new JSONObject(JSONObject.Type.NULL); } }    //an empty, null object
@@ -335,13 +337,95 @@ public float f {
     }
     public void AddField(string name, float val)
     {
-
         AddField(name, new JSONObject(val));
     }
+    public void AddVector3Field(string name, Vector3 val)
+    {
+        var obj = new JSONObject(Type.OBJECT);
+        obj.AddField("x", val.x);
+        obj.AddField("y", val.y);
+        obj.AddField("z", val.z);
+        AddField(name, obj);
+    }
+    public Vector3 GetVector3Field(string name)
+    {
+        var obj = GetField(name);
+        if (obj == null || obj.type != Type.OBJECT)
+        {
+            return Vector3.zero;
+        }
+        return new Vector3(obj.GetField("x")?.f ?? 0, obj.GetField("y")?.f ?? 0, obj.GetField("z")?.f ?? 0);
+    }
+
     public void AddField(string name, int val)
     {
         AddField(name, new JSONObject(val));
     }
+    public void AddField<T>(string name, T data) where T : IJSonSerializable
+    {
+        if (data == null)
+            return;
+        
+        var obj = new JSONObject(Type.OBJECT);
+        data.SerializeToJson(obj);
+        AddField(name, obj);
+    }
+
+    public void AddFieldList<T>(string name, List<T> list) where T : IJSonSerializable
+    {
+        var obj = new JSONObject(Type.ARRAY);
+        foreach (var item in list)
+        {
+            var itemObj = new JSONObject(Type.OBJECT);
+            item.SerializeToJson(itemObj);
+            obj.Add(itemObj);
+        }
+        AddField(name, obj);
+    }
+
+    public void GetFieldList<T>(string name, ref List<T> list) where T : IJSonSerializable, new()
+    {
+        var obj = GetField(name);
+        if (obj == null || obj.type != Type.ARRAY)
+        {
+            return;
+        }
+        if (list == null)
+            list = new List<T>();
+        list.Clear();
+        foreach (var item in obj.list)
+        {
+            var itemData = new T();
+            itemData.DeserializeFromJson(item);
+            list.Add(itemData);
+        }
+    }
+
+    public void GetField<T>(string name, ref T data) where T : IJSonSerializable, new()
+    {
+        var obj = GetField(name);
+        if (obj == null || obj.type != Type.OBJECT)
+        {
+            return;
+        }
+        if (data == null)
+        {
+            data = new T();
+        }
+
+        data.DeserializeFromJson(obj);
+    }
+
+    public void AddStringFieldList(string name, List<string> list)
+    {
+        var obj = new JSONObject(Type.ARRAY);
+        foreach (var item in list)
+        {
+            obj.Add(item);
+        }
+        AddField(name, obj);
+    }
+
     public void AddField(string name, AddJSONConents content) { AddField(name, new JSONObject(content)); }
     public void AddField(string name, string val)
     {

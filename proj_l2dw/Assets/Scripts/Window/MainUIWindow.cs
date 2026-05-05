@@ -136,6 +136,7 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
         private Toggle m_toggleMove;
         private Toggle m_toggleRotate;
         private Toggle m_toggleScale;
+        private Button m_btnProj;
         private Text m_lblToolTitle;
         private Dropdown m_dropdownInstCopy;
         #endregion
@@ -146,12 +147,14 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
             m_toggleMove = transform.Find("ToolContainer/Flow/m_toggleMove").GetComponent<Toggle>();
             m_toggleRotate = transform.Find("ToolContainer/Flow/m_toggleRotate").GetComponent<Toggle>();
             m_toggleScale = transform.Find("ToolContainer/Flow/m_toggleScale").GetComponent<Toggle>();
+            m_btnProj = transform.Find("ToolContainer/Flow/m_btnProj").GetComponent<Button>();
             m_lblToolTitle = transform.Find("ToolContainer/m_lblToolTitle").GetComponent<Text>();
             m_dropdownInstCopy = transform.Find("NextAction/m_dropdownInstCopy").GetComponent<Dropdown>();
 
             m_toggleMove.onValueChanged.AddListener(OnToggleMoveChange);
             m_toggleRotate.onValueChanged.AddListener(OnToggleRotateChange);
             m_toggleScale.onValueChanged.AddListener(OnToggleScaleChange);
+            m_btnProj.onClick.AddListener(OnButtonProjClick);
             m_dropdownInstCopy.onValueChanged.AddListener(OnDropdownInstCopyChange);
         }
         #endregion
@@ -181,6 +184,93 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
         private void OnDropdownInstCopyChange(int value)
         {
             Global.InstNextMode = (InstDealOperation)value;
+        }
+
+        private void OnButtonProjClick()
+        {
+            const string HELP = "帮助";
+            const string SAVE_PROJ_TO_FILE = "保存工程到";
+            const string LOAD_PROJ_FROM_FILE = "从文件读取工程";
+            const string LOAD_PROJ_ADD_FROM_FILE = "从文件读取工程 （叠加）";
+            List<string> selections = new (){HELP, SAVE_PROJ_TO_FILE, LOAD_PROJ_FROM_FILE, LOAD_PROJ_ADD_FROM_FILE};
+            TargetSelectUI.Instance.SetData(m_btnProj.GetComponent<RectTransform>(), selections);
+            TargetSelectUI.Instance._OnTargetItemClick = (operationName) =>
+            {
+                TargetSelectUI.Instance.Close();
+                switch (operationName)
+                {
+                    case HELP:
+                        ShowHelp();
+                        break;
+                    case SAVE_PROJ_TO_FILE:
+                        DoSaveProjToFile();
+                        break;
+                    case LOAD_PROJ_FROM_FILE:
+                        DoLoadProjFromFile();
+                        break;
+                    case LOAD_PROJ_ADD_FROM_FILE:
+                        DoLoadProjAddFromFile();
+                        break;
+                }
+            };
+
+            void ShowHelp()
+            {
+                string text = "工程只会保存已加载的立绘，以及他们的变换，名字，显示隐藏状态，滤镜。\n还会保存立绘组以及它的变换关系和其他关联关系。\n保存工程文件后，可以随时在编辑器中打开，并且可以随时保存，保存时会覆盖原来的文件。\n注意工程目录里的路径是相对关系，相对于保存路径的，每次保存工程都会更新相对路径。";
+                MessageTipWindow.Instance.Show("帮助", text);
+            }
+
+            void DoSaveProjToFile()
+            {
+                var projData = new ProjData();
+                projData.Snapshot();
+                var json = JSONObject.obj;
+                var path = L2DWUtils.SaveFileDialog(
+                    "保存工程文件",
+                    ProjData.PATH_KEY,
+                    ProjData.DEFAULT_NAME,
+                    ProjData.EXTENSION
+                );
+                if (string.IsNullOrEmpty(path))
+                {
+                    MessageTipWindow.Instance.Show("提示", "保存工程文件失败！");
+                    return;
+                }
+                string folder = Path.GetDirectoryName(path);
+                projData.SetBasePath(folder);
+                projData.SerializeToJson(json);
+                var jsonString = json.ToString(true);
+                System.IO.File.WriteAllText(path, jsonString);
+                MessageTipWindow.Instance.Show("提示", "保存工程文件成功！");
+            }
+
+            void DoLoadProjFromFile(bool addtive = false)
+            {
+                var paths = L2DWUtils.OpenFileDialog(
+                    "加载工程文件",
+                    ProjData.PATH_KEY,
+                    ProjData.EXTENSION,
+                    false
+                );
+                if (paths.Length < 1 || string.IsNullOrEmpty(paths[0]))
+                {
+                    MessageTipWindow.Instance.Show("提示", "加载工程文件失败！");
+                    return;
+                }
+                var jsonText = System.IO.File.ReadAllText(paths[0]);
+                JSONObject json = new JSONObject(jsonText);
+                var projData = new ProjData();
+                string folder = Path.GetDirectoryName(paths[0]);
+                projData.SetBasePath(folder);
+                projData.DeserializeFromJson(json);
+                projData.Apply();
+                MessageTipWindow.Instance.Show("提示", "加载工程文件成功！");
+            }
+
+            void DoLoadProjAddFromFile()
+            {
+                DoLoadProjFromFile(true);
+            }
         }
 
         #endregion

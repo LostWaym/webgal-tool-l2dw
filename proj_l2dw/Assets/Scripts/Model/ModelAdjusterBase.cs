@@ -26,6 +26,7 @@ public class ModelAdjusterBase : MonoBehaviour
     public virtual bool SupportExpressionMode => false;
     public virtual bool HasMotions => false;
     public virtual string Name => "";
+    public virtual string IdName => "";
 
     protected float zValue = 0;
     public float ZValue
@@ -292,7 +293,7 @@ public class ModelAdjusterBase : MonoBehaviour
     #endregion
 }
 
-public class FilterSetData
+public class FilterSetData : IJSonSerializable
 {
     private float alpha = 1;
     public float Alpha
@@ -710,5 +711,15 @@ public class FilterSetData
         ApplyToJson(json);
         data.ReadFromJson(json);
         return data;
+    }
+
+    public void DeserializeFromJson(JSONObject json)
+    {
+        ReadFromJson(json);
+    }
+
+    public void SerializeToJson(JSONObject json)
+    {
+        ApplyToJson(json);
     }
 }

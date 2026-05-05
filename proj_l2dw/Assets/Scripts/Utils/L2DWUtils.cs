@@ -576,4 +576,43 @@ public static class L2DWUtils
         items = items.Where(x => filters.All(f => getName(x).ToLower().Contains(f))).ToList();
         return items;
     }
+
+    public static string CalculateRelativePath(string basePath, string path)
+    {
+        // 如果不是同一个盘符的，则直接使用绝对路径。
+        if (!IsSameDrive(basePath, path))
+        {
+            return path;
+        }
+        // 如果是同一个盘符的，则使用相对路径。
+        Uri baseUri = new Uri(AppendDirectorySeparatorChar(basePath));
+        Uri targetUri = new Uri(path);
+        Uri relativeUri = baseUri.MakeRelativeUri(targetUri);
+        string relativePath = Uri.UnescapeDataString(relativeUri.ToString().Replace('/', Path.DirectorySeparatorChar));
+        return relativePath;
+    }
+
+    private static string AppendDirectorySeparatorChar(string path)
+    {
+        if (!path.EndsWith(Path.DirectorySeparatorChar))
+        {
+            return path + Path.DirectorySeparatorChar;
+        }
+        return path;
+    }
+
+    public static bool IsAbsolutePath(string path)
+    {
+        return Path.IsPathRooted(path);
+    }
+
+    public static string ToAbsolutePath(string basePath, string relativePath)
+    {
+        if (IsAbsolutePath(relativePath))
+        {
+            return relativePath;
+        }
+        string combinedPath = Path.Combine(basePath, relativePath);
+        return Path.GetFullPath(combinedPath);
+    }
 }

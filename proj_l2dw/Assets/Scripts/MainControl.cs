@@ -459,11 +459,48 @@ public class MainControl : MonoBehaviour
     {
         foreach (var model in models)
         {
-            if (model is ModelAdjuster modelAdjuster)
-            {
-                if (modelAdjuster.meta.name == id)
-                    return model;
-            }
+            if (model.IdName == id)
+                return model;
+        }
+
+        return null;
+    }
+
+    public void DeleteAllModels()
+    {
+        foreach (var model in models.ToList())
+        {
+            DeleteModel(model);
+        }
+        models.Clear();
+    }
+
+    public ModelAdjusterBase AddModel(string path, bool showSettingWindow = true)
+    {
+        var extension = Path.GetExtension(path).ToLower();
+        ModelAdjusterBase model = null;
+        if (extension == ".png" || extension == ".jpg" || extension == ".jpeg")
+        {
+            // load img
+            model = LoadImgModel(path, showSettingWindow);
+        }
+        else 
+        {
+            var (confModel, meta) = LoadConfModelSingle(path);
+            if (confModel == null)
+                return null;
+            model = confModel;
+        }
+
+        return model;
+    }
+
+    public ModelGroup FindGroup(string name)
+    {
+        foreach (var group in modelGroups)
+        {
+            if (group.groupName == name)
+                return group;
         }
 
         return null;
@@ -1004,36 +1041,14 @@ public class MainControl : MonoBehaviour
         ModelAdjusterBase finalTarget = null;
         foreach (var path in paths)
         {
-            if (string.IsNullOrEmpty(path))
+            var (model, meta) = LoadConfModelSingle(path);
+            if (model == null)
                 continue;
 
-            L2DWModelConfig meta = null;
-            if (Path.GetExtension(path).ToLower() == ".conf")
-            {
-                meta = L2DWModelConfig.LoadFromMyGOLive2DExMeta(path);
-                meta.temp_filePath = path;
-            }
-            else
-            {
-                meta = L2DWModelConfig.Load(path);
-                meta.temp_filePath = path;
-            }
-
-            var target = CreateModelAdjuster();
-            target.meta = meta;
-            target.CreateModel();
-            if (target.MainModel == null)
-            {
-                ShowErrorDebugText($"无法加载主模型，不加载了: {path}");
-                DeleteModel(target);
-                continue;
-            }
             success = true;
             validPath = path;
-            target.Adjust();
-            target.InitTransform(new Vector3(meta.x, meta.y, 0), meta.scale, meta.rotation, meta.reverseX);
-            TryPlayDefaultMotion(target);
-            finalTarget = target;
+            TryPlayDefaultMotion(model);
+            finalTarget = model;
         }
 
         if (success)
@@ -1041,8 +1056,49 @@ public class MainControl : MonoBehaviour
             SetCharacter(finalTarget);
             PlayerPrefs.SetString("conf_path", Path.GetDirectoryName(validPath));
             ShowDebugText("加载成功！");
-            OnLoadConf?.Invoke();
+            InvokeLoadConf();
         }
+    }
+
+    public void InvokeLoadConf()
+    {
+        OnLoadConf?.Invoke();
+    }
+
+    /// <summary>
+    /// 加载单个conf模型并初始化，返回生成的ModelAdjusterBase和其meta信息。如果加载失败，返回(null, null)。
+    /// </summary>
+    public (ModelAdjusterBase, L2DWModelConfig) LoadConfModelSingle(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+            return (null, null);
+
+        L2DWModelConfig meta = null;
+        if (Path.GetExtension(path).ToLower() == ".conf")
+        {
+            meta = L2DWModelConfig.LoadFromMyGOLive2DExMeta(path);
+            meta.temp_filePath = path;
+        }
+        else
+        {
+            meta = L2DWModelConfig.Load(path);
+            meta.temp_filePath = path;
+        }
+
+        var target = CreateModelAdjuster();
+        target.meta = meta;
+        target.CreateModel();
+        if (target.MainModel == null)
+        {
+            ShowErrorDebugText($"无法加载主模型，不加载了: {path}");
+            DeleteModel(target);
+            return (null, null);
+        }
+
+        target.Adjust();
+        target.InitTransform(new Vector3(meta.x, meta.y, 0), meta.scale, meta.rotation, meta.reverseX);
+
+        return (target, meta);
     }
 
     private void LoadJsonModel(string path)
@@ -1079,7 +1135,7 @@ public class MainControl : MonoBehaviour
         }
     }
 
-    private void LoadImgModel(string path)
+    private ImageModel LoadImgModel(string path, bool showSettingWindow = true)
     {
         ImageModel CreateImageAdjuster()
         {
@@ -1095,8 +1151,13 @@ public class MainControl : MonoBehaviour
         SetCharacter(ins);
         Resources.UnloadUnusedAssets();
 
-        imageSettingWindow.Show();
-        imageSettingWindow.Load(ins.imgMeta);
+        if (showSettingWindow)
+        {
+            imageSettingWindow.Show();
+            imageSettingWindow.Load(ins.imgMeta);
+        }
+
+        return ins;
     }
 
     public void LoadConfig()
@@ -1186,13 +1247,25 @@ public class MainControl : MonoBehaviour
 
     #region Group相关
 
-    public void AddGroup()
+    public ModelGroup AddGroup(string name = null)
     {
         var group = Instantiate(modelGroupPrefab);
-        group.groupName = "新组";
+        group.groupName = name ?? "新组";
         modelGroups.Add(group);
         SetGroup(group);
         group.gameObject.SetActive(true);
+        return group;
+    }
+
+    public void RemoveAllGroups()
+    {
+        foreach (var group in modelGroups.ToList())
+        {
+            if (group.isAllGroup)
+                continue;
+            RemoveGroup(group);
+        }
+        SetGroup(modelGroups[0]);
     }
 
     private void RemoveModelFromAllGroups(ModelAdjusterBase model)
@@ -1207,6 +1280,8 @@ public class MainControl : MonoBehaviour
     {
         //现在支持角色在多个组中
         // RemoveModelFromAllGroups(model);
+        if (group.modelAdjusters.Contains(model))
+            return;
         group.modelAdjusters.Add(model);
     }
 
@@ -1307,7 +1382,7 @@ public class MainControl : MonoBehaviour
         mainCamera.orthographicSize = 7.2f;
     }
 
-    public class TransformData
+    public class TransformData : IJSonSerializable
     {
         public Vector3 position;
         public float scale;
@@ -1315,6 +1390,26 @@ public class MainControl : MonoBehaviour
         public bool reverseX;
         public WebgalBlendMode blendMode;
         public FilterSetData filterSetData;
+
+        public void DeserializeFromJson(JSONObject json)
+        {
+            position = json.GetVector3Field(nameof(position));
+            scale = json.GetField(nameof(scale))?.f ?? 0;
+            rotation = json.GetField(nameof(rotation))?.f ?? 0;
+            reverseX = json.GetField(nameof(reverseX))?.boolean ?? false;
+            blendMode = (WebgalBlendMode)(json.GetField(nameof(blendMode))?.i ?? (int)WebgalBlendMode.Normal);
+            json.GetField(nameof(filterSetData), ref filterSetData);
+        }
+
+        public void SerializeToJson(JSONObject json)
+        {
+            json.AddVector3Field(nameof(position), position);
+            json.AddField(nameof(scale), scale);
+            json.AddField(nameof(rotation), rotation);
+            json.AddField(nameof(reverseX), reverseX);
+            json.AddField(nameof(blendMode), (int)blendMode);
+            json.AddField(nameof(filterSetData), filterSetData);
+        }
     }
 
     public TransformData transformData;
