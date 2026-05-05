@@ -263,7 +263,7 @@ public class PageNavPreview : UIPageWidget<PageNavPreview>
                 string folder = Path.GetDirectoryName(paths[0]);
                 projData.SetBasePath(folder);
                 projData.DeserializeFromJson(json);
-                projData.Apply();
+                projData.Apply(addtive);
                 MessageTipWindow.Instance.Show("提示", "加载工程文件成功！");
             }
 
