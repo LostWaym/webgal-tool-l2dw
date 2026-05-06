@@ -347,6 +347,15 @@ public float f {
         obj.AddField("z", val.z);
         AddField(name, obj);
     }
+
+    public void AddVector2Field(string name, Vector3 val)
+    {
+        var obj = new JSONObject(Type.OBJECT);
+        obj.AddField("x", val.x);
+        obj.AddField("y", val.y);
+        AddField(name, obj);
+    }
+    
     public Vector3 GetVector3Field(string name)
     {
         var obj = GetField(name);

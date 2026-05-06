@@ -3099,6 +3099,7 @@ public class ExpEntryWidget : UIItemWidget<ExpEntryWidget>
 public class PageGroupMenu : UIPageWidget<PageGroupMenu>
 {
     #region auto generated members
+    private Button m_btnGroupSnapshot;
     private Button m_btnAddGroup;
     private ScrollRect m_scrollGroup;
     private Transform m_tfGroupItems;
@@ -3118,6 +3119,7 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
     #region auto generated binders
     protected override void CodeGenBindMembers()
     {
+        m_btnGroupSnapshot = transform.Find("m_btnGroupSnapshot").GetComponent<Button>();
         m_btnAddGroup = transform.Find("m_btnAddGroup").GetComponent<Button>();
         m_scrollGroup = transform.Find("m_scrollGroup").GetComponent<ScrollRect>();
         m_tfGroupItems = transform.Find("m_scrollGroup/Viewport/m_tfGroupItems").GetComponent<Transform>();
@@ -3133,6 +3135,7 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
         m_btnHelpAutoApply = transform.Find("Properties/Container/m_btnApply/m_btnHelpAutoApply").GetComponent<Button>();
         m_toggleAutoApply = transform.Find("Properties/Container/m_toggleAutoApply").GetComponent<Toggle>();
 
+        m_btnGroupSnapshot.onClick.AddListener(OnButtonGroupSnapshotClick);
         m_btnAddGroup.onClick.AddListener(OnButtonAddGroupClick);
         m_iptGroupName.onValueChanged.AddListener(OnInputFieldGroupNameChange);
         m_iptGroupName.onEndEdit.AddListener(OnInputFieldGroupNameEndEdit);
@@ -3144,6 +3147,40 @@ public class PageGroupMenu : UIPageWidget<PageGroupMenu>
     #endregion
 
     #region auto generated events
+    private void OnButtonGroupSnapshotClick()
+    {
+        const string TAKE_SNAPSHOT = "拍摄快照(全局)";
+        const string PRINT_CURRENT_GROUP = "打印快照命令";
+        const string REMOVE_ALL_SNAPSHOT = "移除所有快照(全局)";
+
+        var list = new List<string>(){$"当前有{GroupSnapshotHelper.groupSnapshotDataList.Count}个快照", TAKE_SNAPSHOT, PRINT_CURRENT_GROUP, REMOVE_ALL_SNAPSHOT};
+
+        TargetSelectUI.Instance.SetData(m_btnGroupSnapshot.GetComponent<RectTransform>(), list);
+        TargetSelectUI.Instance._OnTargetItemClick =  (targetName) => {
+            TargetSelectUI.Instance.Close();
+            switch (targetName)
+            {
+                case TAKE_SNAPSHOT:
+                    if (MainControl.Instance.curGroup == null)
+                    {
+                        MainControl.Instance.ShowErrorDebugText("请选择一个组");
+                        return;
+                    }
+                    GroupSnapshotHelper.RecordGroupSnapshot(MainControl.Instance.curGroup);
+                    MainControl.Instance.ShowDebugText("拍摄成功！");
+                    break;
+                case PRINT_CURRENT_GROUP:
+                    var command = GroupSnapshotHelper.PrintCommand();
+                    L2DWUtils.CopyInstructionToCopyBoard(command);
+                    MainControl.Instance.ShowDebugText("复制成功！");
+                    break;
+                case REMOVE_ALL_SNAPSHOT:
+                    GroupSnapshotHelper.RemoveAllSnapshot();
+                    MainControl.Instance.ShowDebugText("移除成功！");
+                    break;
+            }
+        };
+    }
     private void OnButtonAddGroupClick()
     {
         MainControl.Instance.AddGroup();

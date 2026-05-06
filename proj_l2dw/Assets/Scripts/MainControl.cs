@@ -1480,10 +1480,7 @@ public class MainControl : MonoBehaviour
         if (model == null)
             return;
 
-        model.SetRotation(transformData.rotation);
-        model.SetScale(transformData.scale);
-        model.SetReverseXScale(transformData.reverseX);
-        model.SetCharacterWorldPosition(transformData.position.x, transformData.position.y);
+        model.SetRTS(transformData.position, transformData.scale, transformData.rotation, transformData.reverseX);
         model.blendMode = transformData.blendMode;
 
         var json = new JSONObject();

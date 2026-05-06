@@ -723,3 +723,14 @@ public class FilterSetData : IJSonSerializable
         ApplyToJson(json);
     }
 }
+
+public static class ModelExtension
+{
+    public static void SetRTS(this ModelAdjusterBase model, Vector3 position, float scale, float rotation, bool reverseX)
+    {
+        model.SetRotation(rotation);
+        model.SetScale(scale);
+        model.SetReverseXScale(reverseX);
+        model.SetCharacterWorldPosition(position.x, position.y);
+    }
+}
