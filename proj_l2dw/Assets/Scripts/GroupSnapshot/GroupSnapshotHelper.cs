@@ -92,7 +92,9 @@ public static class GroupSnapshotHelper
         foreach (var modelData in modelDataList)
         {
             var obj = JSONObject.obj;
-            obj.AddVector2Field("position", modelData.position);
+            var model = MainControl.Instance.FindTarget(modelData.modelName);
+            var webgalPos = model.GetWebgalPosition(modelData.position);
+            obj.AddVector2Field("position", new Vector2(webgalPos.x, -webgalPos.y));
             obj.AddVector2Field("scale", new Vector2(modelData.scale * (modelData.reverseX ? -1 : 1), modelData.scale));
             obj.AddField("rotation", GetWebGalRotation(modelData.rotation));
             obj.AddField("duration", modelData.duration);

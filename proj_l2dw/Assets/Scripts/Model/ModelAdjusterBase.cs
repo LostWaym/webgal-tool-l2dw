@@ -227,6 +227,11 @@ public class ModelAdjusterBase : MonoBehaviour
         return default;
     }
 
+    public virtual Vector3 GetWebgalPosition(Vector3 worldPosition)
+    {
+        return default;
+    }
+
     public virtual float GetWebGalRotation()
     {
         return 0;

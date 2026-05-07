@@ -563,7 +563,12 @@ public class ModelAdjuster : ModelAdjusterBase
     {
         var trans = webgalPoses[modelIndex].transform;
         var worldPos = trans.position;
-        return root.parent.InverseTransformPoint(GetCharacterWorldPosition(worldPos.x, worldPos.y, MainPos.transform));
+        return GetWebgalPosition(worldPos);
+    }
+
+    public override Vector3 GetWebgalPosition(Vector3 worldPosition)
+    {
+        return root.parent.InverseTransformPoint(GetCharacterWorldPosition(worldPosition.x, worldPosition.y, MainPos.transform));
     }
 
     public override float GetWebGalRotation()

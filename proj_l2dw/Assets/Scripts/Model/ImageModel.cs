@@ -140,6 +140,11 @@ public class ImageModel : ModelAdjusterBase
         return RootPosition;
     }
 
+    public override Vector3 GetWebgalPosition(Vector3 worldPosition)
+    {
+        return worldPosition;
+    }
+
     public override float GetWebGalRotation()
     {
         return -RootRotation * Mathf.PI / 180;
