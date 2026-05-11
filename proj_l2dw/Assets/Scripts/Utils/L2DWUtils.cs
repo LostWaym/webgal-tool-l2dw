@@ -320,9 +320,20 @@ public static class L2DWUtils
     /// <summary>
     /// 尝试生成 changeFigure 模板
     /// <param name="name">模型名称</param>
+    /// <param name="modelPath">模型路径</param>
+    /// <param name="modelIndex">模型索引</param>
+    /// </summary>
+    public static string GenerateFormatText(string name, string modelPath)
+    {
+        return $"changeFigure:{modelPath} -id={name} %me_0%;";
+    }
+
+    /// <summary>
+    /// 尝试生成 changeFigure 模板
+    /// <param name="name">模型名称</param>
     /// <param name="modelCount">模型数量</param>
     /// </summary>
-    public static string GenerateFormatText(string name, int modelCount)
+    private static string InternalGenerateFormatText(string name, int modelCount)
     {
         var outputTextLines = new List<string>();
 
@@ -337,6 +348,21 @@ public static class L2DWUtils
             outputTextLines.Add(line);
         }
         return string.Join("\n", outputTextLines);
+    }
+
+    /// <summary>
+    /// 尝试生成 changeFigure 模板
+    /// <param name="name">模型名称</param>
+    /// <param name="modelCount">模型数量</param>
+    /// </summary>
+    public static string GenerateFormatText(string name, int modelCount)
+    {
+        if (modelCount == 1)
+        {
+            return GenerateFormatText(name, "%path_0%");
+        }
+
+        return InternalGenerateFormatText(name, modelCount);
     }
     
     /// <summary>
@@ -360,6 +386,11 @@ public static class L2DWUtils
     /// </summary>
     public static string GenerateTransformFormatText(string name, int modelCount)
     {
+        if (modelCount == 1)
+        {
+            return $"setTransform:%me_0% -target={name} -duration=750 -writeDefault;";
+        }
+
         var outputTextLines = new List<string>();
         for (int i = 0; i < modelCount; i++)
         {

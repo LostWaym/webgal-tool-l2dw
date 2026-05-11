@@ -94,7 +94,7 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>, IOpenFolde
     }
     private void OnButtonGenConfFormatTextClick()
     {
-        m_iptFormatText.text = L2DWUtils.GenerateFormatText(m_iptName.text.Trim(), "%conf_path%", 0);
+        m_iptFormatText.text = L2DWUtils.GenerateFormatText(m_iptName.text.Trim(), "%conf_path%");
     }
     private void OnButtonGenFormatTextClick()
     {

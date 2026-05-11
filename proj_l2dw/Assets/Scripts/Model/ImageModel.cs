@@ -142,7 +142,7 @@ public class ImageModel : ModelAdjusterBase
 
     public override Vector3 GetWebgalPosition(Vector3 worldPosition)
     {
-        return worldPosition;
+        return transform.InverseTransformPoint(worldPosition);
     }
 
     public override float GetWebGalRotation()
