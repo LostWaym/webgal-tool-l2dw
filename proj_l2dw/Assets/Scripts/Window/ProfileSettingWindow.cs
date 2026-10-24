@@ -215,7 +215,8 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>, IOpenFolde
         {
             string filePath = config.subModels[i].modelRelativePath;
             config.GetModelOffset(i + 1, out var offsetX, out var offsetY);
-            subModelInfos.Add(new ProfileSettingSubModelInfo() { filePath = filePath, offsetX = offsetX, offsetY = offsetY });
+            config.GetModelScale(i + 1, out var scaleX, out var scaleY);
+            subModelInfos.Add(new ProfileSettingSubModelInfo() { filePath = filePath, offsetX = offsetX, offsetY = offsetY, scaleX = scaleX, scaleY = scaleY });
         }
         RefreshSubModelWidgets();
     }
@@ -265,6 +266,9 @@ public class ProfileSettingWindow : BaseWindow<ProfileSettingWindow>, IOpenFolde
                 subModelData.modelRelativePath = info.filePath;
                 subModelData.offsetX = info.offsetX;
                 subModelData.offsetY = info.offsetY;
+                // 缩放目前没有 UI 输入框，保留配置文件里读到的值，避免保存配置时被重置成 1
+                subModelData.scaleX = info.scaleX;
+                subModelData.scaleY = info.scaleY;
                 config.subModels.Add(subModelData);
             }
         }
@@ -329,6 +333,8 @@ public class ProfileSettingSubModelInfo
     public string filePath;
     public float offsetX;
     public float offsetY;
+    public float scaleX = 1f;
+    public float scaleY = 1f;
 }
 
 public class ProfileSettingSubModelWidget : UIItemWidget<ProfileSettingSubModelWidget>

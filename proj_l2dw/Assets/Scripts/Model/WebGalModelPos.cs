@@ -8,7 +8,7 @@ public class WebGalModelPos : MonoBehaviour
     public Transform anchor;
     public MyGOLive2DEx model;
 
-    public void Adjust(float offsetX, float offsetY)
+    public void Adjust(float offsetX, float offsetY, float subScaleX = 1f, float subScaleY = 1f)
     {
         // if (Global.__PIVOT_2_4)
         // {
@@ -22,23 +22,23 @@ public class WebGalModelPos : MonoBehaviour
         {
             case Global.FigurePivotMode.W_4_5_12:
             {
-                Adjust2_1___2_3(offsetX, offsetY);
+                Adjust2_1___2_3(offsetX, offsetY, subScaleX, subScaleY);
                 break;
             }
             case Global.FigurePivotMode.W_4_5_13:
             {
-                Adjust2_4(offsetX, offsetY);
+                Adjust2_4(offsetX, offsetY, subScaleX, subScaleY);
                 break;
             }
             case Global.FigurePivotMode.BC_1_0:
             {
-                AdjustBC_1_0(offsetX, offsetY);
+                AdjustBC_1_0(offsetX, offsetY, subScaleX, subScaleY);
                 break;
             }
         }
     }
 
-    private void Adjust2_1___2_3(float offsetX, float offsetY)
+    private void Adjust2_1___2_3(float offsetX, float offsetY, float subScaleX, float subScaleY)
     {
         anchor.localScale = Vector3.one * 0.5f;
         float modelWidth = model.getModifiedWidth();
@@ -60,14 +60,14 @@ public class WebGalModelPos : MonoBehaviour
 
         transform.localScale = Vector3.one;
         transform.localEulerAngles = Vector3.zero;
-        pivot.localScale = new Vector3(scale, scale, scale);
+        pivot.localScale = new Vector3(scale * subScaleX, scale * subScaleY, scale);
         transform.localPosition = new Vector3(Constants.WebGalWidth / 2.0f + offsetX, -Constants.WebGalHeight / 1.2f - offsetY + snapBottomOffset, 0);
         // 需要根据除以缩放比例来让偏移正确
         model.left = offsetX / scale;
         model.up = offsetY / scale;
     }
 
-    private void Adjust2_4(float offsetX, float offsetY)
+    private void Adjust2_4(float offsetX, float offsetY, float subScaleX, float subScaleY)
     {
         float modelWidth = model.getModifiedWidth();
         float modelHeight = model.getModifiedHeight();
@@ -100,7 +100,7 @@ public class WebGalModelPos : MonoBehaviour
 
         transform.localScale = Vector3.one;
         transform.localEulerAngles = Vector3.zero;
-        pivot.localScale = new Vector3(scale, scale, scale);
+        pivot.localScale = new Vector3(scale * subScaleX, scale * subScaleY, scale);
         // pivot.transform.localPosition = new Vector3(0, Constants.WebGalHeight / 2, 0);
         transform.localPosition = new Vector3(localX + offsetX, -localY - offsetY + snapBottomOffset, 0);
         // 需要根据除以缩放比例来让偏移正确
@@ -108,7 +108,7 @@ public class WebGalModelPos : MonoBehaviour
         model.up = offsetY / scale;
     }
     
-    private void AdjustBC_1_0(float offsetX, float offsetY)
+    private void AdjustBC_1_0(float offsetX, float offsetY, float subScaleX, float subScaleY)
     {
         float modelWidth = model.getModifiedWidth();
         float modelHeight = model.getModifiedHeight();
@@ -135,7 +135,7 @@ public class WebGalModelPos : MonoBehaviour
 
         transform.localScale = Vector3.one;
         transform.localEulerAngles = Vector3.zero;
-        pivot.localScale = new Vector3(scale, scale, scale);
+        pivot.localScale = new Vector3(scale * subScaleX, scale * subScaleY, scale);
         transform.localPosition = new Vector3(localX + offsetX, -localY - offsetY + snapBottomOffset, 0);
         // 需要根据除以缩放比例来让偏移正确
         model.left = offsetX / scale;
