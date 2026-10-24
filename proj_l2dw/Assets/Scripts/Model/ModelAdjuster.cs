@@ -489,7 +489,8 @@ public class ModelAdjuster : ModelAdjusterBase
         {
             WebGalModelPos pos = webgalPoses[i];
             meta.GetModelOffset(i, out var offsetX, out var offsetY);
-            pos.Adjust(offsetX, offsetY);
+            meta.GetModelScale(i, out var subScaleX, out var subScaleY);
+            pos.Adjust(offsetX, offsetY, subScaleX, subScaleY);
         }
 
         if (Global.PivotMode != Global.FigurePivotMode.W_4_5_12)

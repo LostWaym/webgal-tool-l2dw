@@ -210,6 +210,20 @@ public class L2DWModelConfig : IJSonSerializable
         y = subModels.Count > index ? subModels[index].offsetY : 0;
     }
 
+    public void GetModelScale(int index, out float x, out float y)
+    {
+        if (index == 0)
+        {
+            x = 1;
+            y = 1;
+            return;
+        }
+        index -= 1;
+        //考虑安全，如果index超出范围，则返回1,1（不缩放）
+        x = subModels.Count > index ? subModels[index].scaleX : 1;
+        y = subModels.Count > index ? subModels[index].scaleY : 1;
+    }
+
     public void SetTransform(float x, float y, float scale, float rotation)
     {
         this.x = x;
@@ -246,12 +260,18 @@ public class SubModelData : IJSonSerializable
     public string modelRelativePath;
     public float offsetX;
     public float offsetY;
+    // 子立绘缩放。1 = 不缩放；缺省 1，兼容旧版 wmdl（旧文件没有这两个字段）。
+    // 对应 WebGAL 分层立绘 jsonl 里的 xscale / yscale。
+    public float scaleX = 1f;
+    public float scaleY = 1f;
 
     public void DeserializeFromJson(JSONObject json)
     {
         modelRelativePath = (json.GetField(nameof(modelRelativePath))?.str ?? "").Replace("/", "\\");
         offsetX = json.GetField(nameof(offsetX))?.f ?? 0;
         offsetY = json.GetField(nameof(offsetY))?.f ?? 0;
+        scaleX = json.GetField(nameof(scaleX))?.f ?? 1f;
+        scaleY = json.GetField(nameof(scaleY))?.f ?? 1f;
     }
 
     public void SerializeToJson(JSONObject json)
@@ -260,6 +280,8 @@ public class SubModelData : IJSonSerializable
         json.AddField(nameof(modelRelativePath), modelRelativePath.Replace("\\", "/"));
         json.AddField(nameof(offsetX), offsetX);
         json.AddField(nameof(offsetY), offsetY);
+        json.AddField(nameof(scaleX), scaleX);
+        json.AddField(nameof(scaleY), scaleY);
     }
 }
 
